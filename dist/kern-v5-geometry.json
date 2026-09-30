@@ -6687,7 +6687,7 @@
           "end": 18,
           "width": 4,
           "z": 4.2,
-          "height": 3.9,
+          "height": 3.8999999999999995,
           "sealed": false,
           "type": "open",
           "fullHeight": true
@@ -12120,6 +12120,26 @@
         {
           "id": "B2-wall-17",
           "a": [
+            28,
+            31
+          ],
+          "b": [
+            36,
+            31
+          ],
+          "z": -6.3,
+          "height": 1.5,
+          "thickness": 0.25,
+          "rooms": [
+            "spine",
+            "south"
+          ],
+          "kind": "lintel",
+          "opening": "spine_south"
+        },
+        {
+          "id": "B2-wall-18",
+          "a": [
             36,
             31
           ],
@@ -12137,7 +12157,27 @@
           "opening": null
         },
         {
-          "id": "B2-wall-18",
+          "id": "B2-wall-19",
+          "a": [
+            45,
+            31
+          ],
+          "b": [
+            48,
+            31
+          ],
+          "z": -6.3,
+          "height": 1.5,
+          "thickness": 0.25,
+          "rooms": [
+            "south",
+            "east"
+          ],
+          "kind": "lintel",
+          "opening": "south_east"
+        },
+        {
+          "id": "B2-wall-20",
           "a": [
             48,
             31
@@ -12156,7 +12196,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-19",
+          "id": "B2-wall-21",
           "a": [
             12,
             34
@@ -12175,7 +12215,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-20",
+          "id": "B2-wall-22",
           "a": [
             17,
             34
@@ -12195,7 +12235,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-21",
+          "id": "B2-wall-23",
           "a": [
             20,
             34
@@ -12215,7 +12255,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-22",
+          "id": "B2-wall-24",
           "a": [
             22.400000000000002,
             34
@@ -12235,7 +12275,7 @@
           "opening": "n5_south"
         },
         {
-          "id": "B2-wall-23",
+          "id": "B2-wall-25",
           "a": [
             23.6,
             34
@@ -12255,7 +12295,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-24",
+          "id": "B2-wall-26",
           "a": [
             26,
             34
@@ -12274,7 +12314,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-25",
+          "id": "B2-wall-27",
           "a": [
             39,
             34
@@ -12294,7 +12334,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-26",
+          "id": "B2-wall-28",
           "a": [
             41.4,
             34
@@ -12314,7 +12354,7 @@
           "opening": "n4_south"
         },
         {
-          "id": "B2-wall-27",
+          "id": "B2-wall-29",
           "a": [
             42.6,
             34
@@ -12334,7 +12374,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-28",
+          "id": "B2-wall-30",
           "a": [
             45,
             34
@@ -12353,7 +12393,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-29",
+          "id": "B2-wall-31",
           "a": [
             20,
             6
@@ -12372,7 +12412,27 @@
           "opening": null
         },
         {
-          "id": "B2-wall-30",
+          "id": "B2-wall-32",
+          "a": [
+            20,
+            12
+          ],
+          "b": [
+            20,
+            15
+          ],
+          "z": -6.3,
+          "height": 1.5,
+          "thickness": 0.25,
+          "rooms": [
+            "north",
+            "west"
+          ],
+          "kind": "lintel",
+          "opening": "north_west"
+        },
+        {
+          "id": "B2-wall-33",
           "a": [
             20,
             15
@@ -12391,7 +12451,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-31",
+          "id": "B2-wall-34",
           "a": [
             20,
             34
@@ -12411,7 +12471,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-32",
+          "id": "B2-wall-35",
           "a": [
             20,
             35.25
@@ -12431,7 +12491,7 @@
           "opening": "cavelink_n5"
         },
         {
-          "id": "B2-wall-33",
+          "id": "B2-wall-36",
           "a": [
             20,
             36.75
@@ -12451,7 +12511,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-34",
+          "id": "B2-wall-37",
           "a": [
             20,
             38
@@ -12470,7 +12530,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-35",
+          "id": "B2-wall-38",
           "a": [
             48,
             12
@@ -12489,7 +12549,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-36",
+          "id": "B2-wall-39",
           "a": [
             48,
             15
@@ -12508,7 +12568,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-37",
+          "id": "B2-wall-40",
           "a": [
             48,
             18
@@ -12528,7 +12588,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-38",
+          "id": "B2-wall-41",
           "a": [
             48,
             20.400000000000002
@@ -12548,7 +12608,7 @@
           "opening": "n3_east"
         },
         {
-          "id": "B2-wall-39",
+          "id": "B2-wall-42",
           "a": [
             48,
             21.6
@@ -12568,7 +12628,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-40",
+          "id": "B2-wall-43",
           "a": [
             48,
             24
@@ -12588,7 +12648,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-41",
+          "id": "B2-wall-44",
           "a": [
             48,
             26.900000000000002
@@ -12608,7 +12668,7 @@
           "opening": "hidden_east"
         },
         {
-          "id": "B2-wall-42",
+          "id": "B2-wall-45",
           "a": [
             48,
             28.1
@@ -12628,7 +12688,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-43",
+          "id": "B2-wall-46",
           "a": [
             48,
             31
@@ -12647,7 +12707,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-44",
+          "id": "B2-wall-47",
           "a": [
             20,
             15
@@ -12666,7 +12726,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-45",
+          "id": "B2-wall-48",
           "a": [
             28,
             15
@@ -12686,7 +12746,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-46",
+          "id": "B2-wall-49",
           "a": [
             31,
             15
@@ -12706,7 +12766,7 @@
           "opening": "exciter_north"
         },
         {
-          "id": "B2-wall-47",
+          "id": "B2-wall-50",
           "a": [
             33,
             15
@@ -12726,7 +12786,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-48",
+          "id": "B2-wall-51",
           "a": [
             36,
             15
@@ -12745,7 +12805,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-49",
+          "id": "B2-wall-52",
           "a": [
             45,
             6
@@ -12764,7 +12824,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-50",
+          "id": "B2-wall-53",
           "a": [
             45,
             15
@@ -12783,7 +12843,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-51",
+          "id": "B2-wall-54",
           "a": [
             45,
             34
@@ -12802,7 +12862,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-52",
+          "id": "B2-wall-55",
           "a": [
             17,
             12
@@ -12821,7 +12881,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-53",
+          "id": "B2-wall-56",
           "a": [
             20,
             12
@@ -12841,7 +12901,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-54",
+          "id": "B2-wall-57",
           "a": [
             22.400000000000002,
             12
@@ -12861,7 +12921,7 @@
           "opening": "n1_north"
         },
         {
-          "id": "B2-wall-55",
+          "id": "B2-wall-58",
           "a": [
             23.6,
             12
@@ -12881,7 +12941,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-56",
+          "id": "B2-wall-59",
           "a": [
             26,
             12
@@ -12900,7 +12960,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-57",
+          "id": "B2-wall-60",
           "a": [
             39,
             12
@@ -12920,7 +12980,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-58",
+          "id": "B2-wall-61",
           "a": [
             41.4,
             12
@@ -12940,7 +13000,7 @@
           "opening": "n2_north"
         },
         {
-          "id": "B2-wall-59",
+          "id": "B2-wall-62",
           "a": [
             42.6,
             12
@@ -12960,7 +13020,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-60",
+          "id": "B2-wall-63",
           "a": [
             45,
             12
@@ -12979,7 +13039,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-61",
+          "id": "B2-wall-64",
           "a": [
             17,
             12
@@ -12998,7 +13058,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-62",
+          "id": "B2-wall-65",
           "a": [
             17,
             18
@@ -13018,7 +13078,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-63",
+          "id": "B2-wall-66",
           "a": [
             17,
             20.400000000000002
@@ -13038,7 +13098,7 @@
           "opening": "n6_west"
         },
         {
-          "id": "B2-wall-64",
+          "id": "B2-wall-67",
           "a": [
             17,
             21.6
@@ -13058,7 +13118,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-65",
+          "id": "B2-wall-68",
           "a": [
             17,
             28
@@ -13077,7 +13137,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-66",
+          "id": "B2-wall-69",
           "a": [
             20,
             6
@@ -13096,7 +13156,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-67",
+          "id": "B2-wall-70",
           "a": [
             26,
             6
@@ -13115,7 +13175,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-68",
+          "id": "B2-wall-71",
           "a": [
             39,
             6
@@ -13134,7 +13194,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-69",
+          "id": "B2-wall-72",
           "a": [
             26,
             6
@@ -13154,7 +13214,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-70",
+          "id": "B2-wall-73",
           "a": [
             26,
             7.25
@@ -13174,7 +13234,7 @@
           "opening": "fissure_n1"
         },
         {
-          "id": "B2-wall-71",
+          "id": "B2-wall-74",
           "a": [
             26,
             8.75
@@ -13194,7 +13254,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-72",
+          "id": "B2-wall-75",
           "a": [
             26,
             10
@@ -13213,7 +13273,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-73",
+          "id": "B2-wall-76",
           "a": [
             26,
             34
@@ -13232,7 +13292,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-74",
+          "id": "B2-wall-77",
           "a": [
             39,
             6
@@ -13252,7 +13312,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-75",
+          "id": "B2-wall-78",
           "a": [
             39,
             7.25
@@ -13272,7 +13332,7 @@
           "opening": "fissure_n2"
         },
         {
-          "id": "B2-wall-76",
+          "id": "B2-wall-79",
           "a": [
             39,
             8.75
@@ -13292,7 +13352,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-77",
+          "id": "B2-wall-80",
           "a": [
             39,
             10
@@ -13311,7 +13371,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-78",
+          "id": "B2-wall-81",
           "a": [
             39,
             34
@@ -13330,7 +13390,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-79",
+          "id": "B2-wall-82",
           "a": [
             11,
             18
@@ -13349,7 +13409,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-80",
+          "id": "B2-wall-83",
           "a": [
             48,
             18
@@ -13368,7 +13428,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-81",
+          "id": "B2-wall-84",
           "a": [
             6,
             24
@@ -13387,7 +13447,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-82",
+          "id": "B2-wall-85",
           "a": [
             11,
             24
@@ -13407,7 +13467,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-83",
+          "id": "B2-wall-86",
           "a": [
             48,
             24
@@ -13427,7 +13487,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-84",
+          "id": "B2-wall-87",
           "a": [
             54,
             24
@@ -13446,7 +13506,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-85",
+          "id": "B2-wall-88",
           "a": [
             54,
             18
@@ -13465,7 +13525,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-86",
+          "id": "B2-wall-89",
           "a": [
             20,
             40
@@ -13484,7 +13544,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-87",
+          "id": "B2-wall-90",
           "a": [
             39,
             40
@@ -13503,7 +13563,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-88",
+          "id": "B2-wall-91",
           "a": [
             11,
             18
@@ -13522,7 +13582,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-89",
+          "id": "B2-wall-92",
           "a": [
             6,
             24
@@ -13541,7 +13601,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-90",
+          "id": "B2-wall-93",
           "a": [
             6,
             28
@@ -13560,7 +13620,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-91",
+          "id": "B2-wall-94",
           "a": [
             6,
             36
@@ -13579,7 +13639,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-92",
+          "id": "B2-wall-95",
           "a": [
             12,
             28
@@ -13598,7 +13658,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-93",
+          "id": "B2-wall-96",
           "a": [
             12,
             36
@@ -13617,7 +13677,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-94",
+          "id": "B2-wall-97",
           "a": [
             12,
             38
@@ -13636,7 +13696,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-95",
+          "id": "B2-wall-98",
           "a": [
             26,
             10
@@ -13655,7 +13715,7 @@
           "opening": null
         },
         {
-          "id": "B2-wall-96",
+          "id": "B2-wall-99",
           "a": [
             56,
             24
@@ -13715,7 +13775,7 @@
           "end": 36,
           "width": 8,
           "z": -9,
-          "height": 4.2,
+          "height": 2.7,
           "sealed": false,
           "type": "open",
           "fullHeight": true
@@ -13730,7 +13790,7 @@
           "end": 48,
           "width": 3,
           "z": -9,
-          "height": 4.2,
+          "height": 2.7,
           "sealed": false,
           "type": "open",
           "fullHeight": true
@@ -13760,7 +13820,7 @@
           "end": 15,
           "width": 3,
           "z": -9,
-          "height": 4.2,
+          "height": 2.7,
           "sealed": false,
           "type": "open",
           "fullHeight": true
@@ -13775,7 +13835,7 @@
           "end": 34,
           "width": 3,
           "z": -9,
-          "height": 4.2,
+          "height": 2.7,
           "sealed": false,
           "type": "open",
           "fullHeight": true
@@ -13895,7 +13955,7 @@
           "end": 28,
           "width": 4,
           "z": -9,
-          "height": 4.2,
+          "height": 2.7,
           "sealed": false,
           "type": "open",
           "fullHeight": true
@@ -13910,7 +13970,7 @@
           "end": 12,
           "width": 6,
           "z": -9,
-          "height": 4.2,
+          "height": 2.7,
           "sealed": false,
           "type": "open",
           "fullHeight": true
@@ -13925,7 +13985,7 @@
           "end": 36,
           "width": 2,
           "z": -9,
-          "height": 4.2,
+          "height": 2.7,
           "sealed": false,
           "type": "open",
           "fullHeight": true
