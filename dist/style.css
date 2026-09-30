@@ -6,3 +6,5 @@
 
 #closepanels{display:none}@media(max-width:720px){#closepanels{display:block;margin-left:auto}}
 #sectionview{border:1px solid #bcc6c8;background:#fff;color:#26383f;border-radius:4px;padding:7px 10px;text-decoration:none;font-size:14px}#sectionview:hover{background:#e9eff0}#sectionview:focus-visible{outline:3px solid #c67827;outline-offset:2px}#sectionview[hidden]{display:none}
+
+@media(max-width:720px){.mapcontrols{flex-wrap:wrap}#sectionview{font-size:11px;padding:6px 8px}}
