@@ -4430,11 +4430,12 @@
           "fixed": 22,
           "start": 25.400000000000002,
           "end": 26.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 0,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "freight_operations",
@@ -4448,7 +4449,8 @@
           "z": 0,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "entry_reception",
@@ -4458,11 +4460,12 @@
           "fixed": 46,
           "start": 24.400000000000002,
           "end": 25.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 0,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "reception_control",
@@ -4472,11 +4475,12 @@
           "fixed": 22,
           "start": 41.4,
           "end": 42.6,
-          "width": 1.2,
+          "width": 1.2000000000000028,
           "z": 0,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "reception_brief",
@@ -4486,11 +4490,12 @@
           "fixed": 38,
           "start": 24.400000000000002,
           "end": 25.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 0,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "brief_operations",
@@ -4500,11 +4505,12 @@
           "fixed": 32,
           "start": 25.400000000000002,
           "end": 26.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 0,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "transfer_porch",
@@ -4514,11 +4520,12 @@
           "fixed": 22,
           "start": 19.400000000000002,
           "end": 20.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 0,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "operations_transfer",
@@ -4528,11 +4535,12 @@
           "fixed": 24,
           "start": 22.900000000000002,
           "end": 24.1,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 0,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "porch_map",
@@ -4542,11 +4550,12 @@
           "fixed": 16,
           "start": 18.400000000000002,
           "end": 19.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 0,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "porch_courtyard",
@@ -4556,11 +4565,12 @@
           "fixed": 16,
           "start": 19.400000000000002,
           "end": 20.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 0,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "map_reading",
@@ -4570,11 +4580,12 @@
           "fixed": 16,
           "start": 11.399999999999999,
           "end": 12.599999999999998,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 0,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "reading_courtyard",
@@ -4584,11 +4595,12 @@
           "fixed": 16,
           "start": 11.399999999999999,
           "end": 12.599999999999998,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 0,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "reading_archive",
@@ -4598,11 +4610,12 @@
           "fixed": 8,
           "start": 11.399999999999999,
           "end": 12.599999999999998,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 0,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "archive_north",
@@ -4612,11 +4625,12 @@
           "fixed": 16,
           "start": 4.4,
           "end": 5.6000000000000005,
-          "width": 1.2,
+          "width": 1.2000000000000002,
           "z": 0,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "north_radar",
@@ -4626,11 +4640,12 @@
           "fixed": 8,
           "start": 27.400000000000002,
           "end": 28.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 0,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "radar_control",
@@ -4640,11 +4655,12 @@
           "fixed": 32,
           "start": 11.399999999999999,
           "end": 12.599999999999998,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 0,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "map_issue",
@@ -4654,11 +4670,12 @@
           "fixed": 22,
           "start": 11.399999999999999,
           "end": 12.599999999999998,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 0,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "issue_transfer",
@@ -4668,11 +4685,12 @@
           "fixed": 16,
           "start": 22.900000000000002,
           "end": 24.1,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 0,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "transfer_deconclean",
@@ -4682,11 +4700,12 @@
           "fixed": 25,
           "start": 20.700000000000003,
           "end": 21.900000000000002,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 0,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "wc_map",
@@ -4696,11 +4715,12 @@
           "fixed": 8,
           "start": 18.400000000000002,
           "end": 19.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 0,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "janitor_issue",
@@ -4710,11 +4730,12 @@
           "fixed": 8,
           "start": 23.400000000000002,
           "end": 24.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 0,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "survey_surveyStore",
@@ -4724,11 +4745,12 @@
           "fixed": 15,
           "start": 50.4,
           "end": 51.6,
-          "width": 1.2,
+          "width": 1.2000000000000028,
           "z": 0,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "outside-entry",
@@ -7987,11 +8009,12 @@
           "fixed": 22,
           "start": 25.400000000000002,
           "end": 26.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 4.2,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "freight_study",
@@ -8005,7 +8028,8 @@
           "z": 4.2,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "stair_porch",
@@ -8015,11 +8039,12 @@
           "fixed": 24,
           "start": 20.700000000000003,
           "end": 21.900000000000002,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 4.2,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "porch_common",
@@ -8029,11 +8054,12 @@
           "fixed": 16,
           "start": 18.400000000000002,
           "end": 19.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 4.2,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "common_landing",
@@ -8043,11 +8069,12 @@
           "fixed": 8,
           "start": 18.400000000000002,
           "end": 19.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 4.2,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "landing_sleepa",
@@ -8057,11 +8084,12 @@
           "fixed": 8,
           "start": 4.4,
           "end": 5.6000000000000005,
-          "width": 1.2,
+          "width": 1.2000000000000002,
           "z": 4.2,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "landing_sleepb",
@@ -8071,11 +8099,12 @@
           "fixed": 8,
           "start": 11.399999999999999,
           "end": 12.599999999999998,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 4.2,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "landing_bath",
@@ -8085,11 +8114,12 @@
           "fixed": 5,
           "start": 18.400000000000002,
           "end": 19.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 4.2,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "common_dining",
@@ -8099,11 +8129,12 @@
           "fixed": 22,
           "start": 11.399999999999999,
           "end": 12.599999999999998,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 4.2,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "dining_kitchen",
@@ -8113,11 +8144,12 @@
           "fixed": 8,
           "start": 25.400000000000002,
           "end": 26.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 4.2,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "dining_south",
@@ -8127,11 +8159,12 @@
           "fixed": 16,
           "start": 25.400000000000002,
           "end": 26.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 4.2,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "south_porch",
@@ -8141,11 +8174,12 @@
           "fixed": 22,
           "start": 19.400000000000002,
           "end": 20.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 4.2,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "south_study",
@@ -8155,11 +8189,12 @@
           "fixed": 24,
           "start": 25.400000000000002,
           "end": 26.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 4.2,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "study_bridge",
@@ -8169,11 +8204,12 @@
           "fixed": 32,
           "start": 22.900000000000002,
           "end": 24.1,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 4.2,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "bridge_comms",
@@ -8183,11 +8219,12 @@
           "fixed": 46,
           "start": 22.900000000000002,
           "end": 24.1,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 4.2,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "bridge_terrace",
@@ -8197,11 +8234,12 @@
           "fixed": 25,
           "start": 38.400000000000006,
           "end": 39.60000000000001,
-          "width": 1.2,
+          "width": 1.2000000000000028,
           "z": 4.2,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "comms_roof",
@@ -8211,11 +8249,12 @@
           "fixed": 25,
           "start": 47.4,
           "end": 48.6,
-          "width": 1.2,
+          "width": 1.2000000000000028,
           "z": 4.2,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "roof_terrace",
@@ -8225,11 +8264,12 @@
           "fixed": 46,
           "start": 26.900000000000002,
           "end": 28.1,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": 4.2,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         }
       ],
       "floorSlabs": [
@@ -12436,11 +12476,12 @@
           "fixed": 22,
           "start": 25.400000000000002,
           "end": 26.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": -4.5,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "freight_dispatch",
@@ -12454,7 +12495,8 @@
           "z": -4.5,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "garage_workshop",
@@ -12468,7 +12510,8 @@
           "z": -4.5,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "workshop_storage",
@@ -12482,7 +12525,8 @@
           "z": -4.5,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "garage_dirty",
@@ -12492,11 +12536,12 @@
           "fixed": 16,
           "start": 34.4,
           "end": 35.6,
-          "width": 1.2,
+          "width": 1.2000000000000028,
           "z": -4.5,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "dirty_wash",
@@ -12506,11 +12551,12 @@
           "fixed": 33,
           "start": 18.400000000000002,
           "end": 19.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": -4.5,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "wash_deconclean",
@@ -12520,11 +12566,12 @@
           "fixed": 29,
           "start": 20.700000000000003,
           "end": 21.900000000000002,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": -4.5,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "deconclean_dispatch",
@@ -12534,11 +12581,12 @@
           "fixed": 22,
           "start": 26.400000000000002,
           "end": 27.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": -4.5,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "dispatch_decode",
@@ -12548,11 +12596,12 @@
           "fixed": 22,
           "start": 22.400000000000002,
           "end": 23.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": -4.5,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "decode_breaker",
@@ -12562,11 +12611,12 @@
           "fixed": 14,
           "start": 19.400000000000002,
           "end": 20.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": -4.5,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "dispatch_research",
@@ -12576,11 +12626,12 @@
           "fixed": 32,
           "start": 25.400000000000002,
           "end": 26.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": -4.5,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "research_prep",
@@ -12590,11 +12641,12 @@
           "fixed": 22,
           "start": 35.4,
           "end": 36.6,
-          "width": 1.2,
+          "width": 1.2000000000000028,
           "z": -4.5,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "prep_medical",
@@ -12604,11 +12656,12 @@
           "fixed": 40,
           "start": 17.4,
           "end": 18.599999999999998,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": -4.5,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "medical_booth",
@@ -12618,11 +12671,12 @@
           "fixed": 22,
           "start": 43.4,
           "end": 44.6,
-          "width": 1.2,
+          "width": 1.2000000000000028,
           "z": -4.5,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "booth_research",
@@ -12632,11 +12686,12 @@
           "fixed": 40,
           "start": 25.400000000000002,
           "end": 26.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": -4.5,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "booth_test",
@@ -12646,11 +12701,12 @@
           "fixed": 30,
           "start": 43.4,
           "end": 44.6,
-          "width": 1.2,
+          "width": 1.2000000000000028,
           "z": -4.5,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "research_test",
@@ -12664,7 +12720,8 @@
           "z": -4.5,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "prep_north",
@@ -12674,11 +12731,12 @@
           "fixed": 14,
           "start": 35.4,
           "end": 36.6,
-          "width": 1.2,
+          "width": 1.2000000000000028,
           "z": -4.5,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "north_artifact",
@@ -12688,11 +12746,12 @@
           "fixed": 11,
           "start": 35.4,
           "end": 36.6,
-          "width": 1.2,
+          "width": 1.2000000000000028,
           "z": -4.5,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "north_cell1",
@@ -12702,11 +12761,12 @@
           "fixed": 11,
           "start": 41.4,
           "end": 42.6,
-          "width": 1.2,
+          "width": 1.2000000000000028,
           "z": -4.5,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "north_cell2",
@@ -12716,11 +12776,12 @@
           "fixed": 11,
           "start": 45.4,
           "end": 46.6,
-          "width": 1.2,
+          "width": 1.2000000000000028,
           "z": -4.5,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "outside-garage",
@@ -16684,11 +16745,12 @@
           "fixed": 22,
           "start": 25.400000000000002,
           "end": 26.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": -9,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "freight_spine",
@@ -16702,7 +16764,8 @@
           "z": -9,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "spine_south",
@@ -16712,11 +16775,12 @@
           "fixed": 25,
           "start": 27.1,
           "end": 28.900000000000002,
-          "width": 1.8,
+          "width": 1.8000000000000007,
           "z": -9,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "south_east",
@@ -16726,11 +16790,12 @@
           "fixed": 25,
           "start": 41.9,
           "end": 43.1,
-          "width": 1.2,
+          "width": 1.2000000000000028,
           "z": -9,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "east_north",
@@ -16740,11 +16805,12 @@
           "fixed": 9,
           "start": 41.9,
           "end": 43.1,
-          "width": 1.2,
+          "width": 1.2000000000000028,
           "z": -9,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "north_west",
@@ -16754,11 +16820,12 @@
           "fixed": 16,
           "start": 6.8999999999999995,
           "end": 8.1,
-          "width": 1.2,
+          "width": 1.2000000000000002,
           "z": -9,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "west_south",
@@ -16768,11 +16835,12 @@
           "fixed": 16,
           "start": 25.900000000000002,
           "end": 27.1,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": -9,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "exciter_north",
@@ -16786,7 +16854,8 @@
           "z": -9,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "n1_north",
@@ -16796,11 +16865,12 @@
           "fixed": 6,
           "start": 18.400000000000002,
           "end": 19.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": -9,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "n2_north",
@@ -16810,11 +16880,12 @@
           "fixed": 6,
           "start": 37.4,
           "end": 38.6,
-          "width": 1.2,
+          "width": 1.2000000000000028,
           "z": -9,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "n3_east",
@@ -16824,11 +16895,12 @@
           "fixed": 44,
           "start": 14.399999999999999,
           "end": 15.599999999999998,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": -9,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "n4_south",
@@ -16838,11 +16910,12 @@
           "fixed": 28,
           "start": 37.4,
           "end": 38.6,
-          "width": 1.2,
+          "width": 1.2000000000000028,
           "z": -9,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "n5_south",
@@ -16852,11 +16925,12 @@
           "fixed": 28,
           "start": 18.400000000000002,
           "end": 19.6,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": -9,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "n6_west",
@@ -16866,11 +16940,12 @@
           "fixed": 13,
           "start": 14.399999999999999,
           "end": 15.599999999999998,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": -9,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "cavew_west",
@@ -16884,7 +16959,8 @@
           "z": -9,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "cavew_caves",
@@ -16898,7 +16974,8 @@
           "z": -9,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "caves_cavelink",
@@ -16912,7 +16989,8 @@
           "z": -9,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "cavelink_n5",
@@ -16926,7 +17004,8 @@
           "z": -9,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "fissure_n1",
@@ -16940,7 +17019,8 @@
           "z": -9,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "fissure_n2",
@@ -16954,7 +17034,8 @@
           "z": -9,
           "height": 2.4,
           "sealed": false,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         },
         {
           "id": "hidden_east",
@@ -16964,11 +17045,12 @@
           "fixed": 44,
           "start": 20.900000000000002,
           "end": 22.1,
-          "width": 1.2,
+          "width": 1.1999999999999993,
           "z": -9,
           "height": 2.4,
           "sealed": true,
-          "type": "door"
+          "type": "door",
+          "fullHeight": false
         }
       ],
       "floorSlabs": [
@@ -18266,6 +18348,7 @@
     "openToSky": true,
     "ground": "permeable grass"
   },
+  "envelope": null,
   "approaches": [
     {
       "id": "vehicle-ramp",
