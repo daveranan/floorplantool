@@ -1,11 +1,11 @@
 // Read-only regression harness: no production storage, seed or export files are written.
 const fs=require('fs'),vm=require('vm'),assert=require('assert');
-const seeds=['','-v2','-v3','-v4','-v5','-v6','-v7','-v8initial','-v8','-v9','-useredit20260930','-v10'];
+const seeds=['','-v2','-v3','-v4','-v5','-v6','-v7','-v8initial','-v8','-v9','-useredit20260930','-v10','-v11'];
 function boot(initial={}){
  const nodes={},storage={...initial},downloads=[];
  const node=id=>nodes[id]??=( {innerHTML:'',textContent:'',dataset:{},checked:id==='dimensions',setAttribute(k,v){this[k]=v},getAttribute(k){return this[k]},getBoundingClientRect(){return {width:900,height:600}},setPointerCapture(){},hasPointerCapture(){return false},releasePointerCapture(){},createSVGPoint(){return {x:0,y:0,matrixTransform(){return {x:this.x,y:this.y}}}},getScreenCTM(){return {inverse(){return {}}}},click(){},showModal(){},close(){}});
  const ctx={console,JSON,Math,Number,Object,Array,Set,Map,String,Date,Error,setTimeout:()=>0,clearTimeout(){},Blob,URL:{createObjectURL:b=>{downloads.push(b);return ''},revokeObjectURL(){}},localStorage:{getItem:k=>storage[k],setItem:(k,v)=>storage[k]=v},document:{getElementById:node,querySelector:()=>null,createElement:()=>node('anchor')},confirm:()=>true,alert:e=>{throw Error(e)},window:{}};
- vm.createContext(ctx);for(const s of seeds)vm.runInContext(fs.readFileSync('dist/seed'+s+'.js','utf8'),ctx);for(const f of ['geometry','app'])vm.runInContext(fs.readFileSync('dist/'+f+'.js','utf8'),ctx);
+ vm.createContext(ctx);for(const s of seeds)vm.runInContext(fs.readFileSync('dist/seed'+s+'.js','utf8'),ctx);for(const f of ['geometry','stair-detail','app'])vm.runInContext(fs.readFileSync('dist/'+f+'.js','utf8'),ctx);
  return {run:s=>vm.runInContext(s,ctx),storage,nodes,downloads};
 }
 const t=boot({'kern-active-variant':'v9'}),{run}=t,baseline=run('JSON.stringify(model)');
