@@ -1,0 +1,1534 @@
+window.KERN_V2 = {
+  "version": 1,
+  "variant": "v2",
+  "title": "KERN courtyard clusters",
+  "units": "metres",
+  "geometryVersion": 2,
+  "floors": {
+    "L0": {
+      "name": "Courtyard & operations",
+      "elevation": "+0.00 m",
+      "z": 0,
+      "note": "Three pedestrian doors: east arrival, north archive, and an outside-only survey suite. The grass court is open to the sky. Two useful loops pass through working rooms, with no WC or bedroom shortcuts.",
+      "rooms": [
+        {
+          "id": "courtyard",
+          "name": "OPEN SKY / GRASS COURT",
+          "x": 16,
+          "y": 8,
+          "w": 8,
+          "h": 8,
+          "type": "courtyard",
+          "locked": true,
+          "outdoor": true,
+          "permeable": true
+        },
+        {
+          "id": "porch",
+          "name": "Court porch / equipment display",
+          "x": 16,
+          "y": 16,
+          "w": 8,
+          "h": 6,
+          "type": "circulation",
+          "locked": false
+        },
+        {
+          "id": "map",
+          "name": "Map room / expedition planning",
+          "x": 8,
+          "y": 16,
+          "w": 8,
+          "h": 6,
+          "type": "tech",
+          "locked": false
+        },
+        {
+          "id": "reading",
+          "name": "Records reading room",
+          "x": 8,
+          "y": 8,
+          "w": 8,
+          "h": 8,
+          "type": "tech",
+          "locked": false
+        },
+        {
+          "id": "archive",
+          "name": "Archive / north entrance",
+          "x": 8,
+          "y": 2,
+          "w": 8,
+          "h": 6,
+          "type": "tech",
+          "locked": false
+        },
+        {
+          "id": "north",
+          "name": "Signal exhibits / north room",
+          "x": 16,
+          "y": 2,
+          "w": 16,
+          "h": 6,
+          "type": "tech",
+          "locked": false
+        },
+        {
+          "id": "radar",
+          "name": "Radar & signal analysis",
+          "x": 24,
+          "y": 8,
+          "w": 8,
+          "h": 8,
+          "type": "tech",
+          "locked": false
+        },
+        {
+          "id": "control",
+          "name": "Control / operations",
+          "x": 32,
+          "y": 8,
+          "w": 14,
+          "h": 14,
+          "type": "tech",
+          "locked": false,
+          "height": 8.1
+        },
+        {
+          "id": "stair",
+          "name": "Main stair",
+          "x": 24,
+          "y": 16,
+          "w": 4,
+          "h": 6,
+          "type": "core",
+          "locked": true
+        },
+        {
+          "id": "freight",
+          "name": "Freight lift",
+          "x": 28,
+          "y": 16,
+          "w": 4,
+          "h": 6,
+          "type": "core",
+          "locked": true
+        },
+        {
+          "id": "operations",
+          "name": "Operations support",
+          "x": 24,
+          "y": 22,
+          "w": 8,
+          "h": 8,
+          "type": "tech",
+          "locked": false
+        },
+        {
+          "id": "brief",
+          "name": "Briefing room",
+          "x": 32,
+          "y": 22,
+          "w": 6,
+          "h": 8,
+          "type": "tech",
+          "locked": false
+        },
+        {
+          "id": "reception",
+          "name": "Reception / security",
+          "x": 38,
+          "y": 22,
+          "w": 8,
+          "h": 6,
+          "type": "tech",
+          "locked": false
+        },
+        {
+          "id": "entry",
+          "name": "East arrival vestibule",
+          "x": 46,
+          "y": 22,
+          "w": 6,
+          "h": 6,
+          "type": "circulation",
+          "locked": false
+        },
+        {
+          "id": "issue",
+          "name": "Equipment issue",
+          "x": 8,
+          "y": 22,
+          "w": 8,
+          "h": 8,
+          "type": "service",
+          "locked": false
+        },
+        {
+          "id": "transfer",
+          "name": "Decon arrival / lockers",
+          "x": 16,
+          "y": 22,
+          "w": 8,
+          "h": 3,
+          "type": "service",
+          "locked": false
+        },
+        {
+          "id": "deconclean",
+          "name": "Clean transfer stair",
+          "x": 16,
+          "y": 25,
+          "w": 6,
+          "h": 4,
+          "type": "core",
+          "locked": true
+        },
+        {
+          "id": "wc",
+          "name": "WC",
+          "x": 2,
+          "y": 16,
+          "w": 6,
+          "h": 6,
+          "type": "service",
+          "locked": false
+        },
+        {
+          "id": "janitor",
+          "name": "Janitor",
+          "x": 4,
+          "y": 22,
+          "w": 4,
+          "h": 4,
+          "type": "service",
+          "locked": false
+        },
+        {
+          "id": "survey",
+          "name": "Survey office / outside only",
+          "x": 48,
+          "y": 10,
+          "w": 6,
+          "h": 5,
+          "type": "tech",
+          "locked": false,
+          "outsideOnly": true
+        },
+        {
+          "id": "surveyStore",
+          "name": "Survey stores / outside only",
+          "x": 48,
+          "y": 15,
+          "w": 6,
+          "h": 5,
+          "type": "service",
+          "locked": false,
+          "outsideOnly": true
+        }
+      ],
+      "doors": [
+        {
+          "id": "stair_operations",
+          "a": "stair",
+          "b": "operations",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "freight_operations",
+          "a": "freight",
+          "b": "operations",
+          "width": 2,
+          "offset": 0.5
+        },
+        {
+          "id": "entry_reception",
+          "a": "entry",
+          "b": "reception",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "reception_control",
+          "a": "reception",
+          "b": "control",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "reception_brief",
+          "a": "reception",
+          "b": "brief",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "brief_operations",
+          "a": "brief",
+          "b": "operations",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "transfer_porch",
+          "a": "transfer",
+          "b": "porch",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "operations_transfer",
+          "a": "operations",
+          "b": "transfer",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "porch_map",
+          "a": "porch",
+          "b": "map",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "porch_courtyard",
+          "a": "porch",
+          "b": "courtyard",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "map_reading",
+          "a": "map",
+          "b": "reading",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "reading_courtyard",
+          "a": "reading",
+          "b": "courtyard",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "reading_archive",
+          "a": "reading",
+          "b": "archive",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "archive_north",
+          "a": "archive",
+          "b": "north",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "north_radar",
+          "a": "north",
+          "b": "radar",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "radar_control",
+          "a": "radar",
+          "b": "control",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "map_issue",
+          "a": "map",
+          "b": "issue",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "issue_transfer",
+          "a": "issue",
+          "b": "transfer",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "transfer_deconclean",
+          "a": "transfer",
+          "b": "deconclean",
+          "width": 1.2,
+          "offset": 1
+        },
+        {
+          "id": "wc_map",
+          "a": "wc",
+          "b": "map",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "janitor_issue",
+          "a": "janitor",
+          "b": "issue",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "survey_surveyStore",
+          "a": "survey",
+          "b": "surveyStore",
+          "width": 1.2,
+          "offset": 0.5
+        }
+      ],
+      "entrances": [
+        "entry",
+        "archive",
+        "survey"
+      ],
+      "externals": [
+        {
+          "room": "entry",
+          "side": "e",
+          "label": "MAIN PEDESTRIAN ENTRY",
+          "width": 1.8
+        },
+        {
+          "room": "archive",
+          "side": "n",
+          "label": "ARCHIVE ENTRY",
+          "width": 1.5
+        },
+        {
+          "room": "survey",
+          "side": "e",
+          "label": "OUTSIDE-ONLY SUITE",
+          "width": 1.5
+        }
+      ]
+    },
+    "L1": {
+      "name": "Quarters & overlook",
+      "elevation": "+4.20 m",
+      "z": 4.2,
+      "note": "Living rooms make a south loop through dining, court porch, study and the Control overlook. Sleeping rooms are private leaves off their own landing. No floor, roof or bridge crosses the grass courtyard.",
+      "rooms": [
+        {
+          "id": "stair",
+          "name": "Main stair",
+          "x": 24,
+          "y": 16,
+          "w": 4,
+          "h": 6,
+          "type": "core",
+          "locked": true
+        },
+        {
+          "id": "freight",
+          "name": "Freight lift",
+          "x": 28,
+          "y": 16,
+          "w": 4,
+          "h": 6,
+          "type": "core",
+          "locked": true
+        },
+        {
+          "id": "void",
+          "name": "OPEN TO CONTROL BELOW",
+          "x": 32,
+          "y": 8,
+          "w": 14,
+          "h": 14,
+          "type": "void",
+          "locked": true
+        },
+        {
+          "id": "sky",
+          "name": "COURTYARD / OPEN TO SKY",
+          "x": 16,
+          "y": 8,
+          "w": 8,
+          "h": 8,
+          "type": "void",
+          "locked": true,
+          "courtyardVoid": true
+        },
+        {
+          "id": "landing",
+          "name": "Quiet stair landing",
+          "x": 5,
+          "y": 2,
+          "w": 3,
+          "h": 20,
+          "type": "circulation",
+          "locked": false
+        },
+        {
+          "id": "sleepa",
+          "name": "Sleeping A",
+          "x": 8,
+          "y": 2,
+          "w": 8,
+          "h": 6,
+          "type": "living",
+          "locked": false
+        },
+        {
+          "id": "sleepb",
+          "name": "Sleeping B",
+          "x": 8,
+          "y": 8,
+          "w": 8,
+          "h": 8,
+          "type": "living",
+          "locked": false
+        },
+        {
+          "id": "common",
+          "name": "Common room",
+          "x": 8,
+          "y": 16,
+          "w": 8,
+          "h": 6,
+          "type": "living",
+          "locked": false
+        },
+        {
+          "id": "bath",
+          "name": "Showers / WC",
+          "x": 0,
+          "y": 16,
+          "w": 5,
+          "h": 6,
+          "type": "service",
+          "locked": false
+        },
+        {
+          "id": "dining",
+          "name": "Dining room",
+          "x": 8,
+          "y": 22,
+          "w": 8,
+          "h": 8,
+          "type": "living",
+          "locked": false
+        },
+        {
+          "id": "kitchen",
+          "name": "Kitchen",
+          "x": 2,
+          "y": 22,
+          "w": 6,
+          "h": 8,
+          "type": "living",
+          "locked": false
+        },
+        {
+          "id": "porch",
+          "name": "Court-edge lounge",
+          "x": 16,
+          "y": 16,
+          "w": 8,
+          "h": 6,
+          "type": "living",
+          "locked": false
+        },
+        {
+          "id": "south",
+          "name": "Library / conversation room",
+          "x": 16,
+          "y": 22,
+          "w": 8,
+          "h": 8,
+          "type": "living",
+          "locked": false
+        },
+        {
+          "id": "study",
+          "name": "Office / records",
+          "x": 24,
+          "y": 22,
+          "w": 8,
+          "h": 8,
+          "type": "living",
+          "locked": false
+        },
+        {
+          "id": "bridge",
+          "name": "Control overlook",
+          "x": 32,
+          "y": 22,
+          "w": 14,
+          "h": 3,
+          "type": "circulation",
+          "locked": false
+        },
+        {
+          "id": "comms",
+          "name": "Communications",
+          "x": 46,
+          "y": 16,
+          "w": 8,
+          "h": 9,
+          "type": "tech",
+          "locked": false
+        },
+        {
+          "id": "roof",
+          "name": "Roof access",
+          "x": 46,
+          "y": 25,
+          "w": 4,
+          "h": 5,
+          "type": "service",
+          "locked": false
+        },
+        {
+          "id": "terrace",
+          "name": "South roof terrace",
+          "x": 32,
+          "y": 25,
+          "w": 14,
+          "h": 7,
+          "type": "terrace",
+          "locked": false,
+          "outdoor": true
+        }
+      ],
+      "doors": [
+        {
+          "id": "stair_study",
+          "a": "stair",
+          "b": "study",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "freight_study",
+          "a": "freight",
+          "b": "study",
+          "width": 2,
+          "offset": 0.5
+        },
+        {
+          "id": "stair_porch",
+          "a": "stair",
+          "b": "porch",
+          "width": 1.2,
+          "offset": 1
+        },
+        {
+          "id": "porch_common",
+          "a": "porch",
+          "b": "common",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "common_landing",
+          "a": "common",
+          "b": "landing",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "landing_sleepa",
+          "a": "landing",
+          "b": "sleepa",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "landing_sleepb",
+          "a": "landing",
+          "b": "sleepb",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "landing_bath",
+          "a": "landing",
+          "b": "bath",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "common_dining",
+          "a": "common",
+          "b": "dining",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "dining_kitchen",
+          "a": "dining",
+          "b": "kitchen",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "dining_south",
+          "a": "dining",
+          "b": "south",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "south_porch",
+          "a": "south",
+          "b": "porch",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "south_study",
+          "a": "south",
+          "b": "study",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "study_bridge",
+          "a": "study",
+          "b": "bridge",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "bridge_comms",
+          "a": "bridge",
+          "b": "comms",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "bridge_terrace",
+          "a": "bridge",
+          "b": "terrace",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "comms_roof",
+          "a": "comms",
+          "b": "roof",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "roof_terrace",
+          "a": "roof",
+          "b": "terrace",
+          "width": 1.2,
+          "offset": 0.5
+        }
+      ],
+      "entrances": [
+        "stair"
+      ],
+      "externals": []
+    },
+    "B1": {
+      "name": "Expedition & research clusters",
+      "elevation": "-4.50 m",
+      "z": -4.5,
+      "note": "Separate west vehicle ramp. Dirty gear → showers → clean stair is the only garage-to-base threshold. Research loops through prep and scanner rooms, with containment as secure dead ends.",
+      "rooms": [
+        {
+          "id": "stair",
+          "name": "Main stair",
+          "x": 24,
+          "y": 16,
+          "w": 4,
+          "h": 6,
+          "type": "core",
+          "locked": true
+        },
+        {
+          "id": "freight",
+          "name": "Freight lift",
+          "x": 28,
+          "y": 16,
+          "w": 4,
+          "h": 6,
+          "type": "core",
+          "locked": true
+        },
+        {
+          "id": "garage",
+          "name": "Garage / expedition bay",
+          "x": 0,
+          "y": 25,
+          "w": 16,
+          "h": 14,
+          "type": "service",
+          "locked": false
+        },
+        {
+          "id": "workshop",
+          "name": "Workshop",
+          "x": 0,
+          "y": 17,
+          "w": 13,
+          "h": 8,
+          "type": "service",
+          "locked": false
+        },
+        {
+          "id": "storage",
+          "name": "General storage",
+          "x": 0,
+          "y": 10,
+          "w": 13,
+          "h": 7,
+          "type": "service",
+          "locked": false
+        },
+        {
+          "id": "dirty",
+          "name": "Dirty gear / undress",
+          "x": 16,
+          "y": 33,
+          "w": 6,
+          "h": 4,
+          "type": "service",
+          "locked": false
+        },
+        {
+          "id": "wash",
+          "name": "Decon showers",
+          "x": 16,
+          "y": 29,
+          "w": 6,
+          "h": 4,
+          "type": "service",
+          "locked": false
+        },
+        {
+          "id": "deconclean",
+          "name": "Clean transfer stair",
+          "x": 16,
+          "y": 25,
+          "w": 6,
+          "h": 4,
+          "type": "core",
+          "locked": true
+        },
+        {
+          "id": "dispatch",
+          "name": "Equipment dispatch",
+          "x": 22,
+          "y": 22,
+          "w": 10,
+          "h": 8,
+          "type": "service",
+          "locked": false
+        },
+        {
+          "id": "decode",
+          "name": "Decode / server lab",
+          "x": 16,
+          "y": 14,
+          "w": 8,
+          "h": 8,
+          "type": "tech",
+          "locked": false
+        },
+        {
+          "id": "breaker",
+          "name": "Breaker / maintenance",
+          "x": 16,
+          "y": 8,
+          "w": 8,
+          "h": 6,
+          "type": "service",
+          "locked": false
+        },
+        {
+          "id": "prep",
+          "name": "Research prep",
+          "x": 32,
+          "y": 14,
+          "w": 8,
+          "h": 8,
+          "type": "tech",
+          "locked": false
+        },
+        {
+          "id": "medical",
+          "name": "Medical / scanner",
+          "x": 40,
+          "y": 14,
+          "w": 8,
+          "h": 8,
+          "type": "tech",
+          "locked": false
+        },
+        {
+          "id": "research",
+          "name": "Research exchange",
+          "x": 32,
+          "y": 22,
+          "w": 8,
+          "h": 8,
+          "type": "tech",
+          "locked": false
+        },
+        {
+          "id": "booth",
+          "name": "Protected observation",
+          "x": 40,
+          "y": 22,
+          "w": 8,
+          "h": 8,
+          "type": "tech",
+          "locked": false
+        },
+        {
+          "id": "test",
+          "name": "Test chamber",
+          "x": 32,
+          "y": 30,
+          "w": 16,
+          "h": 8,
+          "type": "tech",
+          "locked": false
+        },
+        {
+          "id": "north",
+          "name": "Secure material transfer",
+          "x": 32,
+          "y": 11,
+          "w": 16,
+          "h": 3,
+          "type": "circulation",
+          "locked": false
+        },
+        {
+          "id": "artifact",
+          "name": "Reinforced artifact store",
+          "x": 32,
+          "y": 5,
+          "w": 8,
+          "h": 6,
+          "type": "tech",
+          "locked": false
+        },
+        {
+          "id": "cell1",
+          "name": "Containment 01",
+          "x": 40,
+          "y": 5,
+          "w": 4,
+          "h": 6,
+          "type": "tech",
+          "locked": false
+        },
+        {
+          "id": "cell2",
+          "name": "Containment 02",
+          "x": 44,
+          "y": 5,
+          "w": 4,
+          "h": 6,
+          "type": "tech",
+          "locked": false
+        }
+      ],
+      "doors": [
+        {
+          "id": "stair_dispatch",
+          "a": "stair",
+          "b": "dispatch",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "freight_dispatch",
+          "a": "freight",
+          "b": "dispatch",
+          "width": 2,
+          "offset": 0.5
+        },
+        {
+          "id": "garage_workshop",
+          "a": "garage",
+          "b": "workshop",
+          "width": 3,
+          "offset": 0.5
+        },
+        {
+          "id": "workshop_storage",
+          "a": "workshop",
+          "b": "storage",
+          "width": 2,
+          "offset": 0.5
+        },
+        {
+          "id": "garage_dirty",
+          "a": "garage",
+          "b": "dirty",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "dirty_wash",
+          "a": "dirty",
+          "b": "wash",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "wash_deconclean",
+          "a": "wash",
+          "b": "deconclean",
+          "width": 1.2,
+          "offset": 1
+        },
+        {
+          "id": "deconclean_dispatch",
+          "a": "deconclean",
+          "b": "dispatch",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "dispatch_decode",
+          "a": "dispatch",
+          "b": "decode",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "decode_breaker",
+          "a": "decode",
+          "b": "breaker",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "dispatch_research",
+          "a": "dispatch",
+          "b": "research",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "research_prep",
+          "a": "research",
+          "b": "prep",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "prep_medical",
+          "a": "prep",
+          "b": "medical",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "medical_booth",
+          "a": "medical",
+          "b": "booth",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "booth_research",
+          "a": "booth",
+          "b": "research",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "booth_test",
+          "a": "booth",
+          "b": "test",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "research_test",
+          "a": "research",
+          "b": "test",
+          "width": 2,
+          "offset": 0.5
+        },
+        {
+          "id": "prep_north",
+          "a": "prep",
+          "b": "north",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "north_artifact",
+          "a": "north",
+          "b": "artifact",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "north_cell1",
+          "a": "north",
+          "b": "cell1",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "north_cell2",
+          "a": "north",
+          "b": "cell2",
+          "width": 1.2,
+          "offset": 0.5
+        }
+      ],
+      "entrances": [
+        "garage",
+        "stair"
+      ],
+      "externals": [
+        {
+          "room": "garage",
+          "side": "w",
+          "label": "VEHICLE RAMP ONLY",
+          "width": 5
+        }
+      ]
+    },
+    "B2": {
+      "name": "Stabilization & cave routes",
+      "elevation": "−9.00 m",
+      "note": "Six distributed nodes surround the exciter. A continuous maintenance ring connects every node. Rough cave passages bypass the west and north ring; a sealed chamber branches off the east route.",
+      "rooms": [
+        {
+          "id": "stair",
+          "name": "Main stair",
+          "x": 24,
+          "y": 16,
+          "w": 4,
+          "h": 6,
+          "type": "core",
+          "locked": true
+        },
+        {
+          "id": "freight",
+          "name": "Freight lift",
+          "x": 28,
+          "y": 16,
+          "w": 4,
+          "h": 6,
+          "type": "core",
+          "locked": true
+        },
+        {
+          "id": "spine",
+          "name": "Core access",
+          "x": 24,
+          "y": 22,
+          "w": 8,
+          "h": 3,
+          "type": "circulation",
+          "locked": false
+        },
+        {
+          "id": "south",
+          "name": "South service gallery",
+          "x": 16,
+          "y": 25,
+          "w": 28,
+          "h": 3,
+          "type": "circulation",
+          "locked": false
+        },
+        {
+          "id": "east",
+          "name": "East service gallery",
+          "x": 41,
+          "y": 9,
+          "w": 3,
+          "h": 16,
+          "type": "circulation",
+          "locked": false
+        },
+        {
+          "id": "north",
+          "name": "North service gallery",
+          "x": 16,
+          "y": 6,
+          "w": 28,
+          "h": 3,
+          "type": "circulation",
+          "locked": false
+        },
+        {
+          "id": "west",
+          "name": "West service gallery",
+          "x": 13,
+          "y": 6,
+          "w": 3,
+          "h": 22,
+          "type": "circulation",
+          "locked": false
+        },
+        {
+          "id": "exciter",
+          "name": "Central exciter",
+          "x": 24,
+          "y": 9,
+          "w": 8,
+          "h": 7,
+          "type": "tech",
+          "locked": false
+        },
+        {
+          "id": "n1",
+          "name": "Node 01",
+          "x": 16,
+          "y": 0,
+          "w": 6,
+          "h": 6,
+          "type": "tech",
+          "locked": false
+        },
+        {
+          "id": "n2",
+          "name": "Node 02",
+          "x": 35,
+          "y": 0,
+          "w": 6,
+          "h": 6,
+          "type": "tech",
+          "locked": false
+        },
+        {
+          "id": "n3",
+          "name": "Node 03",
+          "x": 44,
+          "y": 12,
+          "w": 6,
+          "h": 6,
+          "type": "tech",
+          "locked": false
+        },
+        {
+          "id": "n4",
+          "name": "Node 04",
+          "x": 35,
+          "y": 28,
+          "w": 6,
+          "h": 6,
+          "type": "tech",
+          "locked": false
+        },
+        {
+          "id": "n5",
+          "name": "Node 05",
+          "x": 16,
+          "y": 28,
+          "w": 6,
+          "h": 6,
+          "type": "tech",
+          "locked": false
+        },
+        {
+          "id": "n6",
+          "name": "Node 06",
+          "x": 7,
+          "y": 12,
+          "w": 6,
+          "h": 6,
+          "type": "tech",
+          "locked": false
+        },
+        {
+          "id": "cavew",
+          "name": "West cave passage",
+          "x": 2,
+          "y": 18,
+          "w": 11,
+          "h": 4,
+          "type": "cave",
+          "locked": false
+        },
+        {
+          "id": "caves",
+          "name": "Southwest pocket",
+          "x": 2,
+          "y": 22,
+          "w": 6,
+          "h": 8,
+          "type": "cave",
+          "locked": false
+        },
+        {
+          "id": "cavelink",
+          "name": "South cave bypass",
+          "x": 8,
+          "y": 28,
+          "w": 8,
+          "h": 4,
+          "type": "cave",
+          "locked": false
+        },
+        {
+          "id": "fissure",
+          "name": "North fissure",
+          "x": 22,
+          "y": 0,
+          "w": 13,
+          "h": 4,
+          "type": "cave",
+          "locked": false
+        },
+        {
+          "id": "hidden",
+          "name": "Sealed cavern",
+          "x": 44,
+          "y": 18,
+          "w": 8,
+          "h": 7,
+          "type": "cave",
+          "locked": false
+        }
+      ],
+      "doors": [
+        {
+          "id": "stair_spine",
+          "a": "stair",
+          "b": "spine",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "freight_spine",
+          "a": "freight",
+          "b": "spine",
+          "width": 2,
+          "offset": 0.5
+        },
+        {
+          "id": "spine_south",
+          "a": "spine",
+          "b": "south",
+          "width": 1.8,
+          "offset": 0.5
+        },
+        {
+          "id": "south_east",
+          "a": "south",
+          "b": "east",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "east_north",
+          "a": "east",
+          "b": "north",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "north_west",
+          "a": "north",
+          "b": "west",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "west_south",
+          "a": "west",
+          "b": "south",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "exciter_north",
+          "a": "exciter",
+          "b": "north",
+          "width": 2,
+          "offset": 0.5
+        },
+        {
+          "id": "n1_north",
+          "a": "n1",
+          "b": "north",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "n2_north",
+          "a": "n2",
+          "b": "north",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "n3_east",
+          "a": "n3",
+          "b": "east",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "n4_south",
+          "a": "n4",
+          "b": "south",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "n5_south",
+          "a": "n5",
+          "b": "south",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "n6_west",
+          "a": "n6",
+          "b": "west",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "cavew_west",
+          "a": "cavew",
+          "b": "west",
+          "width": 1.5,
+          "offset": 0.5
+        },
+        {
+          "id": "cavew_caves",
+          "a": "cavew",
+          "b": "caves",
+          "width": 2,
+          "offset": 0.5
+        },
+        {
+          "id": "caves_cavelink",
+          "a": "caves",
+          "b": "cavelink",
+          "width": 1.5,
+          "offset": 0.5
+        },
+        {
+          "id": "cavelink_n5",
+          "a": "cavelink",
+          "b": "n5",
+          "width": 1.5,
+          "offset": 0.5
+        },
+        {
+          "id": "fissure_n1",
+          "a": "fissure",
+          "b": "n1",
+          "width": 1.5,
+          "offset": 0.5
+        },
+        {
+          "id": "fissure_n2",
+          "a": "fissure",
+          "b": "n2",
+          "width": 1.5,
+          "offset": 0.5
+        },
+        {
+          "id": "hidden_east",
+          "a": "hidden",
+          "b": "east",
+          "width": 1.2,
+          "offset": 0.5,
+          "sealed": true
+        }
+      ],
+      "entrances": [
+        "stair"
+      ],
+      "annotations": [
+        {
+          "x": 18,
+          "y": 18,
+          "text": "UNEXCAVATED ROCK"
+        },
+        {
+          "x": 34,
+          "y": 18,
+          "text": "ROCK / SERVICE DUCTS"
+        }
+      ],
+      "z": -9
+    }
+  },
+  "courtyard": {
+    "floor": "L0",
+    "x": 16,
+    "y": 8,
+    "w": 8,
+    "h": 8,
+    "z": 0,
+    "openToSky": true,
+    "ground": "permeable grass"
+  },
+  "verticalConnections": [
+    {
+      "id": "main-stair",
+      "type": "stair",
+      "room": "stair",
+      "floors": [
+        "B2",
+        "B1",
+        "L0",
+        "L1"
+      ],
+      "footprint": {
+        "x": 24,
+        "y": 16,
+        "w": 4,
+        "h": 6
+      }
+    },
+    {
+      "id": "freight",
+      "type": "lift",
+      "room": "freight",
+      "floors": [
+        "B2",
+        "B1",
+        "L0",
+        "L1"
+      ],
+      "footprint": {
+        "x": 28,
+        "y": 16,
+        "w": 4,
+        "h": 6
+      }
+    },
+    {
+      "id": "clean-stair",
+      "type": "stair",
+      "room": "deconclean",
+      "floors": [
+        "B1",
+        "L0"
+      ],
+      "footprint": {
+        "x": 16,
+        "y": 25,
+        "w": 6,
+        "h": 4
+      }
+    }
+  ],
+  "designReferences": [
+    "Säynätsalo: protected outdoor court and differentiated thresholds",
+    "Rostlaube: clustered choices and short loops",
+    "Carpenter Center: multiple approaches and interlocking volumes",
+    "Yale A&A: sectional hierarchy and overlook"
+  ]
+};
