@@ -8,3 +8,5 @@
 #sectionview{border:1px solid #bcc6c8;background:#fff;color:#26383f;border-radius:4px;padding:7px 10px;text-decoration:none;font-size:14px}#sectionview:hover{background:#e9eff0}#sectionview:focus-visible{outline:3px solid #c67827;outline-offset:2px}#sectionview[hidden]{display:none}
 
 @media(max-width:720px){.mapcontrols{flex-wrap:wrap}#sectionview{font-size:11px;padding:6px 8px}}
+
+#planpng{border:1px solid #bcc6c8;background:#fff;color:#26383f;border-radius:4px;padding:7px 10px;text-decoration:none;font-size:14px}#planpng[hidden]{display:none}.floorbrief{font-size:12px;line-height:1.55;color:#526268;margin:0 0 9px}.floorbrief summary{cursor:pointer}.floorbrief p{margin:7px 0;max-width:1000px}.floorbrief[open]{max-height:150px;overflow:auto}#geometryexport[hidden]{display:none}@media(max-width:720px){.toolbar nav button{padding:9px 10px}.floorbrief{font-size:11px;max-height:120px;overflow:auto;margin:0}.floorbrief summary{padding:5px 0}#planpng{font-size:11px;padding:6px 8px}.mapcontrols{gap:3px}.mapcontrols button{padding:6px}.maphead h1{font-size:15px}}

@@ -1,0 +1,2065 @@
+{
+  "version": 1,
+  "variant": "v8",
+  "title": "KERN V8 \u00b7 Full-height freight & two boarded wings",
+  "units": "metres",
+  "geometryVersion": 4,
+  "floors": {
+    "L3": {
+      "name": "Observation deck \u00b7 radar maintenance",
+      "z": 15.9,
+      "elevation": "+15.90 m",
+      "clearHeight": 4,
+      "rooms": [
+        {
+          "id": "stair",
+          "name": "Main stair",
+          "x": 8,
+          "y": 2,
+          "w": 4,
+          "h": 8,
+          "type": "core",
+          "locked": true,
+          "diagramLabel": "NW STAIR",
+          "stairDetail": "30 risers \u00d7 0.1767 m; 2 flights; 1.35 m clear flight / landings; 0.27 m going; conceptual 4 \u00d7 8 m shaft"
+        },
+        {
+          "id": "freight",
+          "name": "Full-height freight",
+          "x": 18,
+          "y": 26,
+          "w": 4,
+          "h": 6,
+          "type": "core",
+          "locked": true,
+          "diagramLabel": "FREIGHT",
+          "liftDetail": "4 \u00d7 6 m shaft allowance; nominal 2.4 m cargo opening; actual car, pit, overhead and capacity require supplier coordination"
+        },
+        {
+          "id": "stairlanding",
+          "name": "Roof stair landing",
+          "x": 8,
+          "y": 10,
+          "w": 10,
+          "h": 3,
+          "type": "terrace",
+          "outdoor": true
+        },
+        {
+          "id": "observation",
+          "name": "Observation deck",
+          "x": 12,
+          "y": 0,
+          "w": 10,
+          "h": 10,
+          "type": "terrace",
+          "outdoor": true
+        },
+        {
+          "id": "radar",
+          "name": "Radar / dish maintenance",
+          "x": 22,
+          "y": 0,
+          "w": 10,
+          "h": 10,
+          "type": "terrace",
+          "outdoor": true
+        },
+        {
+          "id": "roofpath",
+          "name": "Guarded freight service walk",
+          "x": 14,
+          "y": 13,
+          "w": 4,
+          "h": 13,
+          "type": "terrace",
+          "outdoor": true
+        },
+        {
+          "id": "liftlobby",
+          "name": "Roof freight lobby",
+          "x": 14,
+          "y": 26,
+          "w": 4,
+          "h": 6,
+          "type": "circulation"
+        },
+        {
+          "id": "sky",
+          "name": "COURTYARD / OPEN SKY",
+          "x": 18,
+          "y": 10,
+          "w": 10,
+          "h": 10,
+          "type": "void",
+          "courtyardVoid": true,
+          "locked": true
+        }
+      ],
+      "doors": [
+        {
+          "id": "stair_stairlanding",
+          "a": "stair",
+          "b": "stairlanding",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "stairlanding_observation",
+          "a": "stairlanding",
+          "b": "observation",
+          "width": 1.5,
+          "offset": 0.5
+        },
+        {
+          "id": "observation_radar",
+          "a": "observation",
+          "b": "radar",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "stairlanding_roofpath",
+          "a": "stairlanding",
+          "b": "roofpath",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "roofpath_liftlobby",
+          "a": "roofpath",
+          "b": "liftlobby",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "liftlobby_freight",
+          "a": "liftlobby",
+          "b": "freight",
+          "width": 2.4,
+          "offset": 0.5
+        }
+      ],
+      "entrances": [
+        "stair",
+        "freight"
+      ],
+      "note": "A partial open observation / radar deck caps the north crown, with a guarded service walk to the freight tower. Freight therefore serves B3, B2, B1, L0, L1, L2 and L3. This is an outdoor deck, not another full enclosed storey. NW stair remains the normal human route; the freight lift is not an escape route."
+    },
+    "L2": {
+      "name": "Partial roof-service landing",
+      "z": 10.6,
+      "elevation": "+10.60 m",
+      "clearHeight": 4,
+      "rooms": [
+        {
+          "id": "stair",
+          "name": "Main stair",
+          "x": 8,
+          "y": 2,
+          "w": 4,
+          "h": 8,
+          "type": "core",
+          "locked": true,
+          "diagramLabel": "NW STAIR",
+          "stairDetail": "30 risers \u00d7 0.1767 m; 2 flights; 1.35 m clear flight / landings; 0.27 m going; conceptual 4 \u00d7 8 m shaft"
+        },
+        {
+          "id": "freight",
+          "name": "Full-height freight",
+          "x": 18,
+          "y": 26,
+          "w": 4,
+          "h": 6,
+          "type": "core",
+          "locked": true,
+          "diagramLabel": "FREIGHT",
+          "liftDetail": "4 \u00d7 6 m shaft allowance; nominal 2.4 m cargo opening; actual car, pit, overhead and capacity require supplier coordination"
+        },
+        {
+          "id": "stairlanding",
+          "name": "Roof stair landing",
+          "x": 8,
+          "y": 10,
+          "w": 6,
+          "h": 3,
+          "type": "circulation"
+        },
+        {
+          "id": "roofpath",
+          "name": "Guarded roof service walk",
+          "x": 14,
+          "y": 13,
+          "w": 4,
+          "h": 13,
+          "type": "terrace",
+          "outdoor": true
+        },
+        {
+          "id": "liftlobby",
+          "name": "Roof freight lobby",
+          "x": 14,
+          "y": 26,
+          "w": 4,
+          "h": 6,
+          "type": "circulation"
+        },
+        {
+          "id": "pathturn",
+          "name": "Roof route turn",
+          "x": 14,
+          "y": 10,
+          "w": 4,
+          "h": 3,
+          "type": "terrace",
+          "outdoor": true
+        },
+        {
+          "id": "plant",
+          "name": "Roof plant / service",
+          "x": 12,
+          "y": 2,
+          "w": 6,
+          "h": 8,
+          "type": "service"
+        },
+        {
+          "id": "opsroof",
+          "name": "Operations roof terrace",
+          "x": 18,
+          "y": 0,
+          "w": 14,
+          "h": 10,
+          "type": "terrace",
+          "outdoor": true
+        },
+        {
+          "id": "sky",
+          "name": "COURTYARD / OPEN SKY",
+          "x": 18,
+          "y": 10,
+          "w": 10,
+          "h": 10,
+          "type": "void",
+          "courtyardVoid": true,
+          "locked": true
+        }
+      ],
+      "doors": [
+        {
+          "id": "stair_stairlanding",
+          "a": "stair",
+          "b": "stairlanding",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "stairlanding_plant",
+          "a": "stairlanding",
+          "b": "plant",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "stairlanding_pathturn",
+          "a": "stairlanding",
+          "b": "pathturn",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "pathturn_roofpath",
+          "a": "pathturn",
+          "b": "roofpath",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "roofpath_liftlobby",
+          "a": "roofpath",
+          "b": "liftlobby",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "liftlobby_freight",
+          "a": "liftlobby",
+          "b": "freight",
+          "width": 2.4,
+          "offset": 0.5
+        },
+        {
+          "id": "plant_opsroof",
+          "a": "plant",
+          "b": "opsroof",
+          "width": 1.5,
+          "offset": 0.5
+        }
+      ],
+      "entrances": [
+        "stair",
+        "freight"
+      ],
+      "note": "The former concealed L2 rooms have moved down to the two boarded sections. This is a small legitimate roof-service landing and plant room, with a guarded outdoor route between the two cores. The Operations roof is at +10.60 m. No roof or bridge crosses the open-sky courtyard."
+    },
+    "L1": {
+      "name": "Crew quarters \u00b7 boarded listening suite",
+      "z": 5.3,
+      "elevation": "+5.30 m",
+      "clearHeight": 4,
+      "rooms": [
+        {
+          "id": "stair",
+          "name": "Main stair",
+          "x": 8,
+          "y": 2,
+          "w": 4,
+          "h": 8,
+          "type": "core",
+          "locked": true,
+          "diagramLabel": "NW STAIR",
+          "stairDetail": "30 risers \u00d7 0.1767 m; 2 flights; 1.35 m clear flight / landings; 0.27 m going; conceptual 4 \u00d7 8 m shaft"
+        },
+        {
+          "id": "freight",
+          "name": "Full-height freight",
+          "x": 18,
+          "y": 26,
+          "w": 4,
+          "h": 6,
+          "type": "core",
+          "locked": true,
+          "diagramLabel": "FREIGHT",
+          "liftDetail": "4 \u00d7 6 m shaft allowance; nominal 2.4 m cargo opening; actual car, pit, overhead and capacity require supplier coordination"
+        },
+        {
+          "id": "sky",
+          "name": "OPEN SKY COURT",
+          "x": 18,
+          "y": 10,
+          "w": 10,
+          "h": 10,
+          "type": "void",
+          "locked": true,
+          "courtyardVoid": true
+        },
+        {
+          "id": "void",
+          "name": "VOID TO OPERATIONS BELOW",
+          "x": 18,
+          "y": 0,
+          "w": 14,
+          "h": 10,
+          "type": "void",
+          "locked": true,
+          "diagramLabel": "OPERATIONS VOID\nNO L1 FLOOR"
+        },
+        {
+          "id": "stairlanding",
+          "name": "Stair landing",
+          "x": 8,
+          "y": 10,
+          "w": 6,
+          "h": 2,
+          "type": "circulation"
+        },
+        {
+          "id": "sleepa",
+          "name": "Sleeping A",
+          "x": 8,
+          "y": 12,
+          "w": 6,
+          "h": 5,
+          "type": "living"
+        },
+        {
+          "id": "sleepb",
+          "name": "Sleeping B",
+          "x": 8,
+          "y": 17,
+          "w": 6,
+          "h": 6,
+          "type": "living"
+        },
+        {
+          "id": "westhall",
+          "name": "Quiet hall / freight return",
+          "x": 14,
+          "y": 10,
+          "w": 4,
+          "h": 22,
+          "type": "circulation"
+        },
+        {
+          "id": "overlook",
+          "name": "Operations overlook",
+          "x": 14,
+          "y": 7,
+          "w": 4,
+          "h": 3,
+          "type": "circulation"
+        },
+        {
+          "id": "bath",
+          "name": "Showers / WC",
+          "x": 18,
+          "y": 20,
+          "w": 6,
+          "h": 3,
+          "type": "service"
+        },
+        {
+          "id": "southlink",
+          "name": "Common return",
+          "x": 18,
+          "y": 23,
+          "w": 4,
+          "h": 3,
+          "type": "circulation"
+        },
+        {
+          "id": "common",
+          "name": "Kitchen / common",
+          "x": 22,
+          "y": 23,
+          "w": 10,
+          "h": 9,
+          "type": "living"
+        },
+        {
+          "id": "eastreturn",
+          "name": "East return",
+          "x": 24,
+          "y": 20,
+          "w": 12,
+          "h": 3,
+          "type": "circulation"
+        },
+        {
+          "id": "terrace",
+          "name": "South roof terrace",
+          "x": 32,
+          "y": 23,
+          "w": 12,
+          "h": 9,
+          "type": "terrace",
+          "outdoor": true
+        },
+        {
+          "id": "listening",
+          "name": "02 \u00b7 Boarded listening booth",
+          "x": 28,
+          "y": 10,
+          "w": 8,
+          "h": 6,
+          "type": "secret",
+          "boardedSection": "02"
+        },
+        {
+          "id": "tapes",
+          "name": "02 \u00b7 Sealed tape records",
+          "x": 28,
+          "y": 16,
+          "w": 8,
+          "h": 4,
+          "type": "secret",
+          "boardedSection": "02"
+        }
+      ],
+      "doors": [
+        {
+          "id": "stair_stairlanding",
+          "a": "stair",
+          "b": "stairlanding",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "stairlanding_westhall",
+          "a": "stairlanding",
+          "b": "westhall",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "westhall_overlook",
+          "a": "westhall",
+          "b": "overlook",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "westhall_sleepa",
+          "a": "westhall",
+          "b": "sleepa",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "westhall_sleepb",
+          "a": "westhall",
+          "b": "sleepb",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "westhall_bath",
+          "a": "westhall",
+          "b": "bath",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "westhall_southlink",
+          "a": "westhall",
+          "b": "southlink",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "westhall_freight",
+          "a": "westhall",
+          "b": "freight",
+          "width": 2.4,
+          "offset": 0.5
+        },
+        {
+          "id": "southlink_common",
+          "a": "southlink",
+          "b": "common",
+          "width": 1.5,
+          "offset": 0.5
+        },
+        {
+          "id": "southlink_bath",
+          "a": "southlink",
+          "b": "bath",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "common_eastreturn",
+          "a": "common",
+          "b": "eastreturn",
+          "width": 1.5,
+          "offset": 0.5
+        },
+        {
+          "id": "common_terrace",
+          "a": "common",
+          "b": "terrace",
+          "width": 1.8,
+          "offset": 0.5
+        },
+        {
+          "id": "eastreturn_tapes",
+          "a": "eastreturn",
+          "b": "tapes",
+          "width": 1.2,
+          "offset": 0.5,
+          "sealed": true,
+          "boarded": true,
+          "label": "BOARDED 02"
+        },
+        {
+          "id": "tapes_listening",
+          "a": "tapes",
+          "b": "listening",
+          "width": 1.2,
+          "offset": 0.5
+        }
+      ],
+      "entrances": [
+        "stair",
+        "freight"
+      ],
+      "note": "The entire Operations footprint is void at L1. Quiet rooms and a common room use the west / south wings. A disused listening booth and tape records room form boarded section 02, entered from the east return only after removing boards. The suite is 80 m\u00b2; its 1.2 m opening is separate from normal circulation."
+    },
+    "L0": {
+      "name": "Main floor \u00b7 double-height Operations",
+      "z": 0,
+      "elevation": "0.00 m",
+      "clearHeight": 4,
+      "rooms": [
+        {
+          "id": "stair",
+          "name": "Main stair",
+          "x": 8,
+          "y": 2,
+          "w": 4,
+          "h": 8,
+          "type": "core",
+          "locked": true,
+          "diagramLabel": "NW STAIR",
+          "stairDetail": "30 risers \u00d7 0.1767 m; 2 flights; 1.35 m clear flight / landings; 0.27 m going; conceptual 4 \u00d7 8 m shaft"
+        },
+        {
+          "id": "freight",
+          "name": "Full-height freight",
+          "x": 18,
+          "y": 26,
+          "w": 4,
+          "h": 6,
+          "type": "core",
+          "locked": true,
+          "diagramLabel": "FREIGHT",
+          "liftDetail": "4 \u00d7 6 m shaft allowance; nominal 2.4 m cargo opening; actual car, pit, overhead and capacity require supplier coordination"
+        },
+        {
+          "id": "courtyard",
+          "name": "OPEN SKY / GRASS COURT",
+          "x": 18,
+          "y": 10,
+          "w": 10,
+          "h": 10,
+          "type": "courtyard",
+          "locked": true,
+          "outdoor": true,
+          "permeable": true
+        },
+        {
+          "id": "control",
+          "name": "Operations",
+          "x": 18,
+          "y": 0,
+          "w": 14,
+          "h": 10,
+          "type": "tech",
+          "height": 9.3,
+          "zones": [
+            {
+              "name": "Control desks",
+              "x": 20,
+              "y": 3
+            },
+            {
+              "name": "Radar / radio",
+              "x": 28,
+              "y": 3
+            },
+            {
+              "name": "Map / planning",
+              "x": 21,
+              "y": 7
+            },
+            {
+              "name": "Shift support",
+              "x": 28,
+              "y": 7
+            }
+          ],
+          "diagramLabel": "OPERATIONS HALL\n9.3 m CLEAR"
+        },
+        {
+          "id": "archive",
+          "name": "Archive / reading",
+          "x": 8,
+          "y": 10,
+          "w": 6,
+          "h": 10,
+          "type": "tech"
+        },
+        {
+          "id": "northlink",
+          "name": "Operations return",
+          "x": 14,
+          "y": 7,
+          "w": 4,
+          "h": 3,
+          "type": "circulation"
+        },
+        {
+          "id": "westhall",
+          "name": "West passage",
+          "x": 14,
+          "y": 10,
+          "w": 4,
+          "h": 8,
+          "type": "circulation"
+        },
+        {
+          "id": "westelbow",
+          "name": "West turn",
+          "x": 14,
+          "y": 18,
+          "w": 4,
+          "h": 5,
+          "type": "circulation",
+          "diagramLabel": ""
+        },
+        {
+          "id": "courtleg",
+          "name": "Court passage",
+          "x": 18,
+          "y": 20,
+          "w": 10,
+          "h": 3,
+          "type": "circulation"
+        },
+        {
+          "id": "corelink",
+          "name": "Core junction",
+          "x": 28,
+          "y": 16,
+          "w": 4,
+          "h": 6,
+          "type": "circulation"
+        },
+        {
+          "id": "eastleg",
+          "name": "Arrival return",
+          "x": 32,
+          "y": 13,
+          "w": 4,
+          "h": 9,
+          "type": "circulation"
+        },
+        {
+          "id": "reception",
+          "name": "Reception / security",
+          "x": 28,
+          "y": 10,
+          "w": 4,
+          "h": 6,
+          "type": "tech"
+        },
+        {
+          "id": "entry",
+          "name": "Entry",
+          "x": 40,
+          "y": 10,
+          "w": 4,
+          "h": 3,
+          "type": "circulation"
+        },
+        {
+          "id": "issue",
+          "name": "Equipment issue / cargo staging",
+          "x": 6,
+          "y": 23,
+          "w": 12,
+          "h": 9,
+          "type": "service"
+        },
+        {
+          "id": "wc",
+          "name": "WC",
+          "x": 8,
+          "y": 20,
+          "w": 6,
+          "h": 3,
+          "type": "service"
+        },
+        {
+          "id": "survey",
+          "name": "Survey / field store",
+          "x": 36,
+          "y": 22,
+          "w": 8,
+          "h": 8,
+          "type": "service",
+          "outsideOnly": true
+        },
+        {
+          "id": "entryleg",
+          "name": "Arrival turn",
+          "x": 40,
+          "y": 13,
+          "w": 4,
+          "h": 5,
+          "type": "circulation"
+        },
+        {
+          "id": "entryelbow",
+          "name": "",
+          "x": 36,
+          "y": 16,
+          "w": 4,
+          "h": 2,
+          "type": "circulation",
+          "diagramLabel": ""
+        },
+        {
+          "id": "cleanlanding",
+          "name": "Cargo return",
+          "x": 18,
+          "y": 23,
+          "w": 6,
+          "h": 3,
+          "type": "circulation"
+        }
+      ],
+      "doors": [
+        {
+          "id": "northlink_westhall",
+          "a": "northlink",
+          "b": "westhall",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "westhall_westelbow",
+          "a": "westhall",
+          "b": "westelbow",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "westelbow_courtleg",
+          "a": "westelbow",
+          "b": "courtleg",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "courtleg_corelink",
+          "a": "courtleg",
+          "b": "corelink",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "corelink_eastleg",
+          "a": "corelink",
+          "b": "eastleg",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "courtleg_cleanlanding",
+          "a": "courtleg",
+          "b": "cleanlanding",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "reception_eastleg",
+          "a": "reception",
+          "b": "eastleg",
+          "width": 1.8,
+          "offset": 0.5
+        },
+        {
+          "id": "control_northlink",
+          "a": "control",
+          "b": "northlink",
+          "width": 1.5,
+          "offset": 0.5
+        },
+        {
+          "id": "westhall_archive",
+          "a": "westhall",
+          "b": "archive",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "westelbow_archive",
+          "a": "westelbow",
+          "b": "archive",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "westelbow_wc",
+          "a": "westelbow",
+          "b": "wc",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "westelbow_issue",
+          "a": "westelbow",
+          "b": "issue",
+          "width": 1.8,
+          "offset": 0.5
+        },
+        {
+          "id": "issue_cleanlanding",
+          "a": "issue",
+          "b": "cleanlanding",
+          "width": 1.5,
+          "offset": 0.5
+        },
+        {
+          "id": "courtleg_courtyard",
+          "a": "courtleg",
+          "b": "courtyard",
+          "width": 1.8,
+          "offset": 0.5
+        },
+        {
+          "id": "entry_entryleg",
+          "a": "entry",
+          "b": "entryleg",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "entryleg_entryelbow",
+          "a": "entryleg",
+          "b": "entryelbow",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "entryelbow_eastleg",
+          "a": "entryelbow",
+          "b": "eastleg",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "archive_stair",
+          "a": "archive",
+          "b": "stair",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "issue_freight",
+          "a": "issue",
+          "b": "freight",
+          "width": 2.4,
+          "offset": 0.5
+        }
+      ],
+      "entrances": [
+        "entry",
+        "survey"
+      ],
+      "note": "V7 east arrival and the 10 \u00d7 10 m open-sky court are retained. Cargo now arrives at the west equipment bay. Operations is reached only around the south and west sides of the court, never through reception. NW stair and freight remain separate; the stair is reached through Archive, as in V7. The former clean-transfer stair is removed; all basements now share full levels.",
+      "externals": [
+        {
+          "room": "entry",
+          "side": "e",
+          "width": 1.8,
+          "label": "MAIN ENTRY"
+        },
+        {
+          "room": "survey",
+          "side": "e",
+          "width": 1.5,
+          "label": "FIELD ACCESS"
+        }
+      ]
+    },
+    "B1": {
+      "name": "Garage only \u00b7 boarded former research wing",
+      "z": -5.3,
+      "elevation": "-5.30 m",
+      "clearHeight": 4,
+      "rooms": [
+        {
+          "id": "stair",
+          "name": "Main stair",
+          "x": 8,
+          "y": 2,
+          "w": 4,
+          "h": 8,
+          "type": "core",
+          "locked": true,
+          "diagramLabel": "NW STAIR",
+          "stairDetail": "30 risers \u00d7 0.1767 m; 2 flights; 1.35 m clear flight / landings; 0.27 m going; conceptual 4 \u00d7 8 m shaft"
+        },
+        {
+          "id": "freight",
+          "name": "Full-height freight",
+          "x": 18,
+          "y": 26,
+          "w": 4,
+          "h": 6,
+          "type": "core",
+          "locked": true,
+          "diagramLabel": "FREIGHT",
+          "liftDetail": "4 \u00d7 6 m shaft allowance; nominal 2.4 m cargo opening; actual car, pit, overhead and capacity require supplier coordination"
+        },
+        {
+          "id": "stairlanding",
+          "name": "Stair lobby",
+          "x": 8,
+          "y": 10,
+          "w": 6,
+          "h": 3,
+          "type": "circulation"
+        },
+        {
+          "id": "northreturn",
+          "name": "Garage return",
+          "x": 14,
+          "y": 10,
+          "w": 4,
+          "h": 8,
+          "type": "circulation"
+        },
+        {
+          "id": "garage",
+          "name": "Garage / expedition bay",
+          "x": 6,
+          "y": 18,
+          "w": 12,
+          "h": 17,
+          "type": "service",
+          "zones": [
+            {
+              "name": "VEHICLES",
+              "x": 9.5,
+              "y": 23
+            },
+            {
+              "name": "CARGO STAGING",
+              "x": 14,
+              "y": 29
+            }
+          ]
+        },
+        {
+          "id": "boardvest",
+          "name": "01 \u00b7 Boarded vestibule",
+          "x": 18,
+          "y": 18,
+          "w": 6,
+          "h": 5,
+          "type": "secret",
+          "boardedSection": "01"
+        },
+        {
+          "id": "maps",
+          "name": "01 \u00b7 Old map room",
+          "x": 24,
+          "y": 4,
+          "w": 12,
+          "h": 10,
+          "type": "secret",
+          "boardedSection": "01"
+        },
+        {
+          "id": "signal",
+          "name": "01 \u00b7 Signal vault",
+          "x": 36,
+          "y": 4,
+          "w": 8,
+          "h": 10,
+          "type": "secret",
+          "boardedSection": "01"
+        },
+        {
+          "id": "secretreturn",
+          "name": "01 \u00b7 Former research return",
+          "x": 24,
+          "y": 14,
+          "w": 20,
+          "h": 4,
+          "type": "secret",
+          "boardedSection": "01"
+        },
+        {
+          "id": "records",
+          "name": "01 \u00b7 Old records",
+          "x": 24,
+          "y": 18,
+          "w": 10,
+          "h": 10,
+          "type": "secret",
+          "boardedSection": "01"
+        },
+        {
+          "id": "coldlab",
+          "name": "01 \u00b7 Abandoned test room",
+          "x": 34,
+          "y": 18,
+          "w": 10,
+          "h": 10,
+          "type": "secret",
+          "boardedSection": "01"
+        }
+      ],
+      "doors": [
+        {
+          "id": "stair_stairlanding",
+          "a": "stair",
+          "b": "stairlanding",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "stairlanding_northreturn",
+          "a": "stairlanding",
+          "b": "northreturn",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "northreturn_garage",
+          "a": "northreturn",
+          "b": "garage",
+          "width": 1.5,
+          "offset": 0.5
+        },
+        {
+          "id": "garage_freight",
+          "a": "garage",
+          "b": "freight",
+          "width": 2.4,
+          "offset": 0.5
+        },
+        {
+          "id": "garage_boardvest",
+          "a": "garage",
+          "b": "boardvest",
+          "width": 1.5,
+          "offset": 0.5,
+          "sealed": true,
+          "boarded": true,
+          "label": "BOARDED 01"
+        },
+        {
+          "id": "boardvest_records",
+          "a": "boardvest",
+          "b": "records",
+          "width": 1.5,
+          "offset": 0.5
+        },
+        {
+          "id": "records_secretreturn",
+          "a": "records",
+          "b": "secretreturn",
+          "width": 1.5,
+          "offset": 0.5
+        },
+        {
+          "id": "secretreturn_maps",
+          "a": "secretreturn",
+          "b": "maps",
+          "width": 1.5,
+          "offset": 0.5
+        },
+        {
+          "id": "secretreturn_signal",
+          "a": "secretreturn",
+          "b": "signal",
+          "width": 1.5,
+          "offset": 0.5
+        },
+        {
+          "id": "secretreturn_coldlab",
+          "a": "secretreturn",
+          "b": "coldlab",
+          "width": 1.5,
+          "offset": 0.5
+        }
+      ],
+      "entrances": [
+        "stair",
+        "garage"
+      ],
+      "note": "Only the garage and necessary core circulation remain active on B1. The full-height freight opens directly into the garage through a 2.4 m doorway, with a clear 6 m staging strip in front. Boarded section 01 is the former mapping / signals research wing, sealed at one 1.5 m opening off the bay. No routine analysis or maintenance functions are placed on this floor.",
+      "externals": [
+        {
+          "room": "garage",
+          "side": "w",
+          "width": 5,
+          "label": "WEST VEHICLE APPROACH"
+        }
+      ]
+    },
+    "B2": {
+      "name": "Artifact analysis \u00b7 controlled intake",
+      "z": -10.6,
+      "elevation": "-10.60 m",
+      "clearHeight": 4,
+      "rooms": [
+        {
+          "id": "stair",
+          "name": "Main stair",
+          "x": 8,
+          "y": 2,
+          "w": 4,
+          "h": 8,
+          "type": "core",
+          "locked": true,
+          "diagramLabel": "NW STAIR",
+          "stairDetail": "30 risers \u00d7 0.1767 m; 2 flights; 1.35 m clear flight / landings; 0.27 m going; conceptual 4 \u00d7 8 m shaft"
+        },
+        {
+          "id": "freight",
+          "name": "Full-height freight",
+          "x": 18,
+          "y": 26,
+          "w": 4,
+          "h": 6,
+          "type": "core",
+          "locked": true,
+          "diagramLabel": "FREIGHT",
+          "liftDetail": "4 \u00d7 6 m shaft allowance; nominal 2.4 m cargo opening; actual car, pit, overhead and capacity require supplier coordination"
+        },
+        {
+          "id": "stairlanding",
+          "name": "Stair landing",
+          "x": 8,
+          "y": 10,
+          "w": 10,
+          "h": 3,
+          "type": "circulation"
+        },
+        {
+          "id": "westhall",
+          "name": "Staff return",
+          "x": 14,
+          "y": 13,
+          "w": 4,
+          "h": 7,
+          "type": "circulation"
+        },
+        {
+          "id": "researchhall",
+          "name": "Research hall",
+          "x": 18,
+          "y": 13,
+          "w": 4,
+          "h": 13,
+          "type": "circulation"
+        },
+        {
+          "id": "unload",
+          "name": "Freight lobby",
+          "x": 12,
+          "y": 26,
+          "w": 6,
+          "h": 6,
+          "type": "circulation"
+        },
+        {
+          "id": "dirty",
+          "name": "Dirty gear / undress",
+          "x": 6,
+          "y": 26,
+          "w": 6,
+          "h": 6,
+          "type": "service"
+        },
+        {
+          "id": "wash",
+          "name": "Decon wash",
+          "x": 6,
+          "y": 20,
+          "w": 6,
+          "h": 6,
+          "type": "service"
+        },
+        {
+          "id": "gown",
+          "name": "Clean gowning",
+          "x": 12,
+          "y": 20,
+          "w": 6,
+          "h": 6,
+          "type": "service"
+        },
+        {
+          "id": "intake",
+          "name": "Artifact intake / scanner",
+          "x": 22,
+          "y": 22,
+          "w": 10,
+          "h": 10,
+          "type": "tech"
+        },
+        {
+          "id": "analysis",
+          "name": "Artifact analysis station",
+          "x": 22,
+          "y": 12,
+          "w": 14,
+          "h": 10,
+          "type": "tech"
+        },
+        {
+          "id": "artifact",
+          "name": "Artifact store",
+          "x": 36,
+          "y": 12,
+          "w": 8,
+          "h": 10,
+          "type": "tech"
+        },
+        {
+          "id": "test",
+          "name": "Test observation",
+          "x": 32,
+          "y": 22,
+          "w": 4,
+          "h": 10,
+          "type": "tech"
+        },
+        {
+          "id": "containment",
+          "name": "Containment",
+          "x": 36,
+          "y": 22,
+          "w": 8,
+          "h": 10,
+          "type": "tech"
+        },
+        {
+          "id": "decode",
+          "name": "Decode / server lab",
+          "x": 22,
+          "y": 4,
+          "w": 10,
+          "h": 8,
+          "type": "tech"
+        },
+        {
+          "id": "secure",
+          "name": "Secure reference store",
+          "x": 32,
+          "y": 4,
+          "w": 12,
+          "h": 8,
+          "type": "tech"
+        }
+      ],
+      "doors": [
+        {
+          "id": "stair_stairlanding",
+          "a": "stair",
+          "b": "stairlanding",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "stairlanding_westhall",
+          "a": "stairlanding",
+          "b": "westhall",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "westhall_researchhall",
+          "a": "westhall",
+          "b": "researchhall",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "westhall_gown",
+          "a": "westhall",
+          "b": "gown",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "researchhall_gown",
+          "a": "researchhall",
+          "b": "gown",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "gown_wash",
+          "a": "gown",
+          "b": "wash",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "wash_dirty",
+          "a": "wash",
+          "b": "dirty",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "dirty_unload",
+          "a": "dirty",
+          "b": "unload",
+          "width": 1.5,
+          "offset": 0.5
+        },
+        {
+          "id": "unload_freight",
+          "a": "unload",
+          "b": "freight",
+          "width": 2.4,
+          "offset": 0.5
+        },
+        {
+          "id": "freight_intake",
+          "a": "freight",
+          "b": "intake",
+          "width": 2.4,
+          "offset": 0.5
+        },
+        {
+          "id": "researchhall_intake",
+          "a": "researchhall",
+          "b": "intake",
+          "width": 1.5,
+          "offset": 0.5
+        },
+        {
+          "id": "researchhall_analysis",
+          "a": "researchhall",
+          "b": "analysis",
+          "width": 1.5,
+          "offset": 0.5
+        },
+        {
+          "id": "intake_analysis",
+          "a": "intake",
+          "b": "analysis",
+          "width": 2.4,
+          "offset": 0.5
+        },
+        {
+          "id": "analysis_artifact",
+          "a": "analysis",
+          "b": "artifact",
+          "width": 2.4,
+          "offset": 0.5
+        },
+        {
+          "id": "analysis_test",
+          "a": "analysis",
+          "b": "test",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "test_containment",
+          "a": "test",
+          "b": "containment",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "artifact_containment",
+          "a": "artifact",
+          "b": "containment",
+          "width": 1.5,
+          "offset": 0.5
+        },
+        {
+          "id": "analysis_decode",
+          "a": "analysis",
+          "b": "decode",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "decode_secure",
+          "a": "decode",
+          "b": "secure",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "secure_artifact",
+          "a": "secure",
+          "b": "artifact",
+          "width": 1.5,
+          "offset": 0.5
+        }
+      ],
+      "entrances": [
+        "stair",
+        "freight"
+      ],
+      "note": "Artifacts travel straight from B1 garage to B2 intake via a through-car freight lift: west loading doors at B1, east unloading doors at B2. The west core lobby is retained for staff and service access. People returning with dirty equipment pass through wash and gowning; the NW stair reaches the research hall independently. All active rooms have 4 m clear height."
+    },
+    "B3": {
+      "name": "Maintenance \u00b7 stabilization & old caves",
+      "z": -15.9,
+      "elevation": "-15.90 m",
+      "clearHeight": 4,
+      "rooms": [
+        {
+          "id": "stair",
+          "name": "Main stair",
+          "x": 8,
+          "y": 2,
+          "w": 4,
+          "h": 8,
+          "type": "core",
+          "locked": true,
+          "diagramLabel": "NW STAIR",
+          "stairDetail": "30 risers \u00d7 0.1767 m; 2 flights; 1.35 m clear flight / landings; 0.27 m going; conceptual 4 \u00d7 8 m shaft"
+        },
+        {
+          "id": "freight",
+          "name": "Full-height freight",
+          "x": 18,
+          "y": 26,
+          "w": 4,
+          "h": 6,
+          "type": "core",
+          "locked": true,
+          "diagramLabel": "FREIGHT",
+          "liftDetail": "4 \u00d7 6 m shaft allowance; nominal 2.4 m cargo opening; actual car, pit, overhead and capacity require supplier coordination"
+        },
+        {
+          "id": "stairlanding",
+          "name": "NW stair landing",
+          "x": 8,
+          "y": 10,
+          "w": 6,
+          "h": 5,
+          "type": "circulation"
+        },
+        {
+          "id": "north",
+          "name": "North maintenance gallery",
+          "x": 14,
+          "y": 12,
+          "w": 34,
+          "h": 3,
+          "type": "circulation"
+        },
+        {
+          "id": "west",
+          "name": "West maintenance gallery",
+          "x": 14,
+          "y": 15,
+          "w": 4,
+          "h": 19,
+          "type": "circulation"
+        },
+        {
+          "id": "south",
+          "name": "South maintenance gallery",
+          "x": 22,
+          "y": 31,
+          "w": 26,
+          "h": 3,
+          "type": "circulation"
+        },
+        {
+          "id": "east",
+          "name": "East maintenance gallery",
+          "x": 45,
+          "y": 15,
+          "w": 3,
+          "h": 16,
+          "type": "circulation"
+        },
+        {
+          "id": "spine",
+          "name": "Freight service return",
+          "x": 22,
+          "y": 26,
+          "w": 4,
+          "h": 5,
+          "type": "circulation"
+        },
+        {
+          "id": "plant",
+          "name": "Maintenance / plant",
+          "x": 22,
+          "y": 22,
+          "w": 14,
+          "h": 4,
+          "type": "service"
+        },
+        {
+          "id": "exciter",
+          "name": "Central exciter",
+          "x": 28,
+          "y": 15,
+          "w": 8,
+          "h": 7,
+          "type": "tech"
+        },
+        {
+          "id": "n1",
+          "name": "Node 01",
+          "x": 20,
+          "y": 6,
+          "w": 6,
+          "h": 6,
+          "type": "tech"
+        },
+        {
+          "id": "n2",
+          "name": "Node 02",
+          "x": 39,
+          "y": 6,
+          "w": 6,
+          "h": 6,
+          "type": "tech"
+        },
+        {
+          "id": "n3",
+          "name": "Node 03",
+          "x": 48,
+          "y": 18,
+          "w": 6,
+          "h": 6,
+          "type": "tech"
+        },
+        {
+          "id": "n4",
+          "name": "Node 04",
+          "x": 39,
+          "y": 34,
+          "w": 6,
+          "h": 6,
+          "type": "tech"
+        },
+        {
+          "id": "n5",
+          "name": "Node 05",
+          "x": 20,
+          "y": 34,
+          "w": 6,
+          "h": 6,
+          "type": "tech"
+        },
+        {
+          "id": "n6",
+          "name": "Node 06",
+          "x": 8,
+          "y": 18,
+          "w": 6,
+          "h": 6,
+          "type": "tech"
+        },
+        {
+          "id": "cavew",
+          "name": "West cave passage",
+          "x": 6,
+          "y": 24,
+          "w": 8,
+          "h": 4,
+          "type": "cave"
+        },
+        {
+          "id": "caves",
+          "name": "Old cave pocket",
+          "x": 6,
+          "y": 28,
+          "w": 8,
+          "h": 8,
+          "type": "cave"
+        },
+        {
+          "id": "cavelink",
+          "name": "South cave bypass",
+          "x": 14,
+          "y": 34,
+          "w": 6,
+          "h": 4,
+          "type": "cave"
+        },
+        {
+          "id": "fissure",
+          "name": "North fissure",
+          "x": 26,
+          "y": 6,
+          "w": 13,
+          "h": 4,
+          "type": "cave"
+        },
+        {
+          "id": "cavern",
+          "name": "Surveyed cavern",
+          "x": 48,
+          "y": 24,
+          "w": 8,
+          "h": 7,
+          "type": "cave"
+        }
+      ],
+      "doors": [
+        {
+          "id": "stair_stairlanding",
+          "a": "stair",
+          "b": "stairlanding",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "stairlanding_north",
+          "a": "stairlanding",
+          "b": "north",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "north_west",
+          "a": "north",
+          "b": "west",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "north_east",
+          "a": "north",
+          "b": "east",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "east_south",
+          "a": "east",
+          "b": "south",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "west_freight",
+          "a": "west",
+          "b": "freight",
+          "width": 2.4,
+          "offset": 0.5
+        },
+        {
+          "id": "freight_spine",
+          "a": "freight",
+          "b": "spine",
+          "width": 2.4,
+          "offset": 0.7083333333333334
+        },
+        {
+          "id": "spine_south",
+          "a": "spine",
+          "b": "south",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "spine_plant",
+          "a": "spine",
+          "b": "plant",
+          "width": 2.4,
+          "offset": 0.5
+        },
+        {
+          "id": "plant_exciter",
+          "a": "plant",
+          "b": "exciter",
+          "width": 2.4,
+          "offset": 0.5
+        },
+        {
+          "id": "north_exciter",
+          "a": "north",
+          "b": "exciter",
+          "width": 1.8,
+          "offset": 0.5
+        },
+        {
+          "id": "north_n1",
+          "a": "north",
+          "b": "n1",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "north_n2",
+          "a": "north",
+          "b": "n2",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "east_n3",
+          "a": "east",
+          "b": "n3",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "south_n4",
+          "a": "south",
+          "b": "n4",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "south_n5",
+          "a": "south",
+          "b": "n5",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "cavelink_n5",
+          "a": "cavelink",
+          "b": "n5",
+          "width": 1.5,
+          "offset": 0.5
+        },
+        {
+          "id": "west_n6",
+          "a": "west",
+          "b": "n6",
+          "width": 1.2,
+          "offset": 0.5
+        },
+        {
+          "id": "west_cavew",
+          "a": "west",
+          "b": "cavew",
+          "width": 1.5,
+          "offset": 0.5
+        },
+        {
+          "id": "cavew_caves",
+          "a": "cavew",
+          "b": "caves",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "caves_cavelink",
+          "a": "caves",
+          "b": "cavelink",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "west_cavelink",
+          "a": "west",
+          "b": "cavelink",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "n1_fissure",
+          "a": "n1",
+          "b": "fissure",
+          "width": 1.5,
+          "offset": 0.5
+        },
+        {
+          "id": "fissure_n2",
+          "a": "fissure",
+          "b": "n2",
+          "width": 1.5,
+          "offset": 0.5
+        },
+        {
+          "id": "east_cavern",
+          "a": "east",
+          "b": "cavern",
+          "width": 1.5,
+          "offset": 0.5
+        }
+      ],
+      "entrances": [
+        "stair",
+        "freight"
+      ],
+      "note": "Maintenance occupies the lowest full basement, with the six stabilization nodes and cave route retained. The former sealed cavern is now a surveyed cave pocket, so the only boarded / hidden building sections are B1 and L1. Both aligned cores reach this level; maintenance freight never crosses Operations or living quarters."
+    }
+  },
+  "courtyard": {
+    "floor": "L0",
+    "x": 18,
+    "y": 10,
+    "w": 10,
+    "h": 10,
+    "z": 0,
+    "openToSky": true,
+    "ground": "permeable grass"
+  },
+  "verticalConnections": [
+    {
+      "id": "main-stair",
+      "type": "stair",
+      "room": "stair",
+      "floors": [
+        "B3",
+        "B2",
+        "B1",
+        "L0",
+        "L1",
+        "L2",
+        "L3"
+      ],
+      "footprint": {
+        "x": 8,
+        "y": 2,
+        "w": 4,
+        "h": 8
+      },
+      "stair": {
+        "risers": 30,
+        "riserHeight": 0.17666666666666667,
+        "flights": 2,
+        "flightWidth": 1.35,
+        "landingDepth": 1.35,
+        "treadDepth": 0.27
+      }
+    },
+    {
+      "id": "freight",
+      "type": "lift",
+      "room": "freight",
+      "floors": [
+        "B3",
+        "B2",
+        "B1",
+        "L0",
+        "L1",
+        "L2",
+        "L3"
+      ],
+      "footprint": {
+        "x": 18,
+        "y": 26,
+        "w": 4,
+        "h": 6
+      },
+      "throughCar": true,
+      "doorClearWidth": 2.4,
+      "note": "West loading door on all levels; opposite east unloading door on B2 and B3. Nominal shaft, supplier design required."
+    }
+  ],
+  "designReferences": [
+    "S\u00e4yn\u00e4tsalo: protected outdoor court and differentiated thresholds",
+    "Rostlaube: clustered choices and short loops",
+    "Carpenter Center: multiple approaches and interlocking volumes",
+    "Yale A&A: sectional hierarchy and overlook"
+  ],
+  "designSequence": [
+    "B1 garage directly loads freight; B2 receives artifacts; B3 receives heavy maintenance equipment.",
+    "L0 retains the bent east arrival and west-only Operations entry.",
+    "4.0 m clear + 1.0 m clear service zone + 0.3 m slab = 5.3 m floor module.",
+    "Operations has no L1 floor and is 9.3 m clear.",
+    "Exactly two boarded building sections: large B1 former research wing, small L1 listening suite."
+  ],
+  "splitLevelConnections": [],
+  "overlooks": [
+    {
+      "axis": "v",
+      "fixed": 18,
+      "lo": 7,
+      "hi": 10,
+      "guardTop": 6.4,
+      "levels": [
+        "L0",
+        "L1"
+      ]
+    }
+  ],
+  "approaches": [
+    {
+      "id": "vehicle-approach",
+      "level": "B1",
+      "note": "West garage door at \u22125.30 m; hillside / ramp approach remains schematic. 5 m vehicle opening."
+    },
+    {
+      "id": "pedestrian-entry",
+      "level": "L0",
+      "note": "V7 east entrance retained. No new west pedestrian entrance."
+    }
+  ],
+  "section": [
+    {
+      "label": "L3 \u00b7 Observation deck \u00b7 radar maintenance",
+      "z": 15.9
+    },
+    {
+      "label": "L2 \u00b7 Partial roof-service landing",
+      "z": 10.6
+    },
+    {
+      "label": "L1 \u00b7 Crew quarters \u00b7 boarded listening suite",
+      "z": 5.3
+    },
+    {
+      "label": "L0 \u00b7 Main floor \u00b7 double-height Operations",
+      "z": 0
+    },
+    {
+      "label": "B1 \u00b7 Garage only \u00b7 boarded former research wing",
+      "z": -5.3
+    },
+    {
+      "label": "B2 \u00b7 Artifact analysis \u00b7 controlled intake",
+      "z": -10.6
+    },
+    {
+      "label": "B3 \u00b7 Maintenance \u00b7 stabilization & old caves",
+      "z": -15.9
+    }
+  ],
+  "routeStudy": {
+    "garageToAnalysis": [
+      "B1 garage",
+      "freight down 5.3 m",
+      "B2 intake",
+      "analysis"
+    ],
+    "mainArrival": [
+      "entry",
+      "entryleg",
+      "entryelbow",
+      "eastleg",
+      "corelink",
+      "courtleg",
+      "westelbow",
+      "westhall",
+      "northlink",
+      "control"
+    ],
+    "boardedSections": [
+      {
+        "id": "01",
+        "floor": "B1",
+        "threshold": "garage_boardvest",
+        "clearOpening": 1.5
+      },
+      {
+        "id": "02",
+        "floor": "L1",
+        "threshold": "eastreturn_tapes",
+        "clearOpening": 1.2
+      }
+    ]
+  },
+  "floorModule": {
+    "occupiedClear": 4,
+    "serviceClear": 1,
+    "slab": 0.3,
+    "floorToFloor": 5.3,
+    "note": "Service void is a clear crawl / ventilation zone, not an occupied level. Slab allowance is separate. Concept dimensions; detailed structure, access and ventilation are not engineered."
+  },
+  "operationsSection": {
+    "floor": 0,
+    "clearTop": 9.3,
+    "serviceTop": 10.3,
+    "slabTop": 10.6,
+    "voidLevel": "L1",
+    "note": "No L1 slab and no intermediate service ceiling in the hall. The shared upper service zone sits above 9.3 m."
+  },
+  "sourceBaseline": "Approved V7 layout / V7_manifest.json. V8 is a floor-plan revision only; no Blender model or render has been regenerated."
+}
