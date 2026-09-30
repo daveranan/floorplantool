@@ -1,0 +1,49 @@
+// Read-only regression harness: no production storage, seed or export files are written.
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const seeds=['','-v2','-v3','-v4','-v5','-v6','-v7','-v8initial','-v8','-v9','-useredit20260930','-v10','-v11'];
+function boot(initial={},denied=false){
+ const nodes={},storage={...initial},downloads=[],listeners={};
+ const node=id=>nodes[id]??=( {innerHTML:'',textContent:'',dataset:{},checked:id==='dimensions',setAttribute(k,v){this[k]=v},getAttribute(k){return this[k]},getBoundingClientRect(){return {width:900,height:600}},setPointerCapture(){},hasPointerCapture(){return false},releasePointerCapture(){},createSVGPoint(){return {x:0,y:0,matrixTransform(){return {x:this.x,y:this.y}}}},getScreenCTM(){return {inverse(){return {}}}},click(){},showModal(){},close(){}});
+ const ctx={console,JSON,Math,Number,Object,Array,Set,Map,String,Date,Error,setTimeout:()=>0,clearTimeout(){},Blob,URL:{createObjectURL:b=>{downloads.push(b);return ''},revokeObjectURL(){}},localStorage:{getItem:k=>{if(denied)throw Error('Storage blocked');return storage[k]},setItem:(k,v)=>{if(denied)throw Error('Storage blocked');storage[k]=v}},document:{addEventListener:(type,fn)=>listeners[type]=fn,getElementById:node,querySelector:()=>null,createElement:()=>node('anchor')},confirm:()=>true,alert:e=>{throw Error(e)},window:{}};
+ vm.createContext(ctx);for(const s of seeds)vm.runInContext(fs.readFileSync('dist/seed'+s+'.js','utf8'),ctx);for(const f of ['geometry','stair-detail','app'])vm.runInContext(fs.readFileSync('dist/'+f+'.js','utf8'),ctx);
+ return {run:s=>vm.runInContext(s,ctx),storage,nodes,downloads,ctx,listeners};
+}
+
+const t=boot(),run=t.run;
+const target=(kind,id)=>({tagName:'svg',closest:q=>q==='[data-room]'&&kind==='room'?{dataset:{room:id}}:q==='[data-door]'&&kind==='door'?{dataset:{door:id}}:null});
+const event=(x,y,kind='none',id=null,extra={})=>({pointerId:1,pointerType:'mouse',clientX:x,clientY:y,target:target(kind,id),button:0,preventDefault(){},...extra});
+const hover=(x,y,kind='none',id=null)=>t.nodes.plan.onpointermove(event(x,y,kind,id));
+const down=(x,y,kind='room',id='a',extra={})=>t.nodes.plan.onpointerdown(event(x,y,kind,id,extra));
+const up=(extra={})=>t.nodes.plan.onpointerup({pointerId:1,...extra});
+const key=(key,extra={})=>t.ctx.window.onkeydown({key,target:{tagName:'BODY'},preventDefault(){},...extra});
+const release=key=>t.ctx.window.onkeyup({key,target:{tagName:'BODY'},preventDefault(){}});
+const feedback=()=>run('connectionFeedback()');
+const markup=()=>run('interactionMarkup()');
+const immutable=()=>run('JSON.stringify({model,history,future,selected,selectedDoor})')+'|'+JSON.stringify(t.storage);
+function fresh(){run(`resetTransient();model={version:1,units:'metres',floors:{L0:{name:'Test',elevation:'0 m',z:0,rooms:[{id:'a',name:'A',x:0,y:0,w:10,h:10,type:'tech'},{id:'b',name:'B',x:10,y:0,w:10,h:10,type:'tech'},{id:'c',name:'C',x:30,y:0,w:6,h:6,type:'tech'},{id:'void',name:'Void',x:40,y:0,w:6,h:6,type:'void'},{id:'solid',name:'Concrete',x:50,y:0,w:6,h:6,type:'solid'},{id:'narrow',name:'Narrow',x:10,y:9,w:6,h:2,type:'tech'}],doors:[],entrances:['a']}}};floorId='L0';selected=null;selectedDoor=null;history=[];future=[];hoverPointer=null;connectionKind='single';viewBounds=null;zoom=1;pan={x:0,y:0};render()`)}
+fresh();hover(5,5,'room','a');const initial=immutable();key('c');assert.equal(feedback().target.id,'a');assert.equal(feedback().cursor,'connect');assert(markup().includes('fill="#248365"'));assert.equal(t.nodes.plan['data-feedback'],'connect');assert(t.nodes.toolhint.textContent.includes('start here'));assert.equal(immutable(),initial,'pressing C/hover must not mutate editor data or storage');
+for(const [x,id] of [[15,'b'],[33,'c']]){hover(x,3,'room',id);assert.equal(feedback().target.id,id);assert.equal(feedback().cursor,'connect');assert.equal(immutable(),initial)}
+for(const [x,id] of [[43,'void'],[53,'solid']]){hover(x,3,'room',id);assert.equal(feedback().cursor,'blocked');assert(markup().includes('feedback-blocked'));assert(!markup().includes('#248365'));assert.equal(immutable(),initial)}
+hover(80,50);assert.equal(feedback().cursor,'blocked');assert.equal(markup().includes('feedback-room'),false);hover(5,5);release('c');assert.equal(feedback(),null);assert.equal(markup(),'');assert.equal(t.nodes.plan['data-feedback'],'');assert.equal(immutable(),initial);
+// A stationary pointer re-highlights on keydown, and every cancellation clears the overlay.
+for(const stop of ['release','escape','blur','leave']){hover(5,5);key('c');assert(markup().includes('feedback-target'));if(stop==='release')release('c');if(stop==='escape')key('Escape');if(stop==='blur')t.ctx.window.onblur();if(stop==='leave')t.nodes.plan.onpointerleave();assert.equal(markup(),'');if(stop==='leave')assert.equal(t.nodes['interaction-feedback'].innerHTML,'');assert.equal(immutable(),initial);release('c')}
+// Drag and click-click previews follow real shared-wall validity and preserve data until committed.
+hover(5,5);key('c');down(5,5);const dragging=immutable();hover(15,3);assert(feedback().valid);assert.equal(feedback().source.id,'a');assert(markup().includes('feedback-source'));assert(markup().includes('stroke-opacity=".4"'));assert.equal(immutable(),dragging);hover(33,3);assert(!feedback().valid);assert.equal(feedback().cursor,'blocked');assert(markup().includes('feedback-blocked'));assert.equal(immutable(),dragging);hover(12,10);assert(!feedback().valid);assert(feedback().hint.includes('Shared wall needs'));hover(15,3);up();assert.equal(run('floor().doors.length'),1);assert.equal(run('history.length'),1);const linked=run('JSON.stringify(model)');run('undo()');assert.equal(run('floor().doors.length'),0);run('redo()');assert.equal(run('JSON.stringify(model)'),linked);release('c');
+// A duplicate is blocked, rather than previewed green.
+key('c');down(5,5);hover(15,3);assert(!feedback().valid);assert(feedback().hint.includes('already connected'));release('c');
+// Red X previews the exact removable link; hovering a connected room previews a source, never room deletion.
+const door=run('floor().doors[0].id');hover(10,3,'door',door);key('x');assert(feedback().direct);assert.equal(feedback().links[0].id,door);assert.equal(feedback().cursor,'disconnect');assert(markup().includes('disconnect-preview'));assert(markup().includes('#b33f38'));assert(!markup().includes('#248365'));assert(t.nodes.toolhint.textContent.includes('this connection'));const beforeX=immutable();hover(5,5,'room','a');assert(!feedback().direct);assert.equal(feedback().cursor,'disconnect');assert(!markup().includes('disconnect-preview'));assert(feedback().hint.includes('connected room'));hover(33,3,'room','c');assert.equal(feedback().cursor,'blocked');assert.equal(immutable(),beforeX);down(5,5);hover(15,3);assert(feedback().valid);assert(markup().includes('disconnect-preview'));assert(!markup().includes('#328573'));release('x');assert.equal(run('JSON.stringify(model)'),linked);
+// Door click removes exactly that connection; undo restores it without changing any rooms.
+hover(10,3,'door',door);key('x');const rooms=run('JSON.stringify(floor().rooms)');down(10,3,'door',door);up();assert.equal(run('floor().doors.length'),0);assert.equal(run('JSON.stringify(floor().rooms)'),rooms);run('undo()');assert.equal(run('JSON.stringify(model)'),linked);release('x');
+// Space and middle-button pan take cursor/highlight priority, including other held-tool keydowns.
+hover(5,5);key('c');key(' ',{code:'Space'});assert.equal(feedback(),null);assert.equal(t.nodes.plan['data-feedback'],'pan');key('x');assert(run('spaceHeld'));assert.equal(feedback(),null);release(' ');assert.equal(markup(),'');
+key('c');down(5,5,'room','a',{button:1});assert.equal(feedback(),null);assert.equal(t.nodes.plan['data-feedback'],'panning');key('x');assert(run('gesture!==null'));hover(8,8);up();assert.equal(run('tool'),'connect');assert.equal(t.nodes.plan['data-feedback'],'connect');release('c');
+// Typing and focus transitions never activate tools, and focusing a field cancels an unfinished tool.
+for(const tagName of ['INPUT','SELECT','TEXTAREA'])for(const k of ['c','x']){key(k,{target:{tagName}});assert.equal(run('tool'),'select')}
+key('c');down(5,5);t.ctx.document.activeElement={tagName:'INPUT'};t.listeners.focusin({target:t.ctx.document.activeElement});assert.equal(run('tool'),'select');assert.equal(markup(),'');t.ctx.document.activeElement=null;
+// One-shot touch retains the two-tap interaction; finished touches leave no stale hover.
+fresh();t.nodes['tool-connect'].onclick();down(5,5,'room','a',{pointerType:'touch'});up({pointerType:'touch'});assert.equal(run('pendingRoom'),'a');down(15,5,'room','b',{pointerType:'touch'});up({pointerType:'touch'});assert.equal(run('floor().doors.length'),1);assert.equal(run('tool'),'select');assert.equal(run('hoverPointer'),null);assert.equal(markup(),'');
+// Export excludes all interaction layers; hover updates only that layer, never the full plan or inspector.
+fresh();hover(5,5);key('c');const plan=t.nodes.plan.innerHTML,inspector=t.nodes.inspector.innerHTML;hover(15,3);assert.equal(t.nodes.plan.innerHTML,plan);assert.equal(t.nodes.inspector.innerHTML,inspector);assert(!run('planMarkup(true)').includes('interaction-feedback'));assert(!run('planMarkup(true)').includes('feedback-room'));
+const css=fs.readFileSync('dist/style.css','utf8');for(const mode of ['connect','disconnect','blocked','pan','panning'])assert(css.includes('#plan[data-feedback="'+mode+'"] *'));assert(css.includes('#interaction-feedback,#interaction-feedback *{pointer-events:none!important}'));
+console.log('PASS: pre-click C/X hover, immediate stationary key feedback, distinct cursor CSS, green valid/gray invalid targets, red exact-link removal, source/pair previews, cancellation/leave, pan priority, typing focus, no hover selection/history/storage writes, touch one-shot, and clean SVG export.');
