@@ -1026,17 +1026,19 @@
               "x": 14,
               "y": 29
             }
-          ]
+          ],
+          "garagePart": true,
+          "diagramLabel": "GARAGE / EXPEDITION BAY\n408 m\u00b2 TOTAL"
         },
         {
-          "id": "boardvest",
-          "name": "01 \u00b7 Boarded vestibule",
+          "id": "garagewide",
+          "name": "Garage extension / turning bay",
           "x": 18,
           "y": 18,
-          "w": 6,
-          "h": 5,
-          "type": "secret",
-          "boardedSection": "01"
+          "w": 25.5,
+          "h": 8,
+          "type": "service",
+          "garagePart": true
         },
         {
           "id": "maps",
@@ -1065,26 +1067,6 @@
           "y": 14,
           "w": 20,
           "h": 4,
-          "type": "secret",
-          "boardedSection": "01"
-        },
-        {
-          "id": "records",
-          "name": "01 \u00b7 Old records",
-          "x": 24,
-          "y": 18,
-          "w": 10,
-          "h": 10,
-          "type": "secret",
-          "boardedSection": "01"
-        },
-        {
-          "id": "coldlab",
-          "name": "01 \u00b7 Abandoned test room",
-          "x": 34,
-          "y": 18,
-          "w": 10,
-          "h": 10,
           "type": "secret",
           "boardedSection": "01"
         }
@@ -1120,28 +1102,22 @@
           "offset": 0.5
         },
         {
-          "id": "garage_boardvest",
+          "id": "garage_garagewide",
           "a": "garage",
-          "b": "boardvest",
+          "b": "garagewide",
+          "width": 1,
+          "offset": 0.5,
+          "kind": "open"
+        },
+        {
+          "id": "garagewide_secretreturn",
+          "a": "garagewide",
+          "b": "secretreturn",
           "width": 1.5,
           "offset": 0.5,
           "sealed": true,
           "boarded": true,
           "label": "BOARDED 01"
-        },
-        {
-          "id": "boardvest_records",
-          "a": "boardvest",
-          "b": "records",
-          "width": 1.5,
-          "offset": 0.5
-        },
-        {
-          "id": "records_secretreturn",
-          "a": "records",
-          "b": "secretreturn",
-          "width": 1.5,
-          "offset": 0.5
         },
         {
           "id": "secretreturn_maps",
@@ -1156,20 +1132,16 @@
           "b": "signal",
           "width": 1.5,
           "offset": 0.5
-        },
-        {
-          "id": "secretreturn_coldlab",
-          "a": "secretreturn",
-          "b": "coldlab",
-          "width": 1.5,
-          "offset": 0.5
         }
       ],
       "entrances": [
         "stair",
         "garage"
       ],
-      "note": "Only the garage and necessary core circulation remain active on B1. The full-height freight opens directly into the garage through a 2.4 m doorway, with a clear 6 m staging strip in front. Boarded section 01 is the former mapping / signals research wing, sealed at one 1.5 m opening off the bay. No routine analysis or maintenance functions are placed on this floor.",
+      "note": "The garage is doubled from 204 to 408 m\u00b2 as one open L-shaped bay. The added 204 m\u00b2 turning / loading arm takes over the former research side; the building footprint and freight position stay fixed. Freight opens directly into the original bay through a 2.4 m doorway, with 6 m staging clearance. Boarded section 01 retains 280 m\u00b2 for old maps, signals and its internal return, sealed at one 1.5 m doorway. Only garage and core circulation remain active on B1.",
+      "garageArea": 408,
+      "previousGarageArea": 204,
+      "boardedArea": 280,
       "externals": [
         {
           "room": "garage",
@@ -2035,7 +2007,7 @@
       {
         "id": "01",
         "floor": "B1",
-        "threshold": "garage_boardvest",
+        "threshold": "garagewide_secretreturn",
         "clearOpening": 1.5
       },
       {
@@ -2046,6 +2018,7 @@
       }
     ]
   },
+  "revision": "v8-garage-double",
   "floorModule": {
     "occupiedClear": 4,
     "serviceClear": 1,

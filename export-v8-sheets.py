@@ -39,7 +39,7 @@ for k in ['B3','B2','B1','L0','L1','L2']:
  f=p['floors'][k];z=f['z'];span=wA if k in ['L0','L1','L2'] else wA+25+wO
  color={'B3':'#e5e6de','B2':'#dbe5e7','B1':'#e5e6de','L0':'#dbe5e7','L1':'#e8dbc5','L2':'#e5e6de'}[k]
  s+=rect(xA,y(z+4),span,4*S,color,'#72868c',1)+rect(xA,y(z+5),span,S,'url(#mep)')+rect(xA,y(z+5.3),span,.3*S,'#3b5158')
- name={'B3':'Maintenance / caves','B2':'Artifact analysis','B1':'Garage + boarded wing 01','L0':'Main occupied wings','L1':'Quarters + boarded suite 02','L2':'Partial roof service'}[k]
+ name={'B3':'Maintenance / caves','B2':'Artifact analysis','B1':'Garage 408 m² + boarded wing','L0':'Main occupied wings','L1':'Quarters + boarded suite 02','L2':'Partial roof service'}[k]
  s+=txt(xA+18,y(z+2),name,24)+txt(xA+18,y(z+.9),'4.0 m clear',22,'#6b7d82')
  if k=='L2':s+=txt(xO+18,y(z+2.4),'No full upper floor',23,'#809095')+txt(xO+18,y(z+1.2),'Open roof above Operations',21,'#809095')
  # keep the service label inside the wide hatch band

@@ -16,10 +16,6 @@
     "B1": [
       {
         "kind": "sealed",
-        "text": "01 \u00b7 Boarded vestibule: intentionally sealed route"
-      },
-      {
-        "kind": "sealed",
         "text": "01 \u00b7 Old map room: intentionally sealed route"
       },
       {
@@ -29,14 +25,6 @@
       {
         "kind": "sealed",
         "text": "01 \u00b7 Former research return: intentionally sealed route"
-      },
-      {
-        "kind": "sealed",
-        "text": "01 \u00b7 Old records: intentionally sealed route"
-      },
-      {
-        "kind": "sealed",
-        "text": "01 \u00b7 Abandoned test room: intentionally sealed route"
       }
     ],
     "B2": [],
@@ -46,19 +34,18 @@
     "7 levels have no room overlaps",
     "All shared-edge door openings fit",
     "Every active room is reachable",
-    "Exactly 2 boarded sections, 510 m\u00b2 B1 + 80 m\u00b2 L1",
+    "Exactly 2 boarded sections, 280 m\u00b2 B1 + 80 m\u00b2 L1",
     "4 + 1 + 0.3 = 5.3 m; elevations consistent",
     "Operations 9.3 m clear, matching L1 void",
     "Freight shaft and NW stair align on all 7 levels",
     "Direct 2.4 m garage\u2013freight loading door",
     "Garage has no active analysis/maintenance rooms",
-    "V1\u2013V8 saved edit isolation",
+    "V1\u2013V8 and earlier-garage saved edit isolation",
     "JSON import, undo/redo, touch pan/pinch, Fit, cross-variant floor fallback",
-    "V8 geometry export disabled to keep this revision plan-only",
-    "Independent stair routes verified without using lift",
-    "Lift west/east openings align at y=29 m",
-    "Cave bypass loop retained",
-    "Cargo openings to analysis / plant / exciter are 2.4 m"
+    "Garage doubled exactly 204 \u2192 408 m\u00b2",
+    "B1 boarded area now 280 m\u00b2; L1 remains 80 m\u00b2",
+    "Earlier V8 saved edits retained in separate variant",
+    "Full-height lift door centers align y=29 m"
   ],
-  "browserQA": "No browser session used. SVG/PNG floor sheets reviewed visually; UI behavior tested in JavaScript harness."
+  "browserQA": "SVG/PNG sheets visually reviewed; JavaScript harness tested editing and touch behaviors."
 }
