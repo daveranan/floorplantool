@@ -1,0 +1,33 @@
+{
+  "floorChecks": {
+    "L1": [],
+    "L0": [],
+    "B1": [],
+    "B2": [
+      {
+        "kind": "sealed",
+        "text": "Sealed cavern: intentionally sealed route"
+      }
+    ]
+  },
+  "passed": [
+    "zero room overlaps",
+    "shared-edge door geometry and width",
+    "reachable unsealed spaces",
+    "aligned primary stair/freight and clean transfer",
+    "rename",
+    "move",
+    "resize",
+    "undo/redo",
+    "add room",
+    "device-local serialization",
+    "JSON roundtrip",
+    "invalid import rejection",
+    "detached door warnings",
+    "overlap warnings",
+    "disconnected route warnings",
+    "all four SVG exports"
+  ],
+  "browserQA": "Unavailable: Chromium socket denied; cloud browser localhost blocked",
+  "webMCP": "Unsupported browser context"
+}
