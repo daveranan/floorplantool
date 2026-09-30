@@ -1,0 +1,26 @@
+{
+  "floorChecks": {
+    "L1": [],
+    "L0": [],
+    "B1": [],
+    "B2": [
+      {
+        "kind": "sealed",
+        "text": "Sealed cavern: intentionally sealed route"
+      }
+    ]
+  },
+  "passed": [
+    "no overlaps",
+    "shared-edge doors fit",
+    "reachable via intended entrances",
+    "V1 and V2 save isolation",
+    "undo redo",
+    "JSON validation",
+    "7 aligned vertical connections",
+    "3 L0 pedestrian entrances",
+    "courtyard and Control holes",
+    "positive wall segments"
+  ],
+  "browserQA": "Unavailable per verified environment restrictions"
+}
