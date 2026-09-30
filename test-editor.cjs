@@ -1,14 +1,14 @@
 // Read-only regression harness: no production storage, seed or export files are written.
 const fs=require('fs'),vm=require('vm'),assert=require('assert');
-const seeds=['','-v2','-v3','-v4','-v5','-v6','-v7','-v8initial','-v8','-v9'];
+const seeds=['','-v2','-v3','-v4','-v5','-v6','-v7','-v8initial','-v8','-v9','-useredit20260930','-v10'];
 function boot(initial={}){
  const nodes={},storage={...initial},downloads=[];
- const node=id=>nodes[id]??=( {innerHTML:'',textContent:'',checked:id==='dimensions',setAttribute(k,v){this[k]=v},getAttribute(k){return this[k]},getBoundingClientRect(){return {width:900,height:600}},setPointerCapture(){},hasPointerCapture(){return false},releasePointerCapture(){},createSVGPoint(){return {x:0,y:0,matrixTransform(){return {x:this.x,y:this.y}}}},getScreenCTM(){return {inverse(){return {}}}},click(){},showModal(){},close(){}});
+ const node=id=>nodes[id]??=( {innerHTML:'',textContent:'',dataset:{},checked:id==='dimensions',setAttribute(k,v){this[k]=v},getAttribute(k){return this[k]},getBoundingClientRect(){return {width:900,height:600}},setPointerCapture(){},hasPointerCapture(){return false},releasePointerCapture(){},createSVGPoint(){return {x:0,y:0,matrixTransform(){return {x:this.x,y:this.y}}}},getScreenCTM(){return {inverse(){return {}}}},click(){},showModal(){},close(){}});
  const ctx={console,JSON,Math,Number,Object,Array,Set,Map,String,Date,Error,setTimeout:()=>0,clearTimeout(){},Blob,URL:{createObjectURL:b=>{downloads.push(b);return ''},revokeObjectURL(){}},localStorage:{getItem:k=>storage[k],setItem:(k,v)=>storage[k]=v},document:{getElementById:node,querySelector:()=>null,createElement:()=>node('anchor')},confirm:()=>true,alert:e=>{throw Error(e)},window:{}};
  vm.createContext(ctx);for(const s of seeds)vm.runInContext(fs.readFileSync('dist/seed'+s+'.js','utf8'),ctx);for(const f of ['geometry','app'])vm.runInContext(fs.readFileSync('dist/'+f+'.js','utf8'),ctx);
  return {run:s=>vm.runInContext(s,ctx),storage,nodes,downloads};
 }
-const t=boot(),{run}=t,baseline=run('JSON.stringify(model)');
+const t=boot({'kern-active-variant':'v9'}),{run}=t,baseline=run('JSON.stringify(model)');
 const target=(id,edge)=>({closest(q){return q==='[data-handle]'&&edge?{dataset:{handle:id,edge}}:q==='[data-room]'&&!edge&&id?{dataset:{room:id}}:null}});
 function down(id,edge,pointerId=1,pointerType='mouse'){t.nodes.plan.onpointerdown({button:0,pointerId,pointerType,clientX:0,clientY:0,target:target(id,edge)})}
 function move(x,y,id=1){t.nodes.plan.onpointermove({pointerId:id,clientX:x,clientY:y})}
@@ -32,10 +32,10 @@ for(const edge of ['nw','ne','se','sw']){down('artifactstair',edge);move(edge.in
 const pre=run('JSON.stringify(model)'),pan=run('JSON.stringify(pan)');down('stair',null,7,'touch');move(2,3,8);assert.equal(run('JSON.stringify(model)'),pre);down('artifactstair',null,8,'touch');move(1,2,7);up(8);assert(run('!!drag'));up(7);assert.equal(run('JSON.stringify(pan)'),pan);assert.equal(run("room('stair').x"),9);run('undo()');assert.equal(run('JSON.stringify(model)'),pre);
 // Pointer cancellation and capture loss restore the entire original model, without new undo history.
 for(const method of ['onpointercancel','onlostpointercapture']){const n=run('history.length');down('transferstair','nw');move(2,3);t.nodes.plan[method]({pointerId:1});assert.equal(run('JSON.stringify(model)'),pre);assert.equal(run('history.length'),n)}
-// Edits to each stair round-trip JSON, reload, derived geometry, and undo without moving another floor.
+// Linked stairs synchronize across floors; local transfer stays local. All round-trip and undo.
 for(const id of ['stair','transferstair','artifactstair']){
- const other=run("JSON.stringify(model.floors.B2)"),before=run('JSON.stringify(model)');down(id);move(1.5,2);up();const serialized=run('JSON.stringify(model)');assert.equal(run("JSON.stringify(model.floors.B2)"),other);const reloaded=boot(t.storage);assert.equal(reloaded.run('JSON.stringify(model)'),serialized);run('validateImport(JSON.parse(JSON.stringify(model)))');
- const g=run('buildGeometry(model)');if(id==='transferstair')assert.equal(g.splitLevelConnections.find(c=>c.room===id).footprint.x,run(`room('${id}').x`));else{const c=g.verticalConnections.find(c=>c.room===id&&(c.from==='B1'||c.to==='B1'));assert.equal((c.from==='B1'?c.fromFootprint:c.toFootprint).x,run(`room('${id}').x`));assert(run("checks().some(c=>c.kind==='alignment')"))}
+ const other=run("JSON.stringify(model.floors.B2)"),before=run('JSON.stringify(model)');down(id);move(1.5,2);up();const serialized=run('JSON.stringify(model)');if(id==='transferstair')assert.equal(run("JSON.stringify(model.floors.B2)"),other);else assert.notEqual(run("JSON.stringify(model.floors.B2)"),other);const reloaded=boot(t.storage);assert.equal(reloaded.run('JSON.stringify(model)'),serialized);run('validateImport(JSON.parse(JSON.stringify(model)))');
+ const g=run('buildGeometry(model)');if(id==='transferstair')assert.equal(g.splitLevelConnections.find(c=>c.room===id).footprint.x,run(`room('${id}').x`));else{const c=g.verticalConnections.find(c=>c.room===id&&(c.from==='B1'||c.to==='B1'));assert.equal((c.from==='B1'?c.fromFootprint:c.toFootprint).x,run(`room('${id}').x`));assert(!run("checks().some(c=>c.kind==='alignment')"))}
  run('undo()');assert.equal(run('JSON.stringify(model)'),before);
 }
 // Common-field label edits update the actual plan annotation and undo together.
