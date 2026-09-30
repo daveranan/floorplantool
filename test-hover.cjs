@@ -5,7 +5,7 @@ function boot(initial={},denied=false){
  const nodes={},storage={...initial},downloads=[],listeners={};
  const node=id=>nodes[id]??=( {innerHTML:'',textContent:'',dataset:{},checked:id==='dimensions',setAttribute(k,v){this[k]=v},getAttribute(k){return this[k]},getBoundingClientRect(){return {width:900,height:600}},setPointerCapture(){},hasPointerCapture(){return false},releasePointerCapture(){},createSVGPoint(){return {x:0,y:0,matrixTransform(){return {x:this.x,y:this.y}}}},getScreenCTM(){return {inverse(){return {}}}},click(){},showModal(){},close(){}});
  const ctx={console,JSON,Math,Number,Object,Array,Set,Map,String,Date,Error,setTimeout:()=>0,clearTimeout(){},Blob,URL:{createObjectURL:b=>{downloads.push(b);return ''},revokeObjectURL(){}},localStorage:{getItem:k=>{if(denied)throw Error('Storage blocked');return storage[k]},setItem:(k,v)=>{if(denied)throw Error('Storage blocked');storage[k]=v}},document:{addEventListener:(type,fn)=>listeners[type]=fn,getElementById:node,querySelector:()=>null,createElement:()=>node('anchor')},confirm:()=>true,alert:e=>{throw Error(e)},window:{}};
- vm.createContext(ctx);for(const s of seeds)vm.runInContext(fs.readFileSync('dist/seed'+s+'.js','utf8'),ctx);for(const f of ['geometry','stair-detail','app'])vm.runInContext(fs.readFileSync('dist/'+f+'.js','utf8'),ctx);
+ vm.createContext(ctx);for(const s of seeds)vm.runInContext(fs.readFileSync('dist/seed'+s+'.js','utf8'),ctx);for(const f of ['geometry','stair-detail','buildings','app'])vm.runInContext(fs.readFileSync('dist/'+f+'.js','utf8'),ctx);
  return {run:s=>vm.runInContext(s,ctx),storage,nodes,downloads,ctx,listeners};
 }
 
