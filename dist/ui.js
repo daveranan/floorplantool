@@ -196,7 +196,7 @@
     details.onkeydown = event => {
       const items = [...panel.querySelectorAll('button:not([disabled]), a[href], input:not([disabled]), select:not([disabled])')].filter(visible);
       if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); details.open = false; focus(summary); return; }
-      if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+      if (isTypingTarget(event.target) || !['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
       event.preventDefault(); event.stopPropagation();
       if (!details.open) details.open = true;
       const i = items.indexOf(document.activeElement), n = items.length;
