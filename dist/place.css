@@ -48,3 +48,16 @@
 .hvac-defaults .field{margin:7px 0 9px}
 .place-tool summary:focus-visible,.place-popup button:focus-visible,.hvac-options summary:focus-visible,.connection-disclosure summary:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
 @media(max-width:720px){.place-tool{grid-column:1/-1;width:max-content}.place-tool>summary{min-height:34px;padding:5px 8px}.place-popup{padding:8px}.place-categories>button{flex-basis:78px}.place-section>span{font-size:10px}.place-card{flex-basis:113px}.hvac-options,.connection-disclosure{grid-column:1/-1}.hvac-content input,.hvac-content select{font-size:16px}}
+/* Compact bottom shelf: previews carry the meaning; persistent helper copy is omitted. */
+.place-tool>summary{font-size:12px;min-height:28px;padding:4px 7px;gap:4px}
+.place-tool>summary .ui-icon{width:15px;height:15px}.place-tool kbd{font-size:10px;margin-left:2px}
+.place-popup{padding:5px 7px;border-radius:8px;box-sizing:border-box;box-shadow:0 5px 24px var(--shadow)}
+.place-categories{gap:2px;padding:0 26px 4px 0;align-items:center;border-bottom:1px solid var(--line)}
+.place-categories>button{flex:0 0 auto;flex-direction:row;gap:4px;min-height:27px;padding:4px 6px;font-size:11px;border-radius:4px}
+.place-categories>button svg{width:17px;height:17px}.place-categories>button[aria-selected=true]{transform:none;box-shadow:none}
+.place-section{position:absolute;right:5px;top:4px;border:0;padding:0;min-height:0}.place-section>strong,.place-section>span,.place-caption{display:none}
+.place-section>button{padding:0 4px;font-size:18px;min-height:25px}
+.place-preview-row{gap:2px}.place-items{gap:4px;padding:5px 0 3px}.place-card{flex-basis:82px;min-height:84px;padding:5px!important;gap:2px;border-radius:5px!important}
+.place-illustration{height:39px}.place-illustration svg{width:52px;height:39px}.place-card strong{font-size:11px;line-height:1.15}.place-card small{font-size:9px;line-height:1.1}
+.place-scroll{width:14px;font-size:20px!important}
+@media(max-width:720px){.place-tool>summary{min-height:28px;padding:4px 7px}.place-popup{padding:4px 6px}.place-categories>button{flex-basis:auto;font-size:10px;padding:4px}.place-card{flex-basis:76px;min-height:80px}.place-illustration{height:36px}.place-illustration svg{height:36px;width:48px}}
