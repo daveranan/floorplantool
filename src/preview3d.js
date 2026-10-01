@@ -43,6 +43,23 @@ function mount(container, data, options = {}) {
     const boxes = level.boxes;
     return boxes.length ? {minX: Math.min(...boxes.map(q => q.x)), maxX: Math.max(...boxes.map(q => q.x + q.w)), minY: Math.min(...boxes.map(q => q.y)), maxY: Math.max(...boxes.map(q => q.y + q.h))} : b;
   };
+  const roomLabel = (room, level, group) => {
+    const name = String(room.name || room.id), labelWidth = Math.min(180, Math.max(110, name.length * 6.5));
+    const canvas = document.createElement('canvas'); canvas.width = labelWidth * 2; canvas.height = 84;
+    const ctx = canvas.getContext('2d'); if (!ctx) return;
+    const lines = []; let line = '';
+    ctx.font = '500 24px system-ui';
+    for (const word of name.split(/\s+/)) {const next = line ? line + ' ' + word : word; if (line && (ctx.measureText?.(next).width ?? next.length * 13) > canvas.width - 28) {lines.push(line); line = word;} else line = next;}
+    if (line) lines.push(line); if (lines.length > 2) lines.splice(1, lines.length - 1, lines.slice(1).join(' '));
+    ctx.fillStyle = '#202936ed'; ctx.fillRect(0, 0, canvas.width, 84); ctx.strokeStyle = '#738399'; ctx.strokeRect(1, 1, canvas.width - 2, 82);
+    ctx.fillStyle = '#f0f5ff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    lines.slice(0, 2).forEach((text, index) => {while ((ctx.measureText?.(text).width ?? text.length * 13) > canvas.width - 28 && text.length > 2) text = text.slice(0, -2).trimEnd() + '…'; ctx.fillText(text, canvas.width / 2, lines.length > 1 ? 27 + index * 30 : 42);});
+    const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace;
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({map: texture, depthTest: true, depthWrite: false}));
+    sprite.position.set(room.x + room.w / 2, room.z + .22, room.y + room.h / 2);
+    sprite.userData = {level: level.id, roomLabel: true, room: room.id, labelWidth, labelRatio: 84 / canvas.width, area: room.w * room.h};
+    group.add(sprite); sprites.push(sprite);
+  };
   for (let i = 0; i < data.levels.length; i++) {
     const level = data.levels[i], group = new THREE.Group(), bounds = levelBounds(level);
     group.userData = {id: level.id, rank: i - groundRank, z: level.z}; groups.set(level.id, group); scene.add(group);
@@ -64,28 +81,34 @@ function mount(container, data, options = {}) {
     const ctx = canvas.getContext('2d');
     if (ctx) {
       ctx.fillStyle = '#202936'; ctx.fillRect(0, 0, 640, 96); ctx.strokeStyle = '#465367'; ctx.strokeRect(1, 1, 638, 94);
-      ctx.fillStyle = '#e7effc'; ctx.font = '500 29px system-ui'; ctx.fillText(`${level.id} · ${level.z > 0 ? '+' : ''}${level.z.toFixed(2)} m`, 18, 38);
-      ctx.fillStyle = '#aebed3'; ctx.font = '23px system-ui'; ctx.fillText(String(level.name).slice(0, 40), 18, 73);
+      ctx.fillStyle = '#e7effc'; ctx.font = '500 34px system-ui'; ctx.fillText(`${level.id} · ${level.z > 0 ? '+' : ''}${level.z.toFixed(2)} m`, 18, 38);
+      ctx.fillStyle = '#c9d4e4'; ctx.font = '30px system-ui'; ctx.fillText(String(level.name).slice(0, 40), 18, 77, 604);
       const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace;
       const sprite = new THREE.Sprite(new THREE.SpriteMaterial({map: texture, depthTest: true, depthWrite: false}));
       sprite.position.set(b.minX - labelScale * .65 - 1, level.z + .2, (bounds.minY + bounds.maxY) / 2); sprite.scale.set(labelScale, labelScale * 96 / 640, 1);
-      sprite.userData = {level: level.id, floorLabel: true}; group.add(sprite); sprites.push(sprite);
+      sprite.userData = {level: level.id, floorLabel: true, labelWidth: 230, labelRatio: 96 / 640}; group.add(sprite); sprites.push(sprite);
       const leader = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(sprite.position.x + labelScale / 2, level.z + .2, sprite.position.z), new THREE.Vector3(bounds.minX, level.z + .07, sprite.position.z)]), new THREE.LineBasicMaterial({color: 0x7cc4ff, depthTest: true, transparent: true, opacity: .9}));
       leader.visible = false; leader.userData.floorLeader = level.id; group.add(leader); decorations.push(leader);
     }
+    for (const room of level.rooms || []) roomLabel(room, level, group);
   }
   const size = Math.max(b.maxX - b.minX, b.maxY - b.minY, 15) * 1.35;
   const grid = new THREE.GridHelper(size, Math.min(100, Math.ceil(size)), 0x677b92, 0x303a48);
   grid.position.set(centerX, groundZ, centerY); grid.userData.groundDatum = groundZ; scene.add(grid);
-  for (const m of Array.isArray(grid.material) ? grid.material : [grid.material]) {m.transparent = true; m.opacity = .65; m.depthWrite = false;}
-  let gap = 0, disposed = false, showWalls = true, cutaway = false, labels = true, xray = true, hovered = null, focused = null, overview = null, physical = [], lastOcclusion = '', clickStart = null;
+  // Draw the datum before opaque slabs so coplanar grid lines never stripe room floors.
+  grid.renderOrder = -10;
+  for (const m of Array.isArray(grid.material) ? grid.material : [grid.material]) {m.transparent = false; m.opacity = 1; m.depthWrite = false;}
+  let gap = 0, disposed = false, showWalls = true, cutaway = false, cutHeight = 1.15, labels = true, xray = false, hovered = null, focused = null, overview = null, physical = [], lastOcclusion = '', clickStart = null, transition = null, interacting = false, xraySignature = '', xrayChangedAt = 0, xrayPending = false;
+  const motionPreference = window.matchMedia?.('(prefers-reduced-motion: reduce)');
   const pointerIds = new Set(), raycaster = new THREE.Raycaster(), mouse = new THREE.Vector2();
   const visibleIds = () => [...groups].filter(([, group]) => group.visible).map(([id]) => id);
   const notifyVisibility = () => options.onVisibilityChanged?.(visibleIds(), focused);
-  function heightFor(box, level) {let height = box.height; const wall = box.kind === 'wall' || box.kind === 'solid'; if (cutaway && wall) height = Math.max(0, Math.min(height, level.z + 1.15 - box.z)); if (wall && !showWalls) height = 0; return height;}
+  function heightFor(box, level) {let height = box.height; const wall = box.kind === 'wall' || box.kind === 'solid'; if (cutaway && wall) height = Math.max(0, Math.min(height, (box.baseZ ?? level.z) + cutHeight - box.z)); if (wall && !showWalls) height = 0; return height;}
   function updateMatrices() {
     const transform = new THREE.Object3D(); physical = [];
-    for (const group of groups.values()) group.position.y = group.userData.rank * gap;
+    for (const group of groups.values()) group.position.y = focused ? 0 : group.userData.rank * gap;
+    grid.position.y = focused ? groups.get(focused).userData.z : groundZ;
+    grid.userData.displayDatum = grid.position.y;
     for (const mesh of primaryMeshes) {
       const level = data.levels.find(l => l.id === mesh.userData.level), group = groups.get(level.id), fade = mesh.userData.fadeMesh;
       mesh.userData.boxes.forEach((box, index) => {
@@ -95,7 +118,7 @@ function mount(container, data, options = {}) {
       });
       mesh.instanceMatrix.needsUpdate = true; if (fade) fade.instanceMatrix.needsUpdate = true;
     }
-    for (const sprite of sprites) sprite.visible = labels; scene.updateMatrixWorld(true); lastOcclusion = '';
+    for (const sprite of sprites) sprite.visible = labels && (!sprite.userData.roomLabel || sprite.userData.level === focused); scene.updateMatrixWorld(true); lastOcclusion = '';
   }
   function hoverFloor(id) {
     if (id && !groups.get(id)?.visible) id = null;
@@ -105,10 +128,15 @@ function mount(container, data, options = {}) {
     renderer.domElement.style.cursor = id ? 'pointer' : 'default'; options.onHover?.(id ? data.levels.find(l => l.id === id) : null);
   }
   function refreshOcclusion(force = false) {
-    const signature = [...camera.position.toArray(), ...camera.quaternion.toArray(), gap, showWalls, cutaway, labels, xray, ...visibleIds()].join(':');
-    if (!force && signature === lastOcclusion) return;
+    camera.updateMatrixWorld(true);
+    const signature = [...camera.position.toArray(), ...camera.quaternion.toArray(), gap, showWalls, cutaway, cutHeight, labels, xray, focused, ...visibleIds()].join(':');
+    if (!force && signature === lastOcclusion && !xrayPending) return;
+    const stableSignature = [...camera.position.toArray().map(v => v.toFixed(2)), ...camera.quaternion.toArray().map(v => v.toFixed(3)), gap, showWalls, cutaway, cutHeight, xray, ...visibleIds()].join(':');
+    if (stableSignature !== xraySignature) {xraySignature = stableSignature; xrayChangedAt = performance.now(); xrayPending = xray;}
+    // Keep a steady set of transparent walls throughout an orbit or camera move.
+    const updateXray = !xray || (!interacting && !transition && (force || performance.now() - xrayChangedAt >= 180));
     const faded = new Map(primaryMeshes.map(m => [m, new Set()]));
-    if (xray && showWalls) {
+    if (updateXray && xray && showWalls) {
       for (const level of data.levels) {
         const group = groups.get(level.id); if (!group.visible) continue;
         const slabs = level.boxes.filter(q => q.kind === 'slab').sort((a, b) => b.w * b.h - a.w * a.h).slice(0, 12);
@@ -121,32 +149,57 @@ function mount(container, data, options = {}) {
       }
     }
     let changed = false;
-    for (const mesh of primaryMeshes) {const next = faded.get(mesh), previous = mesh.userData.faded;if (next.size !== previous.size || [...next].some(i => !previous.has(i))) changed = true; mesh.userData.faded = next;}
+    if (updateXray) {for (const mesh of primaryMeshes) {const next = faded.get(mesh), previous = mesh.userData.faded;if (next.size !== previous.size || [...next].some(i => !previous.has(i))) changed = true; mesh.userData.faded = next;} xrayPending = false;}
     if (changed) updateMatrices();
-    // A label hidden by solid geometry stays hidden even if that wall is x-rayed.
-    for (const sprite of sprites) {
+    // Keep text a readable screen size, suppress overlaps and respect solid occlusion.
+    const occupied = [], width = Math.max(1, container.clientWidth), height = Math.max(1, container.clientHeight);
+    for (const sprite of [...sprites].sort((a, b) => Number(!!a.userData.roomLabel) - Number(!!b.userData.roomLabel) || (b.userData.area || 0) - (a.userData.area || 0))) {
       const point = sprite.getWorldPosition(new THREE.Vector3());
-      sprite.visible = labels && groups.get(sprite.userData.level).visible && !physical.some(box => {const hit = segmentBox(camera.position, point, box); return hit !== null && hit > .00001 && hit < .995;});
+      const cameraPoint = point.clone().applyMatrix4(camera.matrixWorldInverse), unitsPerPixel = 2 * Math.max(.1, -cameraPoint.z) * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) / height;
+      const worldWidth = Math.min(sprite.userData.labelWidth * unitsPerPixel, sprite.userData.maxWorldWidth || Infinity);
+      sprite.scale.set(worldWidth, worldWidth * sprite.userData.labelRatio, 1);
+      const projected = point.clone().project(camera), pixelWidth = worldWidth / unitsPerPixel, pixelHeight = pixelWidth * sprite.userData.labelRatio;
+      const rect = {x: (projected.x + 1) * width / 2 - pixelWidth / 2, y: (1 - projected.y) * height / 2 - pixelHeight / 2, w: pixelWidth, h: pixelHeight};
+      const collision = occupied.some(r => rect.x < r.x + r.w + 5 && rect.x + rect.w + 5 > r.x && rect.y < r.y + r.h + 5 && rect.y + rect.h + 5 > r.y);
+      sprite.visible = labels && groups.get(sprite.userData.level).visible && (!sprite.userData.roomLabel || sprite.userData.level === focused) && cameraPoint.z < 0 && projected.z >= -1 && projected.z <= 1 && rect.x + rect.w > 0 && rect.y + rect.h > 0 && rect.x < width && rect.y < height && pixelWidth >= 58 && !collision && !physical.some(box => {const hit = segmentBox(camera.position, point, box); return hit !== null && hit > .00001 && hit < .995;});
+      if (sprite.visible) occupied.push(rect);
+      if (sprite.userData.floorLabel) {const leader = decorations.find(d => d.userData.floorLeader === sprite.userData.level); if (leader) {const attr = leader.geometry.attributes.position; attr.setX(0, sprite.position.x + worldWidth / 2); attr.needsUpdate = true; leader.visible = labels && sprite.visible && sprite.userData.level === hovered;}}
     }
     lastOcclusion = signature;
   }
-  function fit(preserveDirection = false) {
+  function cancelTransition() {if (transition?.returning) overview = null; transition = null;}
+  function moveCamera(position, target, animate) {
+    const currentPosition = camera.position.clone(), currentTarget = controls.target.clone(), damping = controls.enableDamping;
+    // Consume OrbitControls inertia without changing the pose the next animation starts from.
+    controls.enableDamping = false; controls.update(); camera.position.copy(currentPosition); controls.target.copy(currentTarget); controls.update(); controls.enableDamping = damping;
+    transition = animate && !motionPreference?.matches ? {from: currentPosition, targetFrom: currentTarget, to: position.clone(), targetTo: target.clone(), start: performance.now(), duration: 420} : null;
+    if (!transition) {camera.position.copy(position); controls.target.copy(target); camera.lookAt(target); controls.update(); refreshOcclusion(true);}
+  }
+  function advanceCamera(now = performance.now()) {
+    if (!transition) return false;
+    const motion = transition, t = motionPreference?.matches ? 1 : Math.min(1, Math.max(0, (now - motion.start) / motion.duration)), eased = t * t * (3 - 2 * t);
+    camera.position.lerpVectors(motion.from, motion.to, eased); controls.target.lerpVectors(motion.targetFrom, motion.targetTo, eased); camera.lookAt(controls.target); camera.updateMatrixWorld(true);
+    if (t === 1) {if (motion.returning) overview = null; transition = null; controls.update();}
+    return true;
+  }
+  function fit(preserveDirection = false, animate = false) {
     const box = new THREE.Box3();
     for (const group of groups.values()) if (group.visible) {const level = data.levels.find(l => l.id === group.userData.id); for (const shape of level.boxes) {box.expandByPoint(new THREE.Vector3(shape.x, shape.z + group.position.y, shape.y)); box.expandByPoint(new THREE.Vector3(shape.x + shape.w, shape.z + shape.height + group.position.y, shape.y + shape.h));}}
     if (box.isEmpty()) {box.min.set(b.minX, b.minZ - groundRank * gap, b.minY); box.max.set(b.maxX, b.maxZ + (data.levels.length - 1 - groundRank) * gap, b.maxY);}
     const center = box.getCenter(new THREE.Vector3()), dimensions = box.getSize(new THREE.Vector3()), radius = Math.max(dimensions.length() / 2, 8), angle = THREE.MathUtils.degToRad(camera.fov / 2), distance = radius / Math.sin(angle) * Math.max(1, 1 / camera.aspect) * 1.1;
     const direction = preserveDirection ? camera.position.clone().sub(controls.target).normalize() : new THREE.Vector3(1, .9, 1.2).normalize();
-    controls.target.copy(center); camera.position.copy(center).add(direction.multiplyScalar(distance)); camera.near = .05; camera.far = Math.max(5000, distance * 5); camera.updateProjectionMatrix(); controls.update(); refreshOcclusion(true);
+    camera.near = .05; camera.far = Math.max(5000, distance * 5); camera.updateProjectionMatrix(); moveCamera(center.clone().add(direction.multiplyScalar(distance)), center, animate);
   }
   function showAll() {
     for (const group of groups.values()) group.visible = true; focused = null; hoverFloor(null); updateMatrices();
-    if (overview) {camera.position.copy(overview.position); controls.target.copy(overview.target); camera.updateProjectionMatrix(); controls.update(); overview = null; refreshOcclusion(true);} else fit();
+    if (overview) {moveCamera(overview.position, overview.target, true); if (transition) transition.returning = true; else overview = null;} else fit(false, true);
     notifyVisibility();
   }
   function isolate(id) {
-    if (!groups.has(id)) return; if (!focused) overview = {position: camera.position.clone(), target: controls.target.clone()};
-    focused = id; for (const [key, group] of groups) group.visible = key === id; hoverFloor(null); updateMatrices(); fit(true); notifyVisibility();
+    if (!groups.has(id) || focused === id) return; if (!focused && !overview) overview = {position: camera.position.clone(), target: controls.target.clone()};
+    focused = id; for (const [key, group] of groups) group.visible = key === id; hoverFloor(null); updateMatrices(); fit(true, true); notifyVisibility();
   }
+  function adjacentFloor(direction) {const index = data.levels.findIndex(l => l.id === focused), next = data.levels[index + Math.sign(direction)]; if (index >= 0 && next) isolate(next.id);}
   function hitFloor(event) {
     const rect = renderer.domElement.getBoundingClientRect(); if (!rect.width || !rect.height) return null;
     mouse.set((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1); camera.updateMatrixWorld(true); scene.updateMatrixWorld(true); raycaster.setFromCamera(mouse, camera);
@@ -156,18 +209,20 @@ function mount(container, data, options = {}) {
   const pointerDown = e => {pointerIds.add(e.pointerId); if (pointerIds.size > 1) clickStart = null; else clickStart = e.button === 0 ? {id: e.pointerId, x: e.clientX, y: e.clientY, moved: false} : null;};
   const pointerMove = e => {if (clickStart && Math.hypot(e.clientX - clickStart.x, e.clientY - clickStart.y) > 5) clickStart.moved = true; if (pointerIds.size || e.buttons) {hoverFloor(null); return;} hoverFloor(hitFloor(e));};
   const pointerUp = e => {const click = clickStart && e.pointerId === clickStart.id && !clickStart.moved && Math.hypot(e.clientX - clickStart.x, e.clientY - clickStart.y) <= 5 && pointerIds.size === 1;pointerIds.delete(e.pointerId); clickStart = null; if (click) {const id = hitFloor(e); if (id) isolate(id);}};
-  const blur = () => {pointerIds.clear();clickStart=null;hoverFloor(null);};
+  const blur = () => {pointerIds.clear();clickStart=null;interacting=false;cancelTransition();hoverFloor(null);};
   window.addEventListener('blur',blur);
   const pointerCancel = e => {pointerIds.delete(e.pointerId); clickStart = null; hoverFloor(null);}, pointerLeave = () => {if (!pointerIds.size) hoverFloor(null);};
-  const keyDown = e => {if (e.key === 'Escape' && focused) {e.preventDefault(); e.stopPropagation(); showAll();}}, contextMenu = e => e.preventDefault();
+  const keyDown = e => {if (e.key === 'Escape' && focused) {e.preventDefault(); e.stopPropagation(); showAll();} else if (focused && ['ArrowUp', 'ArrowDown'].includes(e.key)) {e.preventDefault(); e.stopPropagation(); adjacentFloor(e.key === 'ArrowUp' ? 1 : -1);}}, contextMenu = e => e.preventDefault();
   const listeners = {pointerdown: pointerDown, pointermove: pointerMove, pointerup: pointerUp, pointercancel: pointerCancel, pointerleave: pointerLeave, keydown: keyDown, contextmenu: contextMenu};
   for (const [name, fn] of Object.entries(listeners)) renderer.domElement.addEventListener(name, fn);
   const resize = () => {if (disposed) return; const w = Math.max(1, container.clientWidth), h = Math.max(1, container.clientHeight); renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); lastOcclusion = '';};
+  const controlStart = () => {cancelTransition(); interacting = true;}, controlEnd = () => {interacting = false; xrayChangedAt = performance.now(); xrayPending = xray;};
+  controls.addEventListener('start', controlStart); controls.addEventListener('end', controlEnd);
   const observer = new ResizeObserver(resize); observer.observe(container); resize(); updateMatrices(); fit();
-  renderer.setAnimationLoop(() => {if (disposed) return; controls.update(); refreshOcclusion(); renderer.render(scene, camera);});
+  renderer.setAnimationLoop(() => {if (disposed) return; if (!advanceCamera()) controls.update(); refreshOcclusion(); renderer.render(scene, camera);});
   const contextLost = e => {e.preventDefault(); options.onContextLost?.();}; renderer.domElement.addEventListener('webglcontextlost', contextLost);
   function dispose() {
-    if (disposed) return; disposed = true; renderer.setAnimationLoop(null); observer.disconnect(); controls.dispose();
+    if (disposed) return; disposed = true; transition = null; renderer.setAnimationLoop(null); observer.disconnect(); controls.removeEventListener('start', controlStart); controls.removeEventListener('end', controlEnd); controls.dispose();
     for (const [name, fn] of Object.entries(listeners)) renderer.domElement.removeEventListener(name, fn);
     renderer.domElement.removeEventListener('webglcontextlost', contextLost);window.removeEventListener('blur',blur);
     for (const sprite of sprites) {sprite.material.map.dispose(); sprite.material.dispose();}
@@ -177,12 +232,13 @@ function mount(container, data, options = {}) {
     renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove(); scene.clear(); pointerIds.clear(); overview = null;
   }
   return {
-    fit, dispose, showAll, isolate, hoverFloor,
+    fit, dispose, showAll, isolate, hoverFloor, adjacentFloor,
     getFocusedFloor() {return focused;},
-    setFloor(id, visible) {const group = groups.get(id); if (!group) return; group.visible = !!visible; focused = null; overview = null; hoverFloor(null); updateMatrices(); refreshOcclusion(true); notifyVisibility();},
-    setExplode(value) {gap = Math.max(0, Math.min(12, Number(value) || 0)); hoverFloor(null); updateMatrices(); refreshOcclusion(true);},
+    setFloor(id, visible) {const group = groups.get(id); if (!group) return; cancelTransition(); group.visible = !!visible; focused = null; overview = null; hoverFloor(null); updateMatrices(); refreshOcclusion(true); notifyVisibility();},
+    setExplode(value) {cancelTransition(); gap = Math.max(0, Math.min(12, Number(value) || 0)); hoverFloor(null); updateMatrices(); refreshOcclusion(true);},
     setWalls(value) {showWalls = !!value; updateMatrices(); refreshOcclusion(true);},
     setCutaway(value) {cutaway = !!value; updateMatrices(); refreshOcclusion(true);},
+    setCutHeight(value) {const height = Number(value); if (!Number.isFinite(height)) return; cutHeight = Math.max(.4, Math.min(2.4, height)); updateMatrices(); refreshOcclusion(true);},
     setLabels(value) {labels = !!value; updateMatrices(); refreshOcclusion(true);},
     setXray(value) {xray = !!value; updateMatrices(); refreshOcclusion(true);},
     png() {refreshOcclusion(true); renderer.render(scene, camera); return new Promise((resolve, reject) => renderer.domElement.toBlob(blob => blob ? resolve(blob) : reject(Error('Could not create this image.')), 'image/png'));}

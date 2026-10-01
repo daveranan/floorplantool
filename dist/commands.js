@@ -19,7 +19,8 @@ function commands(){
  for(const [id,label]of [['export','Export this building JSON'],['backupall','Back up all buildings JSON'],['import','Import building or backup'],['pngexport','Export current floor PNG'],['svgexport','Export current floor SVG'],['stackpngexport','Export vertical stack PNG'],['archive','Open legacy layout archive']])add(id,label,'Files',click(id));
  const three=$('buildingpreview3d').open;
  add('threeall','3D · Show all floors / exit focus','3D',click('threeall'),'Esc','Restore overview camera',!three);add('threefit','3D · Fit visible floors','3D',click('threefit'),'','',!three);
- for(const [id,label]of [['threexray','X-ray foreground walls'],['threewalls','Walls'],['threecutaway','Low-wall cutaway'],['threelabels','Floor labels']])add(id,'3D · '+label,'3D',toggle(id),'',$(id).checked?'On':'Off',!three);
+ add('threefloorup','3D · Focus floor above','3D',click('threefloorup'),'↑','',!three||$('threefloorup').disabled);add('threefloordown','3D · Focus floor below','3D',click('threefloordown'),'↓','',!three||$('threefloordown').disabled);
+ for(const [id,label]of [['threexray','X-ray foreground walls'],['threewalls','Walls'],['threecutaway','Low-wall cutaway'],['threelabels','Floor and room labels']])add(id,'3D · '+label,'3D',toggle(id),'',$(id).checked?'On':'Off',!three);
  add('help','Keyboard shortcuts & editor help','Help',click('help'),'Ctrl / ⌘ /','Persistent C / X / P / D tools; V / Escape returns to selection. Space, marquee, groups, Undo and exports');
  add('pan-help','Pan the floor plan','Shortcuts',click('help'),'Space + drag','Middle-mouse drag also pans; two fingers zoom on touch');
  add('group-help','Add or remove selection objects','Shortcuts',click('help'),'Shift + click','Shift-drag toggles the objects enclosed by a selection box');
