@@ -4,6 +4,7 @@
  */
 (function(root){
 'use strict';
+const connections=root.KERN_CONNECTIONS||(typeof require==='function'?require('./geometry.js'):null);
 const EPS=1e-6;
 const arr=v=>Array.isArray(v)?v:[];
 const DEFAULTS={clearWidth:1.4,landingDepth:1.4,treadDepth:.28,targetRiser:.17,maxRiser:.18,minHeadroom:2.2,perimeter:.2,centerGap:.2,waistThickness:.2,doorHeight:2.2,maxPairRise:6};
@@ -15,7 +16,7 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const round=n=>Math.round(n*1000000)/1000000;
 function intersection(a,b){const x=Math.max(a.x,b.x),y=Math.max(a.y,b.y),w=Math.min(a.x+a.w,b.x+b.w)-x,h=Math.min(a.y+a.h,b.y+b.h)-y;return w>EPS&&h>EPS?{x,y,w,h}:null}
 function boundary(a,b){let lo,hi;if(!a||!b)return null;if(Math.abs(a.x+a.w-b.x)<EPS||Math.abs(b.x+b.w-a.x)<EPS){lo=Math.max(a.y,b.y);hi=Math.min(a.y+a.h,b.y+b.h);if(hi>lo)return{axis:'v',fixed:Math.abs(a.x+a.w-b.x)<EPS?b.x:a.x,lo,hi}}if(Math.abs(a.y+a.h-b.y)<EPS||Math.abs(b.y+b.h-a.y)<EPS){lo=Math.max(a.x,b.x);hi=Math.min(a.x+a.w,b.x+b.w);if(hi>lo)return{axis:'h',fixed:Math.abs(a.y+a.h-b.y)<EPS?b.y:a.y,lo,hi}}return null}
-function doorGeometry(d,f){const a=f.rooms.find(r=>r.id===d.a),b=f.rooms.find(r=>r.id===d.b),g=boundary(a,b);if(!g)return null;if(d.kind==='open'&&d.fullWidth!==false)return{...g,start:g.lo,end:g.hi};if(g.hi-g.lo<d.width+.2-EPS)return null;const t=Math.max(0,Math.min(1,d.offset??.5)),start=g.lo+.1+Math.max(0,g.hi-g.lo-d.width-.2)*t;return{...g,start,end:start+d.width}}
+function doorGeometry(d,f){if(d.b==='outside')return connections?.geometry(d,f);const a=f.rooms.find(r=>r.id===d.a),b=f.rooms.find(r=>r.id===d.b),g=boundary(a,b);if(!g)return null;if(d.kind==='open'&&d.fullWidth!==false)return{...g,start:g.lo,end:g.hi};if(g.hi-g.lo<d.width+.2-EPS)return null;const t=Math.max(0,Math.min(1,d.offset??.5)),start=g.lo+.1+Math.max(0,g.hi-g.lo-d.width-.2)*t;return{...g,start,end:start+d.width}}
 function coordinateFrame(r,axis,end){
  const long=axis==='x'?r.w:r.h,short=axis==='x'?r.h:r.w;
  const reverse=(axis==='x'&&end==='east')||(axis==='y'&&end==='south');
@@ -118,7 +119,7 @@ function build(plan,floorId,roomId,options={}){
  }
  if(minimum!==null&&minimum<spec.minHeadroom-EPS)warn('headroom',`Only ${minimum.toFixed(2)} m headroom below ${worst.obstructionId}; needs ${spec.minHeadroom.toFixed(2)} m`,'error',{headroom:minimum,required:spec.minHeadroom,location:worst.point});
  const access=[];
- for(const d of arr(floor.doors)){if(!d||d.a!==roomId&&d.b!==roomId)continue;const other=floor.rooms.find(r=>r.id===(d.a===roomId?d.b:d.a)),g=doorGeometry(d,floor);if(!other||!g){warn('door-detached',`Door ${d.id} is detached or too wide`);access.push({doorId:d.id,valid:false,reason:'detached'});continue}
+ for(const d of (connections?connections.all(floor):arr(floor.doors))){if(!d||d.a!==roomId&&d.b!==roomId)continue;const other=d.b==='outside'?{id:'outside',name:'Outside',z:room.z??floor.z}:floor.rooms.find(r=>r.id===(d.a===roomId?d.b:d.a)),g=doorGeometry(d,floor);if(!other||!g){warn('door-detached',`Door ${d.id} is detached or too wide`);access.push({doorId:d.id,valid:false,reason:'detached'});continue}
   const z=finite(other.z,floor.z),ends=g.axis==='h'?[[g.start,g.fixed],[g.end,g.fixed]]:[[g.fixed,g.start],[g.fixed,g.end]];
   const uv=ends.map(a=>frame.uv(...a));
   // Project through the perimeter wall into the walking clear zone; opening must still sit within the near landing band.

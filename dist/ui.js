@@ -24,7 +24,7 @@
     document.title = `${currentBuilding().name} · Building Planner`;
     $('floorcount').textContent = count;
     $('floor-menulabel').textContent = `Current floor · ${floorId}`;
-    $('floorstats').textContent = `${plural(f.rooms.filter(r => !['void', 'solid'].includes(r.type) && !r.throughOnly).length, 'space')} · ${plural(f.doors.length, 'connection')}`;
+    $('floorstats').textContent = `${plural(f.rooms.filter(r => !['void', 'solid'].includes(r.type) && !r.throughOnly).length, 'space')} · ${plural(allConnections(f).length, 'connection')}`;
     $('canvasfloor').textContent = `${floorId} / ${f.name}`;
     $('emptyfloor').hidden = !!f.rooms.length || tool !== 'select' || preview;
     $('removefloor').title = floorId === 'L0' ? 'The ground-floor code L0 is permanent. Its name and elevation are editable.' : `Remove ${floorId} · ${f.name}`;
