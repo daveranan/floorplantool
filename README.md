@@ -7,7 +7,8 @@ A static, browser-local building and floor planner. Existing KERN layouts are pr
 - Native HTML dialogs and disclosure menus, shared light/dark tokens, inline form validation and keyboard navigation
 - Responsive floor navigation, optional phone inspector and persistent local-save failure recovery
 - Current floor PNG/SVG, building/all-buildings JSON and a current-model vertical-stack preview/PNG
-- Locally bundled Three.js r180 preview with floor visibility/isolation, exploded spacing, cutaway walls and PNG snapshots
+- Top-right 2D / 3D modes use the same workspace: 3D floor visibility/navigation on the left, read-only scene in the middle, display controls on the right
+- Locally bundled Three.js r180 with per-building camera restoration, exploded spacing, cutaway walls, ground grid and PNG snapshots; returning to 2D keeps the editor view/selection/tool
 
 The UI stays plain JavaScript and SVG. The design system uses shadcn-style composable tokens and interaction patterns without a React/Tailwind migration. No cloud sync, backend or additional account access is introduced.
 
@@ -33,6 +34,8 @@ node test-preview.cjs
 node test-three-scene.cjs
 node test-ui-static.cjs
 node test-typography.cjs
+node test-stair-ux.cjs
+node test-workspace-modes.cjs
 python test-compact-layout.py
 ```
 

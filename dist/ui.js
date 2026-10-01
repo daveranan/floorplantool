@@ -52,7 +52,7 @@
   function restoreFocus() {
     const target = returnFocus;
     returnFocus = null;
-    if (target && visible(target)) focus(target); else focus($('plan'));
+    if (target && visible(target)) focus(target); else focus(window.BuildingExports?.isThreeMode?.()?$('threeviewport').querySelector('canvas')||$('mode3d'):$('plan'));
   }
   function closeManagement() {
     management = null;

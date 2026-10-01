@@ -46,6 +46,8 @@ function floorTextLayout(name, width, height, ctx) {
 // Receives an immutable geometry snapshot. No editor or storage access.
 function mount(container, data, options = {}) {
   const renderer = new THREE.WebGLRenderer({antialias: true, alpha: false, preserveDrawingBuffer: true});
+  let cleanupOnFailure = () => {renderer.setAnimationLoop(null); renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove();};
+  try {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.setClearColor(0x171c24);
   renderer.domElement.setAttribute('aria-label', '3D building preview. Left drag orbits, middle or right drag pans. Click a floor or its label to focus; Escape shows all.');
@@ -55,6 +57,8 @@ function mount(container, data, options = {}) {
   const light = new THREE.DirectionalLight(0xffffff, 2.5); light.position.set(-40, 80, -30); scene.add(light);
   const fill = new THREE.DirectionalLight(0xb7c8ec, .6); fill.position.set(40, 10, 60); scene.add(fill);
   const controls = new OrbitControls(camera, renderer.domElement);
+  const releaseRenderer = cleanupOnFailure;
+  cleanupOnFailure = () => {controls.dispose(); const geometries = new Set(), materials = new Set(), textures = new Set(); scene.traverse(node => {if (node.geometry) geometries.add(node.geometry); for (const material of Array.isArray(node.material) ? node.material : node.material ? [node.material] : []) {materials.add(material); if (material.map) textures.add(material.map);}}); for (const texture of textures) texture.dispose(); for (const material of materials) material.dispose(); for (const geometry of geometries) geometry.dispose(); scene.clear(); releaseRenderer();};
   controls.enableDamping = true; controls.dampingFactor = .09; controls.maxPolarAngle = Math.PI * .92;
   controls.minDistance = 1; controls.maxDistance = 1600; controls.screenSpacePanning = true;
   controls.mouseButtons = {LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.PAN, RIGHT: THREE.MOUSE.PAN};
@@ -133,7 +137,7 @@ function mount(container, data, options = {}) {
   // Draw the datum before opaque slabs so coplanar grid lines never stripe room floors.
   grid.renderOrder = -10;
   for (const m of Array.isArray(grid.material) ? grid.material : [grid.material]) {m.transparent = false; m.opacity = 1; m.depthWrite = false;}
-  let gap = 0, disposed = false, showWalls = true, cutaway = false, cutHeight = 1.15, labels = true, xray = false, hovered = null, focused = null, overview = null, physical = [], lastOcclusion = '', clickStart = null, transition = null, interacting = false, xraySignature = '', xrayChangedAt = 0, xrayPending = false;
+  let gap = 0, disposed = false, showWalls = true, cutaway = false, cutHeight = 1.15, labels = true, xray = false, showGrid = true, hovered = null, focused = null, overview = null, physical = [], lastOcclusion = '', clickStart = null, transition = null, interacting = false, xraySignature = '', xrayChangedAt = 0, xrayPending = false;
   const motionPreference = window.matchMedia?.('(prefers-reduced-motion: reduce)');
   const pointerIds = new Set(), raycaster = new THREE.Raycaster(), mouse = new THREE.Vector2();
   const visibleIds = () => [...groups].filter(([, group]) => group.visible).map(([id]) => id);
@@ -265,7 +269,7 @@ function mount(container, data, options = {}) {
   const pointerMove = e => {if (clickStart && Math.hypot(e.clientX - clickStart.x, e.clientY - clickStart.y) > 5) clickStart.moved = true; if (pointerIds.size || e.buttons) {renderer.domElement.title = ''; hoverFloor(null); return;} hoverFloor(hitFloor(e));};
   const pointerUp = e => {const click = clickStart && e.pointerId === clickStart.id && !clickStart.moved && Math.hypot(e.clientX - clickStart.x, e.clientY - clickStart.y) <= 5 && pointerIds.size === 1;pointerIds.delete(e.pointerId); clickStart = null; if (click) {const id = hitFloor(e); if (id) isolate(id);}};
   const blur = () => {pointerIds.clear();clickStart=null;interacting=false;cancelTransition();hoverFloor(null);};
-  window.addEventListener('blur',blur);
+  window.addEventListener('blur',blur);const releaseScene = cleanupOnFailure;cleanupOnFailure = () => {window.removeEventListener('blur',blur);releaseScene();};
   const pointerCancel = e => {pointerIds.delete(e.pointerId); clickStart = null; hoverFloor(null);}, pointerLeave = () => {if (!pointerIds.size) {renderer.domElement.title = ''; hoverFloor(null);}};
   const keyDown = e => {if (e.key === 'Escape' && focused) {e.preventDefault(); e.stopPropagation(); showAll();} else if (focused && ['ArrowUp', 'ArrowDown'].includes(e.key)) {e.preventDefault(); e.stopPropagation(); adjacentFloor(e.key === 'ArrowUp' ? 1 : -1);}}, contextMenu = e => e.preventDefault();
   const listeners = {pointerdown: pointerDown, pointermove: pointerMove, pointerup: pointerUp, pointercancel: pointerCancel, pointerleave: pointerLeave, keydown: keyDown, contextmenu: contextMenu};
@@ -273,9 +277,26 @@ function mount(container, data, options = {}) {
   const resize = () => {if (disposed) return; const w = Math.max(1, container.clientWidth), h = Math.max(1, container.clientHeight); renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); lastOcclusion = '';};
   const controlStart = () => {cancelTransition(); interacting = true;}, controlEnd = () => {interacting = false; xrayChangedAt = performance.now(); xrayPending = xray;};
   controls.addEventListener('start', controlStart); controls.addEventListener('end', controlEnd);
-  const observer = new ResizeObserver(resize); observer.observe(container); resize(); updateMatrices(); fit();
-  renderer.setAnimationLoop(() => {if (disposed) return; if (!advanceCamera()) controls.update(); refreshOcclusion(); renderer.render(scene, camera);});
+  const observer = new ResizeObserver(resize);
   const contextLost = e => {e.preventDefault(); options.onContextLost?.();}; renderer.domElement.addEventListener('webglcontextlost', contextLost);
+  cleanupOnFailure = dispose;observer.observe(container); resize(); updateMatrices(); fit();
+  renderer.setAnimationLoop(() => {if (disposed) return; if (!advanceCamera()) controls.update(); refreshOcclusion(); renderer.render(scene, camera);});
+  function getViewState() {
+    return {position: camera.position.toArray(), target: controls.target.toArray(), focused, visible: visibleIds(), gap, showWalls, cutaway, cutHeight, labels, xray, showGrid,
+      overview: focused && overview ? {position: overview.position.toArray(), target: overview.target.toArray()} : null};
+  }
+  function restoreViewState(state) {
+    if (!state || disposed) return; const vector = value => Array.isArray(value) && value.length === 3 && value.every(Number.isFinite);
+    cancelTransition(); gap = Math.max(0, Math.min(12, Number(state.gap) || 0)); showWalls = state.showWalls !== false; cutaway = !!state.cutaway;
+    cutHeight = Number.isFinite(state.cutHeight) ? Math.max(.4, Math.min(2.4, state.cutHeight)) : 1.15; labels = state.labels !== false; xray = !!state.xray; showGrid = state.showGrid !== false; grid.visible = showGrid;
+    focused = groups.has(state.focused) ? state.focused : null; const ids = Array.isArray(state.visible) ? state.visible.filter(id => groups.has(id)) : [...groups.keys()];
+    for (const [id, group] of groups) group.visible = focused ? id === focused : ids.includes(id);
+    if (!focused && !ids.length && state.visible?.length) for (const group of groups.values()) group.visible = true;
+    overview = focused && vector(state.overview?.position) && vector(state.overview?.target) ? {position: new THREE.Vector3().fromArray(state.overview.position), target: new THREE.Vector3().fromArray(state.overview.target)} : null;
+    hoverFloor(null); updateMatrices();
+    if (vector(state.position) && vector(state.target)) moveCamera(new THREE.Vector3().fromArray(state.position), new THREE.Vector3().fromArray(state.target), false); else fit();
+    refreshOcclusion(true); notifyVisibility();
+  }
   function dispose() {
     if (disposed) return; disposed = true; transition = null; renderer.setAnimationLoop(null); observer.disconnect(); controls.removeEventListener('start', controlStart); controls.removeEventListener('end', controlEnd); controls.dispose();
     for (const [name, fn] of Object.entries(listeners)) renderer.domElement.removeEventListener(name, fn);
@@ -287,7 +308,9 @@ function mount(container, data, options = {}) {
     renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove(); scene.clear(); pointerIds.clear(); overview = null;
   }
   return {
-    fit, dispose, showAll, isolate, hoverFloor, adjacentFloor,
+    fit, dispose, showAll, isolate, hoverFloor, adjacentFloor, getViewState, restoreViewState,
+    zoomBy(factor) {if (!Number.isFinite(factor) || factor <= 0) return; const delta = camera.position.clone().sub(controls.target), distance = THREE.MathUtils.clamp(delta.length() * factor, controls.minDistance, controls.maxDistance); moveCamera(controls.target.clone().add(delta.normalize().multiplyScalar(distance)), controls.target, false);},
+    setGrid(value) {showGrid = !!value; grid.visible = showGrid;},
     getFocusedFloor() {return focused;},
     setFloor(id, visible) {const group = groups.get(id); if (!group) return; cancelTransition(); group.visible = !!visible; focused = null; overview = null; hoverFloor(null); updateMatrices(); refreshOcclusion(true); notifyVisibility();},
     setExplode(value) {cancelTransition(); gap = Math.max(0, Math.min(12, Number(value) || 0)); hoverFloor(null); updateMatrices(); refreshOcclusion(true);},
@@ -298,5 +321,6 @@ function mount(container, data, options = {}) {
     setXray(value) {xray = !!value; updateMatrices(); refreshOcclusion(true);},
     png() {refreshOcclusion(true); renderer.render(scene, camera); return new Promise((resolve, reject) => renderer.domElement.toBlob(blob => blob ? resolve(blob) : reject(Error('Could not create this image.')), 'image/png'));}
   };
+  } catch (error) {try {cleanupOnFailure();} catch {} throw error;}
 }
 window.Building3D = {mount, version: THREE.REVISION};

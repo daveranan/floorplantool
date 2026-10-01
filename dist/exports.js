@@ -1,7 +1,8 @@
 /* Current-model drawings and previews. Exporting never changes floors, plans or undo history. */
 (function(){
 'use strict';
-let threePromise=null,threeView=null,threeToken=0,stackSnapshot=null,pngBusy=false,threeName='Building';
+let threePromise=null,threeView=null,threeToken=0,stackSnapshot=null,pngBusy=false,threeName='Building',viewMode='2d',threeBuildingId=null,threePlan=null;
+const threeStates=new Map(),twoDTools=new Map();
 const fmt=n=>`${n>0?'+':''}${Number(n).toFixed(2)} m`;
 function prepare(){finishWidthEdit(false);finishDrag(true);closeToolbarMenus();closeConnectionMenu();}
 function sheetBounds(f){
@@ -36,33 +37,62 @@ $('svgexport').onclick=()=>{prepare();downloadBlob(`${fileName(currentBuilding()
 $('stackpngexport').onclick=()=>{prepare();return png(stackSheet(currentGeometry(),currentBuilding().name),`${fileName(currentBuilding().name)}-vertical-stack.png`,$('stackpngexport'))};
 function openStack(){prepare();const name=currentBuilding().name,data=currentGeometry();stackSnapshot={name,svg:stackSheet(data,name)};$('stacktitle').textContent=`${name} · Vertical stack`;$('stackdrawing').innerHTML=stackSnapshot.svg;$('stackassumptions').textContent=data.assumptions;$('stackdialog').showModal()}
 $('openstack').onclick=openStack;$('closestack').onclick=()=>$('stackdialog').close();$('savestackpng').onclick=()=>stackSnapshot&&png(stackSnapshot.svg,`${fileName(stackSnapshot.name)}-vertical-stack.png`,$('savestackpng'));$('stackdialog').onclose=()=>{stackSnapshot=null;$('stackdrawing').innerHTML=''};
-function loadThree(){if(window.Building3D)return Promise.resolve(window.Building3D);if(!threePromise)threePromise=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='preview3d.js';const timer=setTimeout(()=>{threePromise=null;script.remove();reject(Error('Loading the 3D renderer timed out. Close the preview and try again.'))},20000);script.onload=()=>{clearTimeout(timer);window.Building3D?resolve(window.Building3D):reject(Error('The 3D renderer did not start.'))};script.onerror=()=>{clearTimeout(timer);threePromise=null;script.remove();reject(Error('The 3D renderer could not load. Check your connection and try again.'))};document.head.appendChild(script)});return threePromise}
+function loadThree(){if(window.Building3D)return Promise.resolve(window.Building3D);if(!threePromise)threePromise=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='preview3d.js';const timer=setTimeout(()=>{threePromise=null;script.remove();reject(Error('Loading the 3D renderer timed out. Switch to 2D and try 3D again.'))},20000);script.onload=()=>{clearTimeout(timer);window.Building3D?resolve(window.Building3D):(threePromise=null,script.remove(),reject(Error('The 3D renderer did not start.')))};script.onerror=()=>{clearTimeout(timer);threePromise=null;script.remove();reject(Error('The 3D renderer could not load. Check your connection and try again.'))};document.head.appendChild(script)});return threePromise}
+function rememberThree(){if(threeView&&threeBuildingId&&threeView.getViewState)threeStates.set(threeBuildingId,threeView.getViewState())}
 function disposeThree(){threeToken++;threeView?.dispose();threeView=null;$('threeviewport').innerHTML='';$('save3dpng').disabled=true;$('threefocusnav').hidden=true}
-function syncFloorChecks(ids){for(const input of $('threefloors').querySelectorAll('input'))input.checked=ids.includes(input.dataset.floor3d)}
-function failedThree(message){$('threestatus').hidden=false;$('threestatus').textContent=message+' The floor-plan editor still works; use Vertical stack below.';$('save3dpng').disabled=true;for(const id of ['threefit','threeall','threeexplode','threewalls','threecutaway','threecutheight','threelabels','threexray'])$(id).disabled=true}
-async function openThree(){
- prepare();disposeThree();const token=threeToken;threeName=currentBuilding().name;let data;
- $('preview3dtitle').textContent=`${threeName} · 3D`;$('threestatus').hidden=false;$('threestatus').textContent='Loading 3D preview…';$('threefloors').innerHTML='';$('threewarnings').open=false;$('save3dpng').disabled=true;
- $('threeexplode').value='0';$('explodelabel').textContent='0 m';$('threeexplode').setAttribute('aria-valuetext','0 metres');$('threewalls').checked=true;$('threecutaway').checked=false;$('threelabels').checked=true;$('threexray').checked=false;$('threecutheight').value='1.15';$('threecutheightlabel').textContent='1.15 m';$('threecutheight').setAttribute('aria-valuetext','1.15 metres');$('threecutheightfield').hidden=true;$('threehover').hidden=true;$('threefocusstatus').hidden=true;$('threefocusnav').hidden=true;$('threefloorup').disabled=true;$('threefloordown').disabled=true;
- for(const id of ['threefit','threeall','threeexplode','threewalls','threecutaway','threecutheight','threelabels','threexray'])$(id).disabled=true;
- $('buildingpreview3d').showModal();
- try{data=currentGeometry();$('threeassumptions').textContent=data.assumptions;$('threewarningcount').textContent=data.warnings.length;$('threewarninglist').innerHTML=data.warnings.length?data.warnings.map(w=>`<p>${esc(w)}</p>`).join(''):'<p>No geometry warnings from this preview.</p>';
-  $('threefloors').innerHTML=[...data.levels].reverse().map(l=>`<div><label><input type="checkbox" checked data-floor3d="${esc(l.id)}"><span><b>${esc(l.id)}</b> ${esc(l.name)}<small>${fmt(l.z)}</small></span></label><button data-isolate3d="${esc(l.id)}" title="Show only ${esc(l.id)}" aria-label="Show only ${esc(l.id)}">Only</button></div>`).join('');
-  const library=await loadThree();if(token!==threeToken||!$('buildingpreview3d').open)return;
-  threeView=library.mount($('threeviewport'),data,{onHover:level=>{$('threehover').hidden=!level||!!threeView?.getFocusedFloor?.();$('threehover').textContent=level?level.id+' · '+level.name+' · click to focus':''},onVisibilityChanged:(ids,focused)=>{syncFloorChecks(ids);const index=data.levels.findIndex(l=>l.id===focused),level=data.levels[index];$('threefocusstatus').hidden=true;$('threefocusnav').hidden=!focused;$('threefocuslabel').textContent=focused||'';$('threefocuslabel').title=level?level.name+' · '+fmt(level.z):'';$('threefloorup').disabled=index<0||index>=data.levels.length-1;$('threefloordown').disabled=index<=0;if(focused)$('threehover').hidden=true},onContextLost:()=>{disposeThree();failedThree('The graphics context was lost. Close and reopen the preview.')}});$('threestatus').hidden=true;$('save3dpng').disabled=false;
-  for(const id of ['threefit','threeall','threeexplode','threewalls','threecutaway','threecutheight','threelabels','threexray'])$(id).disabled=false;
-  if(!data.levels.some(l=>l.boxes.length)){$('threestatus').hidden=false;$('threestatus').textContent='This building is empty. Draw a room in the editor to give it a 3D shape.'}
- }catch(error){if(token===threeToken){disposeThree();failedThree(/WebGL|context|renderer/i.test(error.message)?'3D needs WebGL 2, which is unavailable in this browser.':error.message)}}
+function isThreeMode(){return viewMode==='3d'}
+function syncModeUI(){
+ const three=isThreeMode();document.body.dataset.viewMode=viewMode;
+ $('canvas').hidden=three;$('buildingpreview3d').hidden=!three;$('floors').hidden=three;$('threefloorpanel').hidden=!three;
+ document.querySelector('.floorsheading').hidden=three;document.querySelector('.floorproperties').hidden=three;
+ $('inspector').hidden=three;document.querySelector('.asidehead').hidden=three;$('threeoptions').hidden=!three;
+ document.querySelector('.editbar').hidden=three;document.querySelector('.historytools').hidden=three;
+ $('mode2d').setAttribute('aria-pressed',String(!three));$('mode3d').setAttribute('aria-pressed',String(three));
+ $('buildingmenu').hidden=three;for(const id of ['import','archive'])$(id).disabled=three;
+ $('mode2d').title='Edit the floor plan';$('mode3d').title='Explore the building in 3D';
+ $('inspectorpanel').setAttribute('aria-label',three?'3D display controls':'Selection inspector');
+ $('newconnectiontype').closest('label').hidden=three;$('snapsize').closest('label').hidden=three;$('belowtoggle').closest('label').hidden=three;$('dimensions').closest('label').hidden=three;
 }
-$('open3d').onclick=openThree;$('close3d').onclick=()=>$('buildingpreview3d').close();$('buildingpreview3d').onclose=disposeThree;
+function syncFloorChecks(ids,focused=null){for(const input of $('threefloors').querySelectorAll('input'))input.checked=ids.includes(input.dataset.floor3d);for(const button of $('threefloors').querySelectorAll('[data-isolate3d]')){button.setAttribute('aria-pressed',String(button.dataset.isolate3d===focused));button.closest('.three-floor-row')?.classList.toggle('focused',button.dataset.isolate3d===focused)}}
+const controlIds=['threefit','threeall','threeexplode','threewalls','threecutaway','threecutheight','threelabels','threexray','threegrid'];
+function failedThree(message){$('threestatus').hidden=false;$('threestatus').textContent=message+' Switch to 2D to edit, or open Vertical stack.';$('save3dpng').disabled=true;for(const id of controlIds)$(id).disabled=true;for(const node of $('threefloors').querySelectorAll('input,button'))node.disabled=true}
+function syncThreeSettings(state={}){
+ $('threeexplode').value=String(state.gap??0);$('explodelabel').textContent=$('threeexplode').value+' m';$('threeexplode').setAttribute('aria-valuetext',$('threeexplode').value+' metres');
+ for(const [id,value]of [['threewalls',state.showWalls??true],['threecutaway',state.cutaway??false],['threelabels',state.labels??true],['threexray',state.xray??false],['threegrid',state.showGrid??true]])$(id).checked=value;
+ $('threecutheight').value=String(state.cutHeight??1.15);$('threecutheightlabel').textContent=Number($('threecutheight').value).toFixed(2)+' m';$('threecutheight').setAttribute('aria-valuetext',Number($('threecutheight').value).toFixed(2)+' metres');$('threecutheightfield').hidden=!$('threecutaway').checked;
+}
+async function mountThree(){
+ rememberThree();disposeThree();const token=threeToken;threeName=currentBuilding().name;threeBuildingId=currentBuilding().id;const editor=twoDTools.get(threeBuildingId);if(editor){tool=editor.tool;connectionKind=editor.connectionKind;$('newconnectiontype').value=connectionKind;updateTools()}else twoDTools.set(threeBuildingId,{tool,connectionKind});threePlan=JSON.stringify(model);const saved=threeStates.get(threeBuildingId);let data;
+ $('preview3dtitle').textContent=`${threeName} · 3D`;$('threestatus').hidden=false;$('threestatus').textContent='Loading 3D…';$('threefloors').innerHTML='';$('threewarnings').open=false;$('save3dpng').disabled=true;
+ syncThreeSettings(saved);$('threehover').hidden=true;$('threefocusstatus').hidden=true;$('threefocusnav').hidden=true;$('threefloorup').disabled=true;$('threefloordown').disabled=true;for(const id of controlIds)$(id).disabled=true;
+ try{data=currentGeometry();$('threeassumptions').textContent=data.assumptions;$('threewarningcount').textContent=data.warnings.length;$('threewarninglist').innerHTML=data.warnings.length?data.warnings.map(w=>`<p>${esc(w)}</p>`).join(''):'<p>No geometry warnings from this preview.</p>';
+  $('threefloors').innerHTML=[...data.levels].reverse().map(l=>`<div class="three-floor-row"><input type="checkbox" checked disabled data-floor3d="${esc(l.id)}" aria-label="Show ${esc(l.id)} · ${esc(l.name)}"><button disabled data-isolate3d="${esc(l.id)}" aria-pressed="false" title="Focus ${esc(l.id)} · ${esc(l.name)}"><b>${esc(l.id)}</b><span class="three-floor-name">${esc(l.name)}</span><small>${fmt(l.z)}</small></button></div>`).join('');
+  const library=await loadThree();if(token!==threeToken||!isThreeMode())return;
+  threeView=library.mount($('threeviewport'),data,{onHover:level=>{$('threehover').hidden=!level||!!threeView?.getFocusedFloor?.();$('threehover').textContent=level?level.id+' · '+level.name+' · click to focus':''},onVisibilityChanged:(ids,focused)=>{syncFloorChecks(ids,focused);const index=data.levels.findIndex(l=>l.id===focused),level=data.levels[index];$('threefocusstatus').hidden=true;$('threefocusnav').hidden=!focused;$('threefocuslabel').textContent=focused||'';$('threefocuslabel').title=level?level.name+' · '+fmt(level.z):'';$('threefloorup').disabled=index<0||index>=data.levels.length-1;$('threefloordown').disabled=index<=0;if(focused)$('threehover').hidden=true},onContextLost:()=>{rememberThree();disposeThree();failedThree('The graphics context was lost.')}});
+  if(saved)threeView.restoreViewState?.(saved);$('threestatus').hidden=true;$('save3dpng').disabled=false;for(const id of controlIds)$(id).disabled=false;for(const node of $('threefloors').querySelectorAll('input,button'))node.disabled=false;
+  if(!data.levels.some(l=>l.boxes.length)){$('threestatus').hidden=false;$('threestatus').textContent='This building is empty. Switch to 2D and draw a room to give it a 3D shape.'}
+  $('threeviewport').querySelector('canvas')?.focus?.({preventScroll:true});
+ }catch(error){if(token===threeToken){disposeThree();failedThree(/WebGL|graphics context/i.test(error.message)?'3D needs WebGL 2, which is unavailable in this browser.':error.message)}}
+}
+async function setWorkspaceMode(mode){
+ if(!['2d','3d'].includes(mode))return;if(mode===viewMode)return;
+ closeToolbarMenus();closeConnectionMenu();if(mode==='3d'){twoDTools.set(currentBuilding().id,{tool,connectionKind});resetTransient(true,true);viewMode='3d';syncModeUI();return mountThree()}
+ rememberThree();disposeThree();viewMode='2d';syncModeUI();render();$('plan').focus?.({preventScroll:true});
+}
+function openThree(){return setWorkspaceMode('3d')}
+function syncWorkspace(){syncModeUI();if(isThreeMode()&&(currentBuilding().id!==threeBuildingId||JSON.stringify(model)!==threePlan))return mountThree()}
+$('mode2d').onclick=()=>setWorkspaceMode('2d');$('mode3d').onclick=openThree;$('open3d').onclick=openThree;$('close3d').onclick=()=>setWorkspaceMode('2d');
+for(const id of ['fit','zoomin','zoomout']){const edit=$(''+id).onclick;$(id).onclick=()=>isThreeMode()?(id==='fit'?threeView?.fit(false,true):threeView?.zoomBy?.(id==='zoomin'?1/1.2:1.2)):edit()}
+window.addEventListener('keydown',e=>{if(!isThreeMode()||document.querySelector('dialog[open]')||e.defaultPrevented||e.target.closest?.('.toolbar-popover'))return;const typing=isTypingTarget(e.target);if(e.key==='Escape'&&(!typing||['range','checkbox'].includes(e.target.type))){e.preventDefault();if(threeView?.getFocusedFloor?.())threeView.showAll()}else if(!typing&&threeView?.getFocusedFloor?.()&&['ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();threeView.adjacentFloor?.(e.key==='ArrowUp'?1:-1)}});
 $('threefit').onclick=()=>threeView?.fit(false,true);$('threeback').onclick=()=>threeView?.showAll();$('threefloorup').onclick=()=>threeView?.adjacentFloor?.(1);$('threefloordown').onclick=()=>threeView?.adjacentFloor?.(-1);$('threeall').onclick=()=>{threeView?.showAll();syncFloorChecks(Object.keys(model.floors))};
 $('threefloors').onchange=e=>{if(e.target.dataset.floor3d)threeView?.setFloor(e.target.dataset.floor3d,e.target.checked)};
-$('threefloors').onclick=e=>{const id=e.target.closest('button')?.dataset.isolate3d;if(id){threeView?.isolate(id);syncFloorChecks([id])}};
+$('threefloors').onclick=e=>{if(!threeView)return;const id=e.target.closest('button')?.dataset.isolate3d;if(id){threeView?.isolate(id);syncFloorChecks([id],id)}};
 $('threeexplode').oninput=e=>{$('explodelabel').textContent=`${e.target.value} m`;$('threeexplode').setAttribute('aria-valuetext',`${e.target.value} metres`);threeView?.setExplode(e.target.value)};
 $('threeexplode').onchange=()=>threeView?.fit(true,true);$('threewalls').onchange=e=>threeView?.setWalls(e.target.checked);$('threecutaway').onchange=e=>{$('threecutheightfield').hidden=!e.target.checked;threeView?.setCutaway(e.target.checked)};$('threecutheight').oninput=e=>{const height=Number(e.target.value);$('threecutheightlabel').textContent=height.toFixed(2)+' m';$('threecutheight').setAttribute('aria-valuetext',height.toFixed(2)+' metres');threeView?.setCutHeight?.(height)};$('threelabels').onchange=e=>threeView?.setLabels(e.target.checked);$('threexray').onchange=e=>threeView?.setXray?.(e.target.checked);
-$('threefallback').onclick=()=>{$('buildingpreview3d').close();openStack()};
-$('buildingpreview3d').addEventListener('cancel',e=>{if(threeView?.getFocusedFloor?.()){e.preventDefault();threeView.showAll()}});
+$('threefallback').onclick=openStack;
+$('buildingpreview3d').addEventListener('cancel',e=>{e.preventDefault();threeView?.showAll()});
+$('threegrid').onchange=e=>threeView?.setGrid?.(e.target.checked);
 $('threefloors').addEventListener('pointerover',e=>{const row=e.target.closest('[data-isolate3d]')||e.target.closest('div')?.querySelector('[data-isolate3d]');if(row)threeView?.hoverFloor?.(row.dataset.isolate3d)});$('threefloors').addEventListener('pointerleave',()=>threeView?.hoverFloor?.(null));
-$('save3dpng').onclick=async()=>{if(!threeView)return;const viewer=threeView,name=threeName;$('save3dpng').disabled=true;try{downloadBlob(`${fileName(name)}-3d-preview.png`,await viewer.png());notify('3D snapshot downloaded')}catch(error){$('threestatus').hidden=false;$('threestatus').textContent='Could not save the snapshot. '+error.message}finally{if(viewer===threeView)$('save3dpng').disabled=false}};
-window.BuildingExports={floorSheet,stackSheet,currentGeometry,svgToPNG,openStack,openThree,disposeThree};
+$('save3dpng').onclick=async()=>{if(!threeView)return;const viewer=threeView,name=threeName;$('save3dpng').disabled=true;try{downloadBlob(`${fileName(name)}-3d-preview.png`,await viewer.png());notify('3D snapshot downloaded')}catch(error){if(viewer===threeView){$('threestatus').hidden=false;$('threestatus').textContent='Could not save the snapshot. '+error.message}}finally{if(viewer===threeView)$('save3dpng').disabled=false}};
+window.BuildingExports={floorSheet,stackSheet,currentGeometry,svgToPNG,openStack,openThree,disposeThree,setWorkspaceMode,isThreeMode,syncWorkspace,focusThreeFloor:id=>threeView?.isolate(id)};syncModeUI();
 })();
