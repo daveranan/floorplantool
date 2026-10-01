@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "start": "node scripts/serve.cjs",
+    "test": "node scripts/test.cjs",
+    "test:browser": "node scripts/browser-qa.cjs",
     "build:preview": "esbuild src/preview3d.js --bundle --minify --format=iife --target=es2020 --outfile=dist/preview3d.js",
     "test:ui": "node test-ui.cjs",
     "test:preview": "node test-preview.cjs"
