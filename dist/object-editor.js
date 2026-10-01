@@ -41,15 +41,16 @@ function sync(){
 }
 function syncTools(){if(!$('servicevisible'))return;if(inServiceMode()){currentBuilding().view.serviceVisibility??={};currentBuilding().view.serviceVisibility[floorId]=true;}$('servicevisible').checked=visible();$('servicemenu').dataset.active=String(inServiceMode());$('symbolmenu').dataset.active=String(tool==='symbol');$('editservices').setAttribute('aria-pressed',String(inServiceMode()));$('drawservice').setAttribute('aria-pressed',String(tool==='service-draw'));$('placesymbol').setAttribute('aria-pressed',String(tool==='symbol'));$('outerdimensions').checked=currentBuilding()?.view.outerDimensions!==false;panel.hidden=window.BuildingExports?.isThreeMode?.()||false;}
 function toolHint(){return tool==='symbol'?'Place outline / text · click to place again · V selects':tool==='service-draw'?'Services · drag a route (Shift: elbow), or click a hatch / vent · Escape cancels':tool==='service-select'?'Services · select and move routes / terminals · drag route nodes to edit · V leaves service mode':null;}
-function newService(p,points){const kind=$('servicekind').value,access=$('serviceaccess').value,location=$('servicelocation').value,player=access==='player';const o={id:uniqueId('service-'),name:kind==='crawlway'?'Crawlway':kind==='duct'?'Utility duct':kind==='hatch'?'Access hatch':'Vent terminal',kind,location,access,z:cleanNumber(floor().z+(location==='underfloor'?-1.8:4.1)),clearHeight:player?1.5:kind==='duct'?.6:.4,provisional:true,runtimeTested:false};
- if(points){o.width=player?.8:.6;o.points=points;}else Object.assign(o,{x:snap(p.x-.4),y:snap(p.y-.4),w:.8,h:.8});return o;}
+function newService(p,points,options={}){const kind=$('servicekind').value,access=$('serviceaccess').value,location=$('servicelocation').value,player=access==='player';const o={id:uniqueId('service-'),name:kind==='crawlway'?'Crawlway':kind==='duct'?'Utility duct':kind==='hatch'?'Access hatch':'Vent terminal',kind,location,access,z:cleanNumber(floor().z+(location==='underfloor'?-1.8:4.1)),clearHeight:player?1.5:kind==='duct'?.6:.4,provisional:true,runtimeTested:false};
+ if(Number.isFinite(options.z))o.z=cleanNumber(options.z);if(Number.isFinite(options.clearHeight))o.clearHeight=cleanNumber(options.clearHeight);
+ if(points){o.width=Number.isFinite(options.width)?cleanNumber(options.width):player?.8:.6;o.points=points;}else Object.assign(o,{x:snap(p.x-.4),y:snap(p.y-.4),w:.8,h:.8});return o;}
 function pointerDown(e){
  if(e.button!==0||drag||preview||spaceHeld)return false;const p=point(e),node=e.target.closest('[data-extra]'),key=node?.dataset.extra,id=node?.dataset.id,handle=e.target.closest('[data-route-point]');
  if(tool==='symbol'){
   e.preventDefault();const value=$('symbolkind').value;if((value==='text'?api.annotations(model,floorId):floor().symbols||[]).length>=300){notify('This floor has reached 300 objects of this type');return true;}commit(()=>{if(value==='text'){api.normalizeAnnotations(model);const a={id:uniqueId('annotation-'),text:'New annotation',x:snap(p.x),y:snap(p.y),fontSize:.45};floor().annotations??=[];floor().annotations.push(a);setSelection({annotations:[a.id]});}else{const t=api.catalog.find(o=>o.kind===value),o={...t,id:uniqueId('symbol-'),x:snap(p.x-t.w/2),y:snap(p.y-t.h/2),rotation:0};floor().symbols??=[];floor().symbols.push(o);setSelection({symbols:[o.id]});}});return true;
  }
  if(tool==='service-draw'){
-  e.preventDefault();const kind=$('servicekind').value;if(['duct','crawlway'].includes(kind)){setSelection();beginDrag(e,{kind:'service-draw',elbow:!!e.shiftKey,service:newService(p,[p,p])});draw();}else commit(()=>{const o=newService(p);floor().services??=[];floor().services.push(o);setSelection({services:[o.id]});});return true;
+  e.preventDefault();const kind=$('servicekind').value,options=window.KERN_PLACE?.serviceDefaults()||{};if(['duct','crawlway'].includes(kind)){setSelection();beginDrag(e,{kind:'service-draw',elbow:!!e.shiftKey,service:newService(p,[p,p],options)});draw();}else{const o=newService(p,null,options),next=clone(floor());next.services??=[];next.services.push(o);try{api.validateFloor(next);commit(()=>{floor().services??=[];floor().services.push(o);setSelection({services:[o.id]});});}catch(e){notify(e.message);}}return true;
  }
  if(handle&&inServiceMode()){e.preventDefault();const o=extraObject('services',handle.dataset.routePoint);setSelection({services:[o.id]});beginDrag(e,{kind:'service-point',id:o.id,index:Number(handle.dataset.point),original:clone(o)});return true;}
  if(node&&(tool==='select'||inServiceMode())){
@@ -89,5 +90,5 @@ function inspector(){const entries=extraSelection(),s=getSelection();if(!entries
  return true;
 }
 function updateExtra(key,id,fn){try{const next=api.normalizeAnnotations(clone(model)),o=next.floors[floorId][key].find(o=>o.id===id);fn(o);api.validateFloor(next.floors[floorId]);commit(()=>{model=next;});return true;}catch(e){notify(e.message);render();return false;}}
-window.KERN_OBJECT_UI={clipboard,moveSelection,deleteExtras,sync,syncTools,toolHint,pointerDown,pointerMove,finishDrawing,markup,dimensionsMarkup,inspector,setVisible,updateExtra};render();
+window.KERN_OBJECT_UI={clipboard,moveSelection,deleteExtras,sync,syncTools,toolHint,pointerDown,pointerMove,finishDrawing,markup,dimensionsMarkup,inspector,setVisible,updateExtra,newService};render();
 })();
