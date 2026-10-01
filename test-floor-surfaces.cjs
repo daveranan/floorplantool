@@ -37,7 +37,7 @@ for(const label of labels) {
  assert(!label.material.map.image._context.draws.some(row=>row[0]==='fillRect'),'Room label canvas must have no panel background');
 }
 const garage=labels.find(l=>l.userData.level==='B1'&&l.userData.room==='garage');assert(garage);assert.equal(garage.userData.surface.z,-9.8);
-const fixedScale=garage.scale.clone(),fixedRotation=garage.quaternion.clone();view.setExplode(6);assert(Math.abs(garage.getWorldPosition(new THREE.Vector3()).y-(-9.8-6+.006))<1e-6);view.isolate('B1');assert(Math.abs(garage.getWorldPosition(new THREE.Vector3()).y-(-9.8+.006))<1e-6);assert(garage.visible);
+const fixedScale=garage.scale.clone(),fixedRotation=garage.quaternion.clone();view.setExplode(6);assert(Math.abs(garage.getWorldPosition(new THREE.Vector3()).y-(-9.8-6+.006))<1e-6);view.isolate('B1');assert(Math.abs(garage.getWorldPosition(new THREE.Vector3()).y-(-9.8-6+.006))<1e-6);assert(garage.visible);
 current.camera.position.set(25,15,35);controls.target.copy(garage.position);controls.update();current.renderer.loop();assert(garage.scale.equals(fixedScale));assert(garage.quaternion.equals(fixedRotation));
 view.setLabels(false);assert(labels.every(l=>!l.visible));view.setLabels(true);assert(garage.visible);view.showAll();assert(labels.every(l=>!l.visible));view.setFloor('B1',false);assert(labels.filter(l=>l.userData.level==='B1').every(l=>!l.visible));
 console.log('PASS flat, room-fitted transparent text, full names, dropped B1 elevation, explosion/focus/toggle visibility, fixed scale/rotation and real depth-test materials');

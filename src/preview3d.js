@@ -137,7 +137,9 @@ function mount(container, data, options = {}) {
   // Draw the datum before opaque slabs so coplanar grid lines never stripe room floors.
   grid.renderOrder = -10;
   for (const m of Array.isArray(grid.material) ? grid.material : [grid.material]) {m.transparent = false; m.opacity = 1; m.depthWrite = false;}
-  let gap = 0, disposed = false, showWalls = true, cutaway = false, cutHeight = 1.15, labels = true, xray = false, showGrid = true, hovered = null, focused = null, overview = null, physical = [], lastOcclusion = '', clickStart = null, transition = null, interacting = false, xraySignature = '', xrayChangedAt = 0, xrayPending = false;
+  let gap = 0, disposed = false, showWalls = true, cutaway = false, cutHeight = 1.15, labels = true, xray = false, showGrid = true, hovered = null, focused = null, physical = [], lastOcclusion = '', clickStart = null, transition = null, interacting = false, xraySignature = '', xrayChangedAt = 0, xrayPending = false;
+  let navigationFloor = groups.has(options.activeFloor) ? options.activeFloor : ground?.id || data.levels[groundRank]?.id, navigationY = groups.get(navigationFloor)?.userData.z || 0;
+  const floorY = id => {const group = groups.get(id); return group ? group.userData.z + group.userData.rank * gap : navigationY;};
   const motionPreference = window.matchMedia?.('(prefers-reduced-motion: reduce)');
   const pointerIds = new Set(), raycaster = new THREE.Raycaster(), mouse = new THREE.Vector2();
   const visibleIds = () => [...groups].filter(([, group]) => group.visible).map(([id]) => id);
@@ -145,8 +147,8 @@ function mount(container, data, options = {}) {
   function heightFor(box, level) {let height = box.height; const wall = box.kind === 'wall' || box.kind === 'solid'; if (cutaway && wall) height = Math.max(0, Math.min(height, (box.baseZ ?? level.z) + cutHeight - box.z)); if (wall && !showWalls) height = 0; return height;}
   function updateMatrices() {
     const transform = new THREE.Object3D(); physical = [];
-    for (const group of groups.values()) group.position.y = focused ? 0 : group.userData.rank * gap;
-    grid.position.y = focused ? groups.get(focused).userData.z : groundZ;
+    for (const group of groups.values()) group.position.y = group.userData.rank * gap;
+    grid.position.y = focused ? floorY(focused) : groundZ;
     grid.userData.displayDatum = grid.position.y;
     for (const mesh of primaryMeshes) {
       const level = data.levels.find(l => l.id === mesh.userData.level), group = groups.get(level.id), fade = mesh.userData.fadeMesh;
@@ -223,19 +225,20 @@ function mount(container, data, options = {}) {
     }
     lastOcclusion = signature;
   }
-  function cancelTransition() {if (transition?.returning) overview = null; transition = null;}
-  function moveCamera(position, target, animate) {
+  function cancelTransition() {transition = null;}
+  function moveCamera(position, target, animate, nextY = navigationY) {
     const currentPosition = camera.position.clone(), currentTarget = controls.target.clone(), damping = controls.enableDamping;
     // Consume OrbitControls inertia without changing the pose the next animation starts from.
     controls.enableDamping = false; controls.update(); camera.position.copy(currentPosition); controls.target.copy(currentTarget); controls.update(); controls.enableDamping = damping;
-    transition = animate && !motionPreference?.matches ? {from: currentPosition, targetFrom: currentTarget, to: position.clone(), targetTo: target.clone(), start: performance.now(), duration: 420} : null;
-    if (!transition) {camera.position.copy(position); controls.target.copy(target); camera.lookAt(target); controls.update(); refreshOcclusion(true);}
+    transition = animate && !motionPreference?.matches ? {from: currentPosition, targetFrom: currentTarget, to: position.clone(), targetTo: target.clone(), datumFrom: navigationY, datumTo: nextY, start: performance.now(), duration: 420} : null;
+    if (!transition) {navigationY = nextY; camera.position.copy(position); controls.target.copy(target); camera.lookAt(target); controls.update(); refreshOcclusion(true);}
   }
   function advanceCamera(now = performance.now()) {
     if (!transition) return false;
     const motion = transition, t = motionPreference?.matches ? 1 : Math.min(1, Math.max(0, (now - motion.start) / motion.duration)), eased = t * t * (3 - 2 * t);
+    navigationY = THREE.MathUtils.lerp(motion.datumFrom, motion.datumTo, eased);
     camera.position.lerpVectors(motion.from, motion.to, eased); controls.target.lerpVectors(motion.targetFrom, motion.targetTo, eased); camera.lookAt(controls.target); camera.updateMatrixWorld(true);
-    if (t === 1) {if (motion.returning) overview = null; transition = null; controls.update();}
+    if (t === 1) {transition = null; controls.update();}
     return true;
   }
   function fit(preserveDirection = false, animate = false) {
@@ -244,16 +247,26 @@ function mount(container, data, options = {}) {
     if (box.isEmpty()) {box.min.set(b.minX, b.minZ - groundRank * gap, b.minY); box.max.set(b.maxX, b.maxZ + (data.levels.length - 1 - groundRank) * gap, b.maxY);}
     const center = box.getCenter(new THREE.Vector3()), dimensions = box.getSize(new THREE.Vector3()), radius = Math.max(dimensions.length() / 2, 8), angle = THREE.MathUtils.degToRad(camera.fov / 2), distance = radius / Math.sin(angle) * Math.max(1, 1 / camera.aspect) * 1.1;
     const direction = preserveDirection ? camera.position.clone().sub(controls.target).normalize() : new THREE.Vector3(1, .9, 1.2).normalize();
-    camera.near = .05; camera.far = Math.max(5000, distance * 5); camera.updateProjectionMatrix(); moveCamera(center.clone().add(direction.multiplyScalar(distance)), center, animate);
+    camera.near = .05; camera.far = Math.max(5000, distance * 5); camera.updateProjectionMatrix(); moveCamera(center.clone().add(direction.multiplyScalar(distance)), center, animate, floorY(navigationFloor));
+  }
+  // Floor navigation translates both ends of the view by the same world-height delta.
+  // The interpolated datum makes rapid reversals start at the actual camera pose.
+  function followFloor(id, animate = true) {
+    const nextY = floorY(id), delta = nextY - navigationY;
+    navigationFloor = id;
+    moveCamera(camera.position.clone().add(new THREE.Vector3(0, delta, 0)), controls.target.clone().add(new THREE.Vector3(0, delta, 0)), animate, nextY);
   }
   function showAll() {
-    for (const group of groups.values()) group.visible = true; focused = null; hoverFloor(null); updateMatrices();
-    if (overview) {moveCamera(overview.position, overview.target, true); if (transition) transition.returning = true; else overview = null;} else fit(false, true);
-    notifyVisibility();
+    cancelTransition(); for (const group of groups.values()) group.visible = true;
+    focused = null; hoverFloor(null); updateMatrices(); refreshOcclusion(true); notifyVisibility();
   }
   function isolate(id) {
-    if (!groups.has(id) || focused === id) return; if (!focused && !overview) overview = {position: camera.position.clone(), target: controls.target.clone()};
-    focused = id; for (const [key, group] of groups) group.visible = key === id; hoverFloor(null); updateMatrices(); fit(true, true); notifyVisibility();
+    if (!groups.has(id) || focused === id) return;
+    focused = id; for (const [key, group] of groups) group.visible = key === id;
+    hoverFloor(null); updateMatrices(); followFloor(id); notifyVisibility();
+  }
+  function syncActiveFloor(id) {
+    if (groups.has(id) && id !== navigationFloor) isolate(id);
   }
   function adjacentFloor(direction) {const index = data.levels.findIndex(l => l.id === focused), next = data.levels[index + Math.sign(direction)]; if (index >= 0 && next) isolate(next.id);}
   function hitFloor(event) {
@@ -279,11 +292,13 @@ function mount(container, data, options = {}) {
   controls.addEventListener('start', controlStart); controls.addEventListener('end', controlEnd);
   const observer = new ResizeObserver(resize);
   const contextLost = e => {e.preventDefault(); options.onContextLost?.();}; renderer.domElement.addEventListener('webglcontextlost', contextLost);
-  cleanupOnFailure = dispose;observer.observe(container); resize(); updateMatrices(); fit();
+  cleanupOnFailure = dispose;observer.observe(container); resize(); updateMatrices();
+  if (options.viewState) restoreViewState(options.viewState); else fit();
+  syncActiveFloor(options.activeFloor);
   renderer.setAnimationLoop(() => {if (disposed) return; if (!advanceCamera()) controls.update(); refreshOcclusion(); renderer.render(scene, camera);});
   function getViewState() {
-    return {position: camera.position.toArray(), target: controls.target.toArray(), focused, visible: visibleIds(), gap, showWalls, cutaway, cutHeight, labels, xray, showGrid,
-      overview: focused && overview ? {position: overview.position.toArray(), target: overview.target.toArray()} : null};
+    return {position: camera.position.toArray(), target: controls.target.toArray(), focused, navigationFloor, navigationY, navigationElevation: floorY(navigationFloor), visible: visibleIds(), gap, showWalls, cutaway, cutHeight, labels, xray, showGrid,
+      overview: null};
   }
   function restoreViewState(state) {
     if (!state || disposed) return; const vector = value => Array.isArray(value) && value.length === 3 && value.every(Number.isFinite);
@@ -292,9 +307,11 @@ function mount(container, data, options = {}) {
     focused = groups.has(state.focused) ? state.focused : null; const ids = Array.isArray(state.visible) ? state.visible.filter(id => groups.has(id)) : [...groups.keys()];
     for (const [id, group] of groups) group.visible = focused ? id === focused : ids.includes(id);
     if (!focused && !ids.length && state.visible?.length) for (const group of groups.values()) group.visible = true;
-    overview = focused && vector(state.overview?.position) && vector(state.overview?.target) ? {position: new THREE.Vector3().fromArray(state.overview.position), target: new THREE.Vector3().fromArray(state.overview.target)} : null;
+    navigationFloor = groups.has(state.navigationFloor) ? state.navigationFloor : focused || navigationFloor;
+    const elevationDelta = groups.has(state.navigationFloor) && Number.isFinite(state.navigationElevation) ? floorY(navigationFloor) - state.navigationElevation : 0;
+    navigationY = (Number.isFinite(state.navigationY) ? state.navigationY : floorY(navigationFloor)) + elevationDelta;
     hoverFloor(null); updateMatrices();
-    if (vector(state.position) && vector(state.target)) moveCamera(new THREE.Vector3().fromArray(state.position), new THREE.Vector3().fromArray(state.target), false); else fit();
+    if (vector(state.position) && vector(state.target)) moveCamera(new THREE.Vector3().fromArray(state.position).add(new THREE.Vector3(0, elevationDelta, 0)), new THREE.Vector3().fromArray(state.target).add(new THREE.Vector3(0, elevationDelta, 0)), false); else fit();
     refreshOcclusion(true); notifyVisibility();
   }
   function dispose() {
@@ -305,15 +322,15 @@ function mount(container, data, options = {}) {
     for (const decoration of decorations) {decoration.geometry.dispose(); decoration.material.dispose();}
     for (const m of materials.values()) m.dispose(); unit.dispose(); grid.geometry.dispose();
     for (const m of Array.isArray(grid.material) ? grid.material : [grid.material]) m.dispose();
-    renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove(); scene.clear(); pointerIds.clear(); overview = null;
+    renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove(); scene.clear(); pointerIds.clear();
   }
   return {
-    fit, dispose, showAll, isolate, hoverFloor, adjacentFloor, getViewState, restoreViewState,
+    fit, dispose, showAll, isolate, hoverFloor, adjacentFloor, getViewState, restoreViewState, syncActiveFloor,
     zoomBy(factor) {if (!Number.isFinite(factor) || factor <= 0) return; const delta = camera.position.clone().sub(controls.target), distance = THREE.MathUtils.clamp(delta.length() * factor, controls.minDistance, controls.maxDistance); moveCamera(controls.target.clone().add(delta.normalize().multiplyScalar(distance)), controls.target, false);},
     setGrid(value) {showGrid = !!value; grid.visible = showGrid;},
     getFocusedFloor() {return focused;},
-    setFloor(id, visible) {const group = groups.get(id); if (!group) return; cancelTransition(); group.visible = !!visible; focused = null; overview = null; hoverFloor(null); updateMatrices(); refreshOcclusion(true); notifyVisibility();},
-    setExplode(value) {cancelTransition(); gap = Math.max(0, Math.min(12, Number(value) || 0)); hoverFloor(null); updateMatrices(); refreshOcclusion(true);},
+    setFloor(id, visible) {const group = groups.get(id); if (!group) return; cancelTransition(); group.visible = !!visible; focused = null; hoverFloor(null); updateMatrices(); refreshOcclusion(true); notifyVisibility();},
+    setExplode(value) {const nextGap = Math.max(0, Math.min(12, Number(value) || 0)); if (nextGap === gap) return; const previousElevation = floorY(navigationFloor); gap = nextGap; hoverFloor(null); updateMatrices(); if (focused) followFloor(focused, !!transition); else {cancelTransition(); navigationY += floorY(navigationFloor) - previousElevation;} refreshOcclusion(true);},
     setWalls(value) {showWalls = !!value; updateMatrices(); refreshOcclusion(true);},
     setCutaway(value) {cutaway = !!value; updateMatrices(); refreshOcclusion(true);},
     setCutHeight(value) {const height = Number(value); if (!Number.isFinite(height)) return; cutHeight = Math.max(.4, Math.min(2.4, height)); updateMatrices(); refreshOcclusion(true);},

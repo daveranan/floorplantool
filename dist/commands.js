@@ -18,7 +18,7 @@ function commands(){
  add('dimensions',($('dimensions').checked?'Hide':'Show')+' dimensions','Settings',toggle('dimensions'));add('lower-floors',(showBelow?'Hide':'Show')+' lower floor stack','Settings',toggle('belowtoggle'));
  for(const [id,label]of [['export','Export this building JSON'],['backupall','Back up all buildings JSON'],['import','Import building or backup'],['pngexport','Export current floor PNG'],['svgexport','Export current floor SVG'],['stackpngexport','Export vertical stack PNG'],['archive','Open legacy layout archive']])add(id,label,'Files',click(id));
 
- add('threeall','3D · Show all floors / exit focus','3D',click('threeall'),'Esc','Restore overview camera',!three);add('threefit','3D · Fit visible floors','3D',click('threefit'),'','',!three);
+ add('threeall','3D · Show all floors / exit focus','3D',click('threeall'),'Esc','Keep current camera framing',!three);add('threefit','3D · Fit visible floors','3D',click('threefit'),'','',!three);
  add('threefloorup','3D · Focus floor above','3D',click('threefloorup'),'↑','',!three||$('threefloorup').disabled);add('threefloordown','3D · Focus floor below','3D',click('threefloordown'),'↓','',!three||$('threefloordown').disabled);
  for(const [id,label]of [['threexray','X-ray foreground walls'],['threewalls','Walls'],['threecutaway','Low-wall cutaway'],['threelabels','Floor and room labels'],['threegrid','Ground grid']])add(id,'3D · '+label,'3D',toggle(id),'',$(id).checked?'On':'Off',!three);
  add('help','Keyboard shortcuts & editor help','Help',click('help'),'Ctrl / ⌘ /','Persistent C / X / P / D tools; V / Escape returns to selection. Space, marquee, groups, Undo and exports');
