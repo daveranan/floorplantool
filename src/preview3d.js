@@ -14,6 +14,35 @@ function segmentBox(origin, end, box) {
   return near >= 0 && near <= 1 ? near : null;
 }
 
+// Labels use an existing horizontal slab or arrival landing, never the air over a stairwell.
+function roomLabelSurface(room, level) {
+  const surfaces = level.boxes.filter(box => (box.kind === 'slab' && (!box.room || box.room === room.id) || box.kind === 'landing') && Math.abs(box.z + box.height - room.z) < .01).map(box => {
+    const x = Math.max(room.x, box.x), y = Math.max(room.y, box.y);
+    return {x, y, w: Math.min(room.x + room.w, box.x + box.w) - x, h: Math.min(room.y + room.h, box.y + box.h) - y, z: box.z + box.height};
+  }).filter(box => box.w > .35 && box.h > .35);
+  const cx = room.x + room.w / 2, cy = room.y + room.h / 2;
+  // Prefer the largest uninterrupted piece. Equal-area pieces prefer the room centre.
+  return surfaces.sort((a, b) => b.w * b.h - a.w * a.h || Math.hypot(a.x + a.w / 2 - cx, a.y + a.h / 2 - cy) - Math.hypot(b.x + b.w / 2 - cx, b.y + b.h / 2 - cy))[0] || null;
+}
+
+function floorTextLayout(name, width, height, ctx) {
+  let fontSize = Math.min(56, height * .42), lines = [];
+  const measure = text => ctx.measureText?.(text).width ?? text.length * fontSize * .56;
+  // Keep every character, including long unbroken names; reduce type rather than spill outside a room.
+  for (let attempt = 0; attempt < 90; attempt++) {
+    ctx.font = `600 ${fontSize}px system-ui`;
+    lines = []; let line = '';
+    for (const word of String(name).split(/\s+/)) {
+      const joined = line ? line + ' ' + word : word;
+      if (line && measure(joined) > width) {lines.push(line); line = word;} else line = joined;
+    }
+    if (line) lines.push(line);
+    if (lines.every(text => measure(text) <= width) && lines.length * fontSize * 1.24 <= height) break;
+    fontSize *= .92;
+  }
+  return {lines, fontSize, lineHeight: fontSize * 1.24};
+}
+
 // Receives an immutable geometry snapshot. No editor or storage access.
 function mount(container, data, options = {}) {
   const renderer = new THREE.WebGLRenderer({antialias: true, alpha: false, preserveDrawingBuffer: true});
@@ -30,7 +59,7 @@ function mount(container, data, options = {}) {
   controls.minDistance = 1; controls.maxDistance = 1600; controls.screenSpacePanning = true;
   controls.mouseButtons = {LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.PAN, RIGHT: THREE.MOUSE.PAN};
   controls.touches = {ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN};
-  const unit = new THREE.BoxGeometry(1, 1, 1), materials = new Map(), groups = new Map(), sprites = [], meshes = [], primaryMeshes = [], decorations = [];
+  const unit = new THREE.BoxGeometry(1, 1, 1), materials = new Map(), groups = new Map(), sprites = [], roomLabels = [], meshes = [], primaryMeshes = [], decorations = [];
   const material = (color, fade = false) => {
     const key = color + (fade ? ':xray' : '');
     if (!materials.has(key)) materials.set(key, new THREE.MeshStandardMaterial({color, roughness: .88, metalness: 0, transparent: fade, opacity: fade ? .5 : 1, depthWrite: !fade}));
@@ -44,21 +73,27 @@ function mount(container, data, options = {}) {
     return boxes.length ? {minX: Math.min(...boxes.map(q => q.x)), maxX: Math.max(...boxes.map(q => q.x + q.w)), minY: Math.min(...boxes.map(q => q.y)), maxY: Math.max(...boxes.map(q => q.y + q.h))} : b;
   };
   const roomLabel = (room, level, group) => {
-    const name = String(room.name || room.id), labelWidth = Math.min(180, Math.max(110, name.length * 6.5));
-    const canvas = document.createElement('canvas'); canvas.width = labelWidth * 2; canvas.height = 84;
+    const surface = roomLabelSurface(room, level); if (!surface) return;
+    const name = String(room.name || room.id), inset = Math.min(.32, Math.min(surface.w, surface.h) * .1);
+    const rotate = surface.h > surface.w * 1.35, span = (rotate ? surface.h : surface.w) - inset * 2, cross = (rotate ? surface.w : surface.h) - inset * 2;
+    const worldWidth = Math.min(span, 9), worldHeight = Math.min(cross, 2.5), density = 64;
+    const canvas = document.createElement('canvas'); canvas.width = Math.ceil(worldWidth * density); canvas.height = Math.ceil(worldHeight * density);
     const ctx = canvas.getContext('2d'); if (!ctx) return;
-    const lines = []; let line = '';
-    ctx.font = '500 24px system-ui';
-    for (const word of name.split(/\s+/)) {const next = line ? line + ' ' + word : word; if (line && (ctx.measureText?.(next).width ?? next.length * 13) > canvas.width - 28) {lines.push(line); line = word;} else line = next;}
-    if (line) lines.push(line); if (lines.length > 2) lines.splice(1, lines.length - 1, lines.slice(1).join(' '));
-    ctx.fillStyle = '#202936ed'; ctx.fillRect(0, 0, canvas.width, 84); ctx.strokeStyle = '#738399'; ctx.strokeRect(1, 1, canvas.width - 2, 82);
-    ctx.fillStyle = '#f0f5ff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    lines.slice(0, 2).forEach((text, index) => {while ((ctx.measureText?.(text).width ?? text.length * 13) > canvas.width - 28 && text.length > 2) text = text.slice(0, -2).trimEnd() + '…'; ctx.fillText(text, canvas.width / 2, lines.length > 1 ? 27 + index * 30 : 42);});
+    const layout = floorTextLayout(name, canvas.width - 10, canvas.height - 8, ctx);
+    ctx.fillStyle = '#263545'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.strokeStyle = '#eef3f4'; ctx.lineWidth = Math.max(1, layout.fontSize * .045); ctx.lineJoin = 'round';
+    layout.lines.forEach((text, index) => {
+      const y = canvas.height / 2 + (index - (layout.lines.length - 1) / 2) * layout.lineHeight;
+      ctx.strokeText?.(text, canvas.width / 2, y); ctx.fillText(text, canvas.width / 2, y);
+    });
     const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace;
-    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({map: texture, depthTest: true, depthWrite: false}));
-    sprite.position.set(room.x + room.w / 2, room.z + .22, room.y + room.h / 2);
-    sprite.userData = {level: level.id, roomLabel: true, room: room.id, labelWidth, labelRatio: 84 / canvas.width, area: room.w * room.h};
-    group.add(sprite); sprites.push(sprite);
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(worldWidth, worldHeight), new THREE.MeshBasicMaterial({map: texture, transparent: true, alphaTest: .06, depthTest: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1}));
+    mesh.rotation.set(-Math.PI / 2, 0, rotate ? Math.PI / 2 : 0);
+    mesh.position.set(surface.x + surface.w / 2, surface.z + .006, surface.y + surface.h / 2); mesh.renderOrder = 2;
+    mesh.userData = {level: level.id, roomLabel: true, room: room.id, name, surface, worldWidth, worldHeight, fontSize: layout.fontSize / density, lines: layout.lines};
+    // Invalid overlapping room footprints must not print two names at the same location.
+    mesh.userData.duplicate = roomLabels.some(label => label.userData.level === level.id && label.position.distanceTo(mesh.position) < .01);
+    group.add(mesh); roomLabels.push(mesh);
   };
   for (let i = 0; i < data.levels.length; i++) {
     const level = data.levels[i], group = new THREE.Group(), bounds = levelBounds(level);
@@ -112,13 +147,24 @@ function mount(container, data, options = {}) {
     for (const mesh of primaryMeshes) {
       const level = data.levels.find(l => l.id === mesh.userData.level), group = groups.get(level.id), fade = mesh.userData.fadeMesh;
       mesh.userData.boxes.forEach((box, index) => {
-        const height = heightFor(box, level), faded = xray && mesh.userData.faded.has(index), set = (target, visible) => {transform.position.set(box.x + box.w / 2, box.z + height / 2, box.y + box.h / 2); transform.scale.set(box.w, visible ? height : 0, box.h); transform.updateMatrix(); target.setMatrixAt(index, transform.matrix);};
+        const height = heightFor(box, level), faded = xray && mesh.userData.faded.has(index), set = (target, visible) => {
+          const drawn = visible && height > .001;
+          transform.position.set(box.x + box.w / 2, box.z + height / 2, box.y + box.h / 2);
+          // A height-only collapse still draws wall caps on top of the slab (and floating lintel caps).
+          // A hidden instance must have zero area on every axis, including unused X-ray partners.
+          transform.scale.set(drawn ? box.w : 0, drawn ? height : 0, drawn ? box.h : 0);
+          transform.updateMatrix(); target.setMatrixAt(index, transform.matrix);
+        };
         set(mesh, !faded); if (fade) set(fade, faded);
         if (group.visible && height > .001) physical.push({mesh, index, kind: box.kind, level: level.id, min: {x: box.x, y: box.z + group.position.y, z: box.y}, max: {x: box.x + box.w, y: box.z + height + group.position.y, z: box.y + box.h}});
       });
-      mesh.instanceMatrix.needsUpdate = true; if (fade) fade.instanceMatrix.needsUpdate = true;
+      mesh.visible = mesh.userData.boxes.some((box, index) => heightFor(box, level) > .001 && !(xray && mesh.userData.faded.has(index)));
+      mesh.instanceMatrix.needsUpdate = true;
+      if (fade) {fade.visible = xray && mesh.userData.boxes.some((box, index) => heightFor(box, level) > .001 && mesh.userData.faded.has(index)); fade.instanceMatrix.needsUpdate = true;}
     }
-    for (const sprite of sprites) sprite.visible = labels && (!sprite.userData.roomLabel || sprite.userData.level === focused); scene.updateMatrixWorld(true); lastOcclusion = '';
+    for (const sprite of sprites) sprite.visible = labels;
+    for (const label of roomLabels) label.visible = labels && label.userData.level === focused && !label.userData.duplicate;
+    scene.updateMatrixWorld(true); lastOcclusion = '';
   }
   function hoverFloor(id) {
     if (id && !groups.get(id)?.visible) id = null;
@@ -165,6 +211,12 @@ function mount(container, data, options = {}) {
       if (sprite.visible) occupied.push(rect);
       if (sprite.userData.floorLabel) {const leader = decorations.find(d => d.userData.floorLeader === sprite.userData.level); if (leader) {const attr = leader.geometry.attributes.position; attr.setX(0, sprite.position.x + worldWidth / 2); attr.needsUpdate = true; leader.visible = labels && sprite.visible && sprite.userData.level === hovered;}}
     }
+    // Room names stay attached to their surfaces. The GPU clips individual glyphs behind walls,
+    // stairs and upper slabs; no camera-facing scaling or billboard overlap suppression applies.
+    for (const label of roomLabels) {
+      const point = label.getWorldPosition(new THREE.Vector3());
+      label.visible = labels && groups.get(label.userData.level).visible && label.userData.level === focused && !label.userData.duplicate && camera.position.y > point.y;
+    }
     lastOcclusion = signature;
   }
   function cancelTransition() {if (transition?.returning) overview = null; transition = null;}
@@ -203,15 +255,18 @@ function mount(container, data, options = {}) {
   function hitFloor(event) {
     const rect = renderer.domElement.getBoundingClientRect(); if (!rect.width || !rect.height) return null;
     mouse.set((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1); camera.updateMatrixWorld(true); scene.updateMatrixWorld(true); raycaster.setFromCamera(mouse, camera);
-    const targets = [...meshes, ...sprites].filter(o => o.visible && groups.get(o.userData.level)?.visible), hit = raycaster.intersectObjects(targets, false)[0];
-    return hit?.object.userData.level || null;
+    const targets = [...meshes, ...sprites, ...roomLabels].filter(o => o.visible && groups.get(o.userData.level)?.visible), hit = raycaster.intersectObjects(targets, false)[0];
+    const levelId = hit?.object.userData.level, box = hit?.object.userData.boxes?.[hit.instanceId], roomId = hit?.object.userData.room || box?.room;
+    const room = data.levels.find(level => level.id === levelId)?.rooms?.find(room => room.id === roomId);
+    renderer.domElement.title = room ? room.name : '';
+    return levelId || null;
   }
   const pointerDown = e => {pointerIds.add(e.pointerId); if (pointerIds.size > 1) clickStart = null; else clickStart = e.button === 0 ? {id: e.pointerId, x: e.clientX, y: e.clientY, moved: false} : null;};
-  const pointerMove = e => {if (clickStart && Math.hypot(e.clientX - clickStart.x, e.clientY - clickStart.y) > 5) clickStart.moved = true; if (pointerIds.size || e.buttons) {hoverFloor(null); return;} hoverFloor(hitFloor(e));};
+  const pointerMove = e => {if (clickStart && Math.hypot(e.clientX - clickStart.x, e.clientY - clickStart.y) > 5) clickStart.moved = true; if (pointerIds.size || e.buttons) {renderer.domElement.title = ''; hoverFloor(null); return;} hoverFloor(hitFloor(e));};
   const pointerUp = e => {const click = clickStart && e.pointerId === clickStart.id && !clickStart.moved && Math.hypot(e.clientX - clickStart.x, e.clientY - clickStart.y) <= 5 && pointerIds.size === 1;pointerIds.delete(e.pointerId); clickStart = null; if (click) {const id = hitFloor(e); if (id) isolate(id);}};
   const blur = () => {pointerIds.clear();clickStart=null;interacting=false;cancelTransition();hoverFloor(null);};
   window.addEventListener('blur',blur);
-  const pointerCancel = e => {pointerIds.delete(e.pointerId); clickStart = null; hoverFloor(null);}, pointerLeave = () => {if (!pointerIds.size) hoverFloor(null);};
+  const pointerCancel = e => {pointerIds.delete(e.pointerId); clickStart = null; hoverFloor(null);}, pointerLeave = () => {if (!pointerIds.size) {renderer.domElement.title = ''; hoverFloor(null);}};
   const keyDown = e => {if (e.key === 'Escape' && focused) {e.preventDefault(); e.stopPropagation(); showAll();} else if (focused && ['ArrowUp', 'ArrowDown'].includes(e.key)) {e.preventDefault(); e.stopPropagation(); adjacentFloor(e.key === 'ArrowUp' ? 1 : -1);}}, contextMenu = e => e.preventDefault();
   const listeners = {pointerdown: pointerDown, pointermove: pointerMove, pointerup: pointerUp, pointercancel: pointerCancel, pointerleave: pointerLeave, keydown: keyDown, contextmenu: contextMenu};
   for (const [name, fn] of Object.entries(listeners)) renderer.domElement.addEventListener(name, fn);
@@ -225,7 +280,7 @@ function mount(container, data, options = {}) {
     if (disposed) return; disposed = true; transition = null; renderer.setAnimationLoop(null); observer.disconnect(); controls.removeEventListener('start', controlStart); controls.removeEventListener('end', controlEnd); controls.dispose();
     for (const [name, fn] of Object.entries(listeners)) renderer.domElement.removeEventListener(name, fn);
     renderer.domElement.removeEventListener('webglcontextlost', contextLost);window.removeEventListener('blur',blur);
-    for (const sprite of sprites) {sprite.material.map.dispose(); sprite.material.dispose();}
+    for (const label of [...sprites, ...roomLabels]) {label.material.map.dispose(); label.material.dispose(); if (label.geometry && !label.isSprite) label.geometry.dispose();}
     for (const decoration of decorations) {decoration.geometry.dispose(); decoration.material.dispose();}
     for (const m of materials.values()) m.dispose(); unit.dispose(); grid.geometry.dispose();
     for (const m of Array.isArray(grid.material) ? grid.material : [grid.material]) m.dispose();
