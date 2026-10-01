@@ -1,0 +1,51 @@
+{
+  "floorChecks": {
+    "L3": [],
+    "L2": [],
+    "L1": [
+      {
+        "kind": "sealed",
+        "text": "02 · Boarded listening booth: intentionally sealed route"
+      },
+      {
+        "kind": "sealed",
+        "text": "02 · Sealed tape records: intentionally sealed route"
+      }
+    ],
+    "L0": [],
+    "B1": [
+      {
+        "kind": "sealed",
+        "text": "01 · Old map room: intentionally sealed route"
+      },
+      {
+        "kind": "sealed",
+        "text": "01 · Signal vault: intentionally sealed route"
+      },
+      {
+        "kind": "sealed",
+        "text": "01 · Former research return: intentionally sealed route"
+      }
+    ],
+    "B2": [],
+    "B3": []
+  },
+  "passed": [
+    "7 levels: no plan overlaps, detached doors, or active dead ends",
+    "L0 main stair has dedicated landing; freight opens to main corridor",
+    "Separate cargo, clean staff, dirty-exit and garage-personnel graph routes verified",
+    "Dedicated artifact stair aligns on B1/B2; NW stair and freight align on all levels",
+    "All stair flights/landings fit concept shafts; 4 m split is 24 risers, not short steps",
+    "Freight B1 stop matches garage floor; no extra normal-lobby stop",
+    "8 m garage has no occupied/service/slab collision with complete B2 below",
+    "4 m occupied + service clear + 0.3 m slab verified separately",
+    "Garage 408 m², boarded B1 280 m², boarded L1 80 m² retained",
+    "All prior variants and saved edits remain isolated; import, undo/redo, touch pan/pinch and Fit verified"
+  ],
+  "serviceClear": 1.5,
+  "floorModule": 5.8,
+  "garageFloor": -9.8,
+  "B2": -15.6,
+  "B3": -21.4,
+  "visualQA": "All seven PNG plan sheets and vertical stack visually reviewed; editing/navigation checked in JavaScript harness"
+}

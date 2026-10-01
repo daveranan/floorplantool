@@ -1,0 +1,38 @@
+{
+  "floorChecks": {
+    "L1": [],
+    "L0": [],
+    "B1": [],
+    "B2": [
+      {
+        "kind": "sealed",
+        "text": "Sealed cavern: intentionally sealed route"
+      }
+    ]
+  },
+  "passed": [
+    "no overlaps",
+    "shared-edge doors fit",
+    "reachable via intended entrances",
+    "V1 and V2 save isolation",
+    "undo redo",
+    "JSON validation",
+    "7 aligned vertical connections",
+    "2 east-side L0 entrances",
+    "courtyard and Control holes",
+    "positive wall segments",
+    "all six variants retain isolated edits",
+    "split bay room/slab/door elevations",
+    "eight real risers equal1.20m",
+    "no flat slab across split stairs",
+    "main stair doors at south floor landing",
+    "operations zones preserve radio/radar/maps/support",
+    "55 percent smaller L0 than V4",
+    "Bent L arrival and west-only Operations approach",
+    "Mainstair/freight centers 30 m apart on every floor",
+    "No west pedestrian entrance",
+    "All sample routes clear modeled walls",
+    "No corridor-to-corridor doors"
+  ],
+  "browserQA": "No browser UI session used; exported L0, L1, B1, B2 and routes SVGs visually reviewed."
+}

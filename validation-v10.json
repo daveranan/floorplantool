@@ -1,0 +1,333 @@
+{
+  "status": "passed",
+  "floorChecks": {
+    "L3": [],
+    "L2": [],
+    "L1": [
+      {
+        "kind": "sealed",
+        "text": "02 \u00b7 Boarded listening booth: intentionally sealed route"
+      },
+      {
+        "kind": "sealed",
+        "text": "02 \u00b7 Sealed tape records: intentionally sealed route"
+      }
+    ],
+    "L0": [],
+    "B1": [
+      {
+        "kind": "sealed",
+        "text": "01 \u00b7 Old map room: intentionally sealed route"
+      },
+      {
+        "kind": "sealed",
+        "text": "01 \u00b7 Signal vault: intentionally sealed route"
+      },
+      {
+        "kind": "sealed",
+        "text": "01 \u00b7 Former research return: intentionally sealed route"
+      }
+    ],
+    "B2": [],
+    "B3": []
+  },
+  "passed": [
+    "Exact original upload preserved byte-for-byte",
+    "All room footprints disjoint within each floor",
+    "All active doors fit shared walls; no detached connections",
+    "All active rooms reachable; boarded rooms remain deliberately sealed",
+    "All named cargo/staff routes connect geometrically",
+    "Cargo routes to analysis and containment maintain at least 2.4 m openings",
+    "Clean staff reach analysis, decode, containment and observation without crossing intake or storage",
+    "NW stair, freight and artifact stair footprints align vertically",
+    "8 \u00d7 4 m artifact stair fits rotated nominal flight/landing envelope",
+    "Garage drop, full B2/B3 modules and inter-floor occupied/service/slab volumes are consistent",
+    "Courtyard and Operations derived footprints match their source rooms",
+    "User upper-floor and B3 footprints remain unchanged",
+    "Seven plan PNGs and vertical section visually reviewed"
+  ],
+  "nominalStairFits": {
+    "main": {
+      "requiredLong": 7.39,
+      "requiredShort": 3.0,
+      "allocated": [
+        4,
+        8
+      ],
+      "nominalEnvelopeOnly": true
+    },
+    "artifact": {
+      "requiredLong": 7.39,
+      "requiredShort": 3.0,
+      "allocated": [
+        8,
+        4
+      ],
+      "nominalEnvelopeOnly": true
+    },
+    "transfer": {
+      "requiredLong": 5.77,
+      "requiredShort": 3.0,
+      "allocated": [
+        4,
+        8
+      ],
+      "nominalEnvelopeOnly": true
+    }
+  },
+  "garageArea": 420,
+  "boardedB1Area": 306,
+  "serviceRoute": {
+    "clearHeight": 1.5,
+    "clearWidth": 0.8
+  },
+  "userUploadedRoomChanges": [
+    {
+      "floor": "L3",
+      "room": "stairlanding",
+      "changes": {
+        "type": {
+          "before": "terrace",
+          "uploaded": "circulation"
+        }
+      }
+    },
+    {
+      "floor": "L3",
+      "room": "roofpath",
+      "changes": {
+        "type": {
+          "before": "terrace",
+          "uploaded": "circulation"
+        }
+      }
+    },
+    {
+      "floor": "L2",
+      "room": "roofpath",
+      "changes": {
+        "type": {
+          "before": "terrace",
+          "uploaded": "circulation"
+        }
+      }
+    },
+    {
+      "floor": "L2",
+      "room": "pathturn",
+      "changes": {
+        "type": {
+          "before": "terrace",
+          "uploaded": "circulation"
+        }
+      }
+    },
+    {
+      "floor": "L1",
+      "room": "bath",
+      "changes": {
+        "w": {
+          "before": 6,
+          "uploaded": 8
+        }
+      }
+    },
+    {
+      "floor": "L1",
+      "room": "eastreturn",
+      "changes": {
+        "x": {
+          "before": 24,
+          "uploaded": 26
+        },
+        "w": {
+          "before": 12,
+          "uploaded": 10
+        }
+      }
+    },
+    {
+      "floor": "L0",
+      "room": "westhall",
+      "changes": {
+        "h": {
+          "before": 8,
+          "uploaded": 22
+        }
+      }
+    },
+    {
+      "floor": "L0",
+      "room": "westelbow",
+      "changes": {
+        "x": {
+          "before": 14,
+          "uploaded": -4
+        },
+        "y": {
+          "before": 18,
+          "uploaded": 17
+        },
+        "h": {
+          "before": 5,
+          "uploaded": 2
+        }
+      }
+    },
+    {
+      "floor": "L0",
+      "room": "corelink",
+      "changes": {
+        "y": {
+          "before": 16,
+          "uploaded": 17.5
+        },
+        "h": {
+          "before": 6,
+          "uploaded": 4.5
+        }
+      }
+    },
+    {
+      "floor": "L0",
+      "room": "reception",
+      "changes": {
+        "h": {
+          "before": 6,
+          "uploaded": 7.5
+        }
+      }
+    },
+    {
+      "floor": "L0",
+      "room": "freightreturn",
+      "changes": {
+        "x": {
+          "before": 14,
+          "uploaded": -4
+        },
+        "y": {
+          "before": 23,
+          "uploaded": 21.5
+        }
+      }
+    },
+    {
+      "floor": "B1",
+      "room": "garage",
+      "changes": {
+        "h": {
+          "before": 17,
+          "uploaded": 18
+        }
+      }
+    },
+    {
+      "floor": "B1",
+      "room": "maps",
+      "changes": {
+        "x": {
+          "before": 24,
+          "uploaded": 37.5
+        },
+        "y": {
+          "before": 4,
+          "uploaded": 3
+        }
+      }
+    },
+    {
+      "floor": "B1",
+      "room": "signal",
+      "changes": {
+        "x": {
+          "before": 36,
+          "uploaded": 24
+        },
+        "y": {
+          "before": 4,
+          "uploaded": 10
+        },
+        "w": {
+          "before": 8,
+          "uploaded": 13.5
+        },
+        "h": {
+          "before": 10,
+          "uploaded": 8
+        }
+      }
+    },
+    {
+      "floor": "B1",
+      "room": "secretreturn",
+      "changes": {
+        "x": {
+          "before": 24,
+          "uploaded": 18
+        },
+        "y": {
+          "before": 14,
+          "uploaded": 6
+        },
+        "w": {
+          "before": 20,
+          "uploaded": 19.5
+        }
+      }
+    },
+    {
+      "floor": "B1",
+      "room": "gown",
+      "changes": {
+        "y": {
+          "before": 8,
+          "uploaded": 14
+        },
+        "h": {
+          "before": 5,
+          "uploaded": 4
+        }
+      }
+    },
+    {
+      "floor": "B1",
+      "room": "wash",
+      "changes": {
+        "y": {
+          "before": 13,
+          "uploaded": 18
+        }
+      }
+    },
+    {
+      "floor": "B1",
+      "room": "artifactstair",
+      "changes": {
+        "x": {
+          "before": 6,
+          "uploaded": 18
+        },
+        "y": {
+          "before": 10,
+          "uploaded": 32
+        },
+        "h": {
+          "before": 8,
+          "uploaded": 4
+        },
+        "locked": {
+          "before": true,
+          "uploaded": false
+        }
+      }
+    }
+  ],
+  "caveats": [
+    "Concept gameplay layout, not construction or life-safety design",
+    "Vehicle swept paths are not tested; turning/loading footprint is retained from user upload",
+    "Stair headroom, structural openings, freight supplier details and runtime character traversal require later tests",
+    "B2 cleaning rooms were intentionally removed in favor of B1 cleaning; no biosafety certification is implied",
+    "L3 enclosure decision remains open"
+  ]
+}
