@@ -572,8 +572,8 @@ window.onkeydown=e=>{
   if(['Delete','Backspace'].includes(e.key)&&(selected||selectedDoor||extraSelection().length)){e.preventDefault();deleteSelection();return}
   if(e.code==='Space'||e.key===' '){e.preventDefault();if(!e.repeat&&!spaceHeld){finishDrag(true);spaceHeld=true;preview=true;pendingRoom=null;render()}return}
   if(e.key.toLowerCase()==='v'){e.preventDefault();if(!e.repeat){resetTransient(true);setTool('select')}return}
-  const mode={d:'door',c:'connect',x:'disconnect',p:'draw'}[e.key.toLowerCase()];
-  if(mode){e.preventDefault();if(spaceHeld||pointers.size)return;if(!e.repeat)setTool(mode);return}
+  const mode={d:'door',c:'connect',x:'disconnect',r:'draw'}[e.key.toLowerCase()];
+  if(mode){e.preventDefault();if(spaceHeld||pointers.size)return;if(!e.repeat)setTool(tool===mode?'select':mode);return}
   if(!preview&&(isMultiSelection()||extraSelection().length)&&['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();const step=(snapSize()||.1)*(e.shiftKey?4:1);nudgeSelection(e.key==='ArrowLeft'?-step:e.key==='ArrowRight'?step:0,e.key==='ArrowUp'?-step:e.key==='ArrowDown'?step:0);return}
   if(!preview&&selected&&['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)){const r=room(selected);if(!canEdit(r))return;e.preventDefault();commit(()=>{const step=(snapSize()||.1)*(e.shiftKey?4:1);r.x=cleanNumber(Math.max(-150,Math.min(150,r.x+(e.key==='ArrowLeft'?-step:e.key==='ArrowRight'?step:0))));r.y=cleanNumber(Math.max(-150,Math.min(150,r.y+(e.key==='ArrowUp'?-step:e.key==='ArrowDown'?step:0))));syncStairEdit(r)})}
 };

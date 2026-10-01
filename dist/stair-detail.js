@@ -187,18 +187,20 @@ function markup(detail){
  if(detail.preview){s+='<g class="stair-ghost" opacity=".18">';for(const l of detail.ghostLandings||[])s+=`<polygon points="${poly(l.polygon)}" fill="#ddd6bf" stroke="#66736e" stroke-width=".045" stroke-dasharray=".15 .1"/>`;for(const f of detail.ghostFlights||[]){s+=`<polygon points="${poly(f.polygon)}" fill="#d8dfdc" stroke="#66736e" stroke-width=".045" stroke-dasharray=".15 .1"/>`;for(const t of f.treads)s+=`<path d="M${t.line[0].map(n).join(' ')}L${t.line[1].map(n).join(' ')}" stroke="#66736e" stroke-width=".035"/>`}s+='</g>'}
  // Landings are real level surfaces. Coincident projections at different heights remain separately described in data.
  const drawn=new Set();for(const l of detail.displayLandings||[]){const key=poly(l.polygon);if(drawn.has(key))continue;drawn.add(key);s+=`<polygon points="${key}" fill="#f2e9ca" fill-opacity=".86" stroke="${color}" stroke-width=".055"/>`}
- for(const f of detail.displayFlights||[]){const c=f.direction==='up'?'#216c7b':'#a2612c',dashed=f.role==='continuation';s+=`<polygon points="${poly(f.polygon)}" fill="${f.direction==='up'?'#dbeaed':'#eee1cf'}" fill-opacity=".85" stroke="${c}" stroke-width=".065"${dashed?' stroke-dasharray=".14 .11"':''}/>`;
+ let badges='';for(const f of detail.displayFlights||[]){const c=f.direction==='up'?'#216c7b':'#a2612c',dashed=f.role==='continuation';s+=`<polygon points="${poly(f.polygon)}" fill="${f.direction==='up'?'#dbeaed':'#eee1cf'}" fill-opacity=".85" stroke="${c}" stroke-width=".065"${dashed?' stroke-dasharray=".14 .11"':''}/>`;
   for(const t of f.treads)s+=`<path d="M${t.line[0].map(n).join(' ')}L${t.line[1].map(n).join(' ')}" stroke="${c}" stroke-width=".035"/>`;
   const cutTread=f.treads[Math.min(f.treads.length-1,Math.max(0,Math.floor(1.2/f.riserHeight)-1))];if(cutTread){const [a,b]=cutTread.line;s+=`<path class="stair-cut-line" d="M${a[0]} ${a[1]}L${b[0]} ${b[1]}" stroke="${c}" stroke-width=".08" stroke-dasharray=".13 .07"/>`;}
   const [a,b]=f.arrowPath,dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len,from=[a[0]+ux*.25,a[1]+uy*.25],to=[b[0]-ux*.25,b[1]-uy*.25];
   s+=`<path d="M${from.map(n).join(' ')}L${to.map(n).join(' ')}m${n(-ux*.28-uy*.15)} ${n(-uy*.28+ux*.15)}L${to.map(n).join(' ')}l${n(-ux*.28+uy*.15)} ${n(-uy*.28-ux*.15)}" fill="none" stroke="${c}" stroke-width=".095"/>`;
-  const cx=(a[0]+b[0])/2,cy=(a[1]+b[1])/2,rotation=detail.runAxis==='y'?-90:0,label=f.label;
-  s+=`<g transform="translate(${n(cx)} ${n(cy)}) rotate(${rotation})"><rect x="${n(-Math.min(2.2,label.length*.077))}" y="-.22" width="${n(Math.min(4.4,label.length*.154))}" height=".44" rx=".08" fill="#f7f7f2" fill-opacity=".97"/><text x="0" y=".105" text-anchor="middle" font-family="system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" letter-spacing="normal" word-spacing="normal" font-size=".3" font-weight="bold" fill="${c}">${esc(label)}</text></g>`;
+  const cx=(a[0]+b[0])/2,cy=(a[1]+b[1])/2,label=f.direction==='up'?'UP':'DOWN',target=f.direction==='up'?f.z1:f.z0;
+  const bw=Math.min(1.2,Math.max(.8,f.rect.w-.12)),font=Math.min(.27,bw/(label.length*.68)),sub=(target>=0?'+':'')+target.toFixed(1)+'m';
+  badges+=`<g aria-label="${esc(f.label)}" transform="translate(${n(cx)} ${n(cy)})"><rect x="${n(-bw/2)}" y="-.43" width="${n(bw)}" height=".86" rx=".08" fill="#f7f7f2" stroke="${c}" stroke-width=".04"/><text x="0" y="-.07" text-anchor="middle" font-family="Arial,sans-serif" style="font-size:${font}px;font-weight:700;letter-spacing:0" fill="${c}">${label}</text><text x="0" y=".25" text-anchor="middle" font-family="Arial,sans-serif" style="font-size:${Math.min(.2,bw/(sub.length*.62))}px;letter-spacing:0" fill="${c}">${sub}</text></g>`;
+
  }
  const near=detail.displayLandings.find(l=>l.role==='floor')||detail.displayLandings[0];
  if(near){const x=near.rect.x+near.rect.w/2,y=near.rect.y+near.rect.h/2;s+=`<text x="${n(x)}" y="${n(y+.1)}" text-anchor="middle" font-family="system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" letter-spacing="normal" word-spacing="normal" font-size=".28" fill="${color}">${esc(detail.datumLabel)}</text>`}
  if(detail.status==='error')s+=`<rect x="${n(r.x+.08)}" y="${n(r.y+.08)}" width="${n(Math.max(.1,r.w-.16))}" height="${n(Math.max(.1,r.h-.16))}" fill="none" stroke="#b73e31" stroke-width=".14" stroke-dasharray=".2 .12"/>`;
- return s+'</g>';
+ return s+badges+'</g>';
 }
 const api={build,markup,previewLevels,slice,defaults:{...DEFAULTS},doorGeometry};root.KERN_STAIR_DETAIL=api;if(typeof module!=='undefined'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

@@ -231,7 +231,7 @@
     button.innerHTML = `<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg><span>${button.innerHTML}</span>`;
   }
   $('undo').setAttribute('aria-label', 'Undo'); $('redo').setAttribute('aria-label', 'Redo');
-  for (const [id, shortcut] of Object.entries({'tool-select':'V', 'tool-door':'D', 'tool-connect': 'C', 'tool-disconnect': 'X', 'tool-draw': 'P', undo: 'Control+Z Meta+Z', redo: 'Control+Shift+Z Meta+Shift+Z'})) $(id).setAttribute('aria-keyshortcuts', shortcut);
+  for (const [id, shortcut] of Object.entries({'tool-select':'V', 'tool-door':'D', 'tool-connect': 'C', 'tool-disconnect': 'X', 'tool-draw': 'R', undo: 'Control+Z Meta+Z', redo: 'Control+Shift+Z Meta+Shift+Z'})) $(id).setAttribute('aria-keyshortcuts', shortcut);
   for (const button of document.querySelectorAll('button:not([type])')) button.type = 'button';
   $('opennotes').onclick=()=>{$('planinfodialog').showModal()};$('closenotes').onclick=()=>$('planinfodialog').close();$('openchecks').onclick=()=>{$('checksDialog').showModal()};$('closechecks').onclick=()=>$('checksDialog').close();
   $('loadstatus').hidden = true;

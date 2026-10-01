@@ -103,7 +103,7 @@ function mount(container, data, options = {}) {
     const level = data.levels[i], group = new THREE.Group(), bounds = levelBounds(level);
     group.userData = {id: level.id, rank: i - groundRank, z: level.z}; groups.set(level.id, group); scene.add(group);
     const batches = new Map();
-    for (const box of level.boxes) {const key = `${box.color}:${box.kind}`; if (!batches.has(key)) batches.set(key, []); batches.get(key).push(box);}
+    for (const box of [...level.boxes,...data.levels.flatMap(other=>other.id===level.id?[]:other.boxes.filter(b=>['stair','landing'].includes(b.kind)&&b.z<level.z&&data.stairs?.some(st=>st.connectionId===b.stair&&st.stops.some(stop=>stop.floor===level.id)&&b.z>=Math.max(...st.stops.filter(stop=>stop.z<level.z).map(stop=>stop.z))-.2)).map(b=>({...b,contextOnly:true})))]) {const key = `${box.color}:${box.kind}:${!!box.contextOnly}`; if (!batches.has(key)) batches.set(key, []); batches.get(key).push(box);}
     for (const boxes of batches.values()) {
       const mesh = new THREE.InstancedMesh(unit, material(boxes[0].color), boxes.length);
       mesh.frustumCulled = false; mesh.userData = {boxes, level: level.id, faded: new Set()}; group.add(mesh); meshes.push(mesh); primaryMeshes.push(mesh);
@@ -113,11 +113,11 @@ function mount(container, data, options = {}) {
         mesh.userData.fadeMesh = fade; group.add(fade); meshes.push(fade);
       }
     }
-    for (const polygon of level.polygons || []) {
+    for (const polygon of [...(level.polygons||[]),...data.levels.flatMap(other=>other.id===level.id?[]:(other.polygons||[]).filter(p=>p.z<level.z&&data.stairs?.some(st=>st.connectionId===p.stair&&st.stops.some(stop=>stop.floor===level.id)&&p.z>=Math.max(...st.stops.filter(stop=>stop.z<level.z).map(stop=>stop.z))-.2)).map(p=>({...p,contextOnly:true})))]) {
       const shape = new THREE.Shape(polygon.polygon.map(p => new THREE.Vector2(p[0], -p[1])));
       const geometry = new THREE.ExtrudeGeometry(shape, {depth: polygon.height, bevelEnabled: false, steps: 1});
       geometry.rotateX(-Math.PI / 2); geometry.translate(0, polygon.z, 0);
-      const mesh = new THREE.Mesh(geometry, material(polygon.color)); mesh.userData = {level: level.id, stair: polygon.stair};
+      const mesh = new THREE.Mesh(geometry, material(polygon.color)); mesh.userData = {level: level.id, stair: polygon.stair,contextOnly:!!polygon.contextOnly};
       group.add(mesh); shapedMeshes.push(mesh);
     }
     const outline = new THREE.Box3Helper(new THREE.Box3(new THREE.Vector3(bounds.minX, level.z + .04, bounds.minY), new THREE.Vector3(bounds.maxX, level.z + .07, bounds.maxY)), 0x7cc4ff);
@@ -158,14 +158,14 @@ function mount(container, data, options = {}) {
   // Draw the datum before opaque slabs so coplanar grid lines never stripe room floors.
   grid.renderOrder = -10;
   for (const m of Array.isArray(grid.material) ? grid.material : [grid.material]) {m.transparent = false; m.opacity = 1; m.depthWrite = false;}
-  let gap = 0, disposed = false, showWalls = true, cutaway = false, cutHeight = 1.15, labels = true, xray = false, showGrid = true, hovered = null, focused = null, physical = [], lastOcclusion = '', clickStart = null, transition = null, interacting = false, xraySignature = '', xrayChangedAt = 0, xrayPending = false;
+  let gap = 0, disposed = false, showWalls = true, cutaway = true, cutHeight = 1.15, labels = true, xray = false, showGrid = true, hovered = null, focused = null, physical = [], lastOcclusion = '', clickStart = null, transition = null, interacting = false, xraySignature = '', xrayChangedAt = 0, xrayPending = false;
   let navigationFloor = groups.has(options.activeFloor) ? options.activeFloor : ground?.id || data.levels[groundRank]?.id, navigationY = groups.get(navigationFloor)?.userData.z || 0;
   const floorY = id => {const group = groups.get(id); return group ? group.userData.z + group.userData.rank * gap : navigationY;};
   const motionPreference = window.matchMedia?.('(prefers-reduced-motion: reduce)');
   const pointerIds = new Set(), raycaster = new THREE.Raycaster(), mouse = new THREE.Vector2();
   const visibleIds = () => [...groups].filter(([, group]) => group.visible).map(([id]) => id);
   const notifyVisibility = () => options.onVisibilityChanged?.(visibleIds(), focused);
-  function heightFor(box, level) {let height = box.height; const wall = box.kind === 'wall' || box.kind === 'solid'; if (cutaway && wall) height = Math.max(0, Math.min(height, (box.baseZ ?? level.z) + cutHeight - box.z)); if (wall && !showWalls) height = 0; return height;}
+  function heightFor(box, level) {let height = box.height;if(box.contextOnly&&focused!==level.id)return 0;if(box.kind==='ceiling'&&cutaway)return 0; const wall = box.kind === 'wall' || box.kind === 'solid'; if (cutaway && wall) height = Math.max(0, Math.min(height, (box.baseZ ?? level.z) + cutHeight - box.z)); if (wall && !showWalls) height = 0; return height;}
   function updateMatrices() {
     const transform = new THREE.Object3D(); physical = [];
     for (const group of groups.values()) group.position.y = group.userData.rank * gap;
@@ -189,8 +189,8 @@ function mount(container, data, options = {}) {
       mesh.instanceMatrix.needsUpdate = true;
       if (fade) {fade.visible = xray && mesh.userData.boxes.some((box, index) => heightFor(box, level) > .001 && mesh.userData.faded.has(index)); fade.instanceMatrix.needsUpdate = true;}
     }
-    for (const sprite of sprites) sprite.visible = labels;
-    for (const label of roomLabels) label.visible = labels && label.userData.level === focused && !label.userData.duplicate;
+    for(const mesh of shapedMeshes)mesh.visible=!mesh.userData.contextOnly||focused===mesh.userData.level;for (const sprite of sprites) sprite.visible = labels;
+    for (const label of roomLabels) label.visible = labels && (!focused||label.userData.level === focused) && !label.userData.duplicate;
     scene.updateMatrixWorld(true); lastOcclusion = '';
   }
   function hoverFloor(id) {
@@ -242,7 +242,7 @@ function mount(container, data, options = {}) {
     // stairs and upper slabs; no camera-facing scaling or billboard overlap suppression applies.
     for (const label of roomLabels) {
       const point = label.getWorldPosition(new THREE.Vector3());
-      label.visible = labels && groups.get(label.userData.level).visible && label.userData.level === focused && !label.userData.duplicate && camera.position.y > point.y;
+      label.visible = labels && groups.get(label.userData.level).visible && (!focused||label.userData.level === focused) && !label.userData.duplicate && camera.position.y > point.y;
     }
     lastOcclusion = signature;
   }
@@ -279,33 +279,43 @@ function mount(container, data, options = {}) {
   }
   function showAll() {
     cancelTransition(); for (const group of groups.values()) group.visible = true;
-    focused = null; hoverFloor(null); updateMatrices(); refreshOcclusion(true); notifyVisibility();
+    focused = null; selectRoom(null,null); hoverFloor(null); updateMatrices(); refreshOcclusion(true); notifyVisibility();
   }
   function isolate(id) {
     if (!groups.has(id) || focused === id) return;
-    focused = id; for (const [key, group] of groups) group.visible = key === id;
+    selectRoom(null,null);focused = id; for (const [key, group] of groups) group.visible = key === id;
     hoverFloor(null); updateMatrices(); followFloor(id); notifyVisibility();
   }
   function syncActiveFloor(id) {
     if (groups.has(id) && id !== navigationFloor) isolate(id);
   }
   function adjacentFloor(direction) {const index = data.levels.findIndex(l => l.id === focused), next = data.levels[index + Math.sign(direction)]; if (index >= 0 && next) isolate(next.id);}
-  function hitFloor(event) {
+  let lastHit=null;function hitFloor(event) {
     const rect = renderer.domElement.getBoundingClientRect(); if (!rect.width || !rect.height) return null;
     mouse.set((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1); camera.updateMatrixWorld(true); scene.updateMatrixWorld(true); raycaster.setFromCamera(mouse, camera);
     const targets = [...meshes, ...shapedMeshes, ...sprites, ...roomLabels].filter(o => o.visible && groups.get(o.userData.level)?.visible), hit = raycaster.intersectObjects(targets, false)[0];
     const levelId = hit?.object.userData.level, box = hit?.object.userData.boxes?.[hit.instanceId], roomId = hit?.object.userData.room || box?.room;
     const room = data.levels.find(level => level.id === levelId)?.rooms?.find(room => room.id === roomId);
     renderer.domElement.title = room ? room.name : '';
-    return levelId || null;
+    lastHit=hit?{floor:levelId,room:roomId||box?.rooms?.[0],point:hit.point}:null;return levelId || null;
   }
-  const pointerDown = e => {pointerIds.add(e.pointerId); if (pointerIds.size > 1) clickStart = null; else clickStart = e.button === 0 ? {id: e.pointerId, x: e.clientX, y: e.clientY, moved: false} : null;};
-  const pointerMove = e => {if (clickStart && Math.hypot(e.clientX - clickStart.x, e.clientY - clickStart.y) > 5) clickStart.moved = true; if (pointerIds.size || e.buttons) {renderer.domElement.title = ''; hoverFloor(null); return;} hoverFloor(hitFloor(e));};
-  const pointerUp = e => {const click = clickStart && e.pointerId === clickStart.id && !clickStart.moved && Math.hypot(e.clientX - clickStart.x, e.clientY - clickStart.y) <= 5 && pointerIds.size === 1;pointerIds.delete(e.pointerId); clickStart = null; if (click) {const id = hitFloor(e); if (id) isolate(id);}};
+  let selectedRoom=null,editDrag=null;const editHandles=new THREE.Group();scene.add(editHandles);
+  const handleMaterial=new THREE.MeshBasicMaterial({color:0x5aa9ff,depthTest:false});
+  function selectRoom(fid,rid){while(editHandles.children.length){const c=editHandles.children[0];editHandles.remove(c);c.geometry.dispose();}const r=data.levels.find(l=>l.id===fid)?.rooms.find(r=>r.id===rid);selectedRoom=r&&focused===fid?{...r,floor:fid}:null;if(!selectedRoom)return;drawHandles(selectedRoom);}
+  function drawHandles(r){while(editHandles.children.length){const c=editHandles.children[0];editHandles.remove(c);c.geometry.dispose();}const z=r.z+groups.get(r.floor).position.y+.08;const line=new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints([[r.x,r.y],[r.x+r.w,r.y],[r.x+r.w,r.y+r.h],[r.x,r.y+r.h]].map(p=>new THREE.Vector3(p[0],z,p[1]))),handleMaterial);line.renderOrder=10;editHandles.add(line);for(const [edge,x,y]of [['nw',r.x,r.y],['ne',r.x+r.w,r.y],['se',r.x+r.w,r.y+r.h],['sw',r.x,r.y+r.h]]){const h=new THREE.Mesh(new THREE.BoxGeometry(.35,.15,.35),handleMaterial);h.position.set(x,z,y);h.userData.edge=edge;h.renderOrder=11;editHandles.add(h);}}
+  function editPoint(e,r){const rect=renderer.domElement.getBoundingClientRect();mouse.set((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);raycaster.setFromCamera(mouse,camera);return raycaster.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),-(r.z+groups.get(r.floor).position.y)),new THREE.Vector3());}
+  const editDown=e=>{if(walking||e.button!==0||!selectedRoom||focused!==selectedRoom.floor)return;const p=editPoint(e,selectedRoom);if(!p)return;const h=raycaster.intersectObjects(editHandles.children,false).find(h=>h.object.userData.edge);hitFloor(e);if(!h&&lastHit?.room!==selectedRoom.id)return;editDrag={start:p.clone(),original:{...selectedRoom},next:{...selectedRoom},edge:h?.object.userData.edge};controls.enabled=false;e.preventDefault();e.stopImmediatePropagation();renderer.domElement.setPointerCapture(e.pointerId);};
+  const editMove=e=>{if(!editDrag)return;const p=editPoint(e,editDrag.original);if(!p)return;const r=editDrag.original,step=.5,dx=Math.round((p.x-editDrag.start.x)/step)*step,dy=Math.round((p.z-editDrag.start.z)/step)*step,n={...r};if(editDrag.edge){if(editDrag.edge.includes('e'))n.w=Math.max(1,r.w+dx);if(editDrag.edge.includes('s'))n.h=Math.max(1,r.h+dy);if(editDrag.edge.includes('w')){n.x=Math.min(r.x+r.w-1,r.x+dx);n.w=r.x+r.w-n.x;}if(editDrag.edge.includes('n')){n.y=Math.min(r.y+r.h-1,r.y+dy);n.h=r.y+r.h-n.y;}}else{n.x+=dx;n.y+=dy;}editDrag.next=n;drawHandles(n);e.preventDefault();e.stopImmediatePropagation();};
+  const editUp=e=>{if(!editDrag)return;const d=editDrag;editDrag=null;controls.enabled=true;e.preventDefault();e.stopImmediatePropagation();if(renderer.domElement.hasPointerCapture(e.pointerId))renderer.domElement.releasePointerCapture(e.pointerId);if(['x','y','w','h'].some(k=>d.next[k]!==d.original[k]))options.onRoomEdit?.(d.original.floor,d.original.id,d.next);};
+  const editCancel=()=>{editDrag=null;controls.enabled=!walking;if(selectedRoom)drawHandles(selectedRoom);};
+  renderer.domElement.addEventListener('pointerdown',editDown,true);renderer.domElement.addEventListener('pointermove',editMove,true);renderer.domElement.addEventListener('pointerup',editUp,true);renderer.domElement.addEventListener('pointercancel',editCancel,true);
+  const pointerDown = e => {if(walking)return;pointerIds.add(e.pointerId); if (pointerIds.size > 1) clickStart = null; else clickStart = e.button === 0 ? {id: e.pointerId, x: e.clientX, y: e.clientY, moved: false} : null;};
+  const pointerMove = e => {if(walking)return;if (clickStart && Math.hypot(e.clientX - clickStart.x, e.clientY - clickStart.y) > 5) clickStart.moved = true; if (pointerIds.size || e.buttons) {renderer.domElement.title = ''; hoverFloor(null); return;} hoverFloor(hitFloor(e));};
+  const pointerUp = e => {if(walking)return;const click = clickStart && e.pointerId === clickStart.id && !clickStart.moved && Math.hypot(e.clientX - clickStart.x, e.clientY - clickStart.y) <= 5 && pointerIds.size === 1;pointerIds.delete(e.pointerId); clickStart = null; if (click) {const id = hitFloor(e); if (id) {if(focused===id&&lastHit?.room)options.onRoomSelect?.(id,lastHit.room);else isolate(id);}}};
   const blur = () => {pointerIds.clear();clickStart=null;interacting=false;cancelTransition();hoverFloor(null);};
   window.addEventListener('blur',blur);const releaseScene = cleanupOnFailure;cleanupOnFailure = () => {window.removeEventListener('blur',blur);releaseScene();};
   const pointerCancel = e => {pointerIds.delete(e.pointerId); clickStart = null; hoverFloor(null);}, pointerLeave = () => {if (!pointerIds.size) {renderer.domElement.title = ''; hoverFloor(null);}};
-  const keyDown = e => {if (e.key === 'Escape' && focused) {e.preventDefault(); e.stopPropagation(); showAll();} else if (focused && ['ArrowUp', 'ArrowDown'].includes(e.key)) {e.preventDefault(); e.stopPropagation(); adjacentFloor(e.key === 'ArrowUp' ? 1 : -1);}}, contextMenu = e => e.preventDefault();
+  const keyDown = e => {if (e.key === 'Escape' && focused) {e.preventDefault(); e.stopPropagation(); showAll();} else if (focused && ['ArrowUp', 'ArrowDown'].includes(e.key)) {e.preventDefault(); e.stopPropagation(); adjacentFloor(e.key === 'ArrowUp' ? 1 : -1);}}, contextMenu = e => {e.preventDefault();if(walking)return;hitFloor(e);if(lastHit)options.onContext?.({floor:lastHit.floor,room:lastHit.room,x:lastHit.point.x,y:lastHit.point.z,z:data.levels.find(l=>l.id===lastHit.floor)?.rooms.find(r=>r.id===lastHit.room)?.z??data.levels.find(l=>l.id===lastHit.floor)?.z??lastHit.point.y,clientX:e.clientX,clientY:e.clientY});};
   const listeners = {pointerdown: pointerDown, pointermove: pointerMove, pointerup: pointerUp, pointercancel: pointerCancel, pointerleave: pointerLeave, keydown: keyDown, contextmenu: contextMenu};
   for (const [name, fn] of Object.entries(listeners)) renderer.domElement.addEventListener(name, fn);
   const resize = () => {if (disposed) return; const w = Math.max(1, container.clientWidth), h = Math.max(1, container.clientHeight); renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); lastOcclusion = '';};
@@ -313,17 +323,23 @@ function mount(container, data, options = {}) {
   controls.addEventListener('start', controlStart); controls.addEventListener('end', controlEnd);
   const observer = new ResizeObserver(resize);
   const contextLost = e => {e.preventDefault(); options.onContextLost?.();}; renderer.domElement.addEventListener('webglcontextlost', contextLost);
+  let walking=false,walkState=null,orbitState=null,walkYaw=0,walkPitch=0,flashOn=true;
+  const torch=new THREE.SpotLight(0xffefd2,55,35,Math.PI/7,.65,1.3);torch.visible=false;scene.add(torch);scene.add(torch.target);
+  const outdoor=new THREE.Group();const outsideRect={x:centerX-(size+50)/2,y:centerY-(size+50)/2,w:size+50,h:size+50};for(const r of window.BuildingPreviewGeometry.subtractAll(outsideRect,(ground?.rooms||[]).filter(r=>!['courtyard','terrace'].includes(r.type)))){const mesh=new THREE.Mesh(new THREE.PlaneGeometry(r.w,r.h),material('#535c62'));mesh.rotation.x=-Math.PI/2;mesh.position.set(r.x+r.w/2,groundZ-.02,r.y+r.h/2);outdoor.add(mesh);}outdoor.visible=false;scene.add(outdoor);
+
+  function updateWalk(){if(!walkState)return;camera.position.set(walkState.x,walkState.z+1.62,walkState.y);camera.rotation.order='YXZ';camera.rotation.set(walkPitch,walkYaw,0);const direction=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);torch.position.copy(camera.position);torch.target.position.copy(camera.position).add(direction.multiplyScalar(8));torch.visible=flashOn;}
+  function setWalk(state,yaw=0,pitch=0,flash=true){if(state){if(!walking){orbitState=getViewState();walking=true;scene.children.filter(n=>n.isHemisphereLight||n.isDirectionalLight).forEach(n=>{n.userData.originalIntensity=n.intensity;n.intensity=n.isHemisphereLight?.8:.3;});editHandles.visible=false;controls.enabled=false;transition=null;gap=0;showWalls=true;cutaway=false;xray=false;labels=false;focused=null;for(const g of groups.values())g.visible=true;grid.visible=false;outdoor.visible=true;updateMatrices();}walkState=state;walkYaw=yaw;walkPitch=pitch;flashOn=flash;updateWalk();}else if(walking){walking=false;scene.children.filter(n=>n.isHemisphereLight||n.isDirectionalLight).forEach(n=>n.intensity=n.userData.originalIntensity??n.intensity);editHandles.visible=true;walkState=null;torch.visible=false;outdoor.visible=false;controls.enabled=true;camera.rotation.order='XYZ';restoreViewState(orbitState);}}
   cleanupOnFailure = dispose;observer.observe(container); resize(); updateMatrices();
   if (options.viewState) restoreViewState(options.viewState); else fit();
-  syncActiveFloor(options.activeFloor);
-  renderer.setAnimationLoop(() => {if (disposed) return; if (!advanceCamera()) controls.update(); refreshOcclusion(); renderer.render(scene, camera);});
+  // Open in overview; floor isolation is an explicit click.
+  renderer.setAnimationLoop(() => {if (disposed) return;if(walking){updateWalk();renderer.render(scene,camera);return;} if (!advanceCamera()) controls.update(); refreshOcclusion(); renderer.render(scene, camera);});
   function getViewState() {
     return {position: camera.position.toArray(), target: controls.target.toArray(), focused, navigationFloor, navigationY, navigationElevation: floorY(navigationFloor), visible: visibleIds(), gap, showWalls, cutaway, cutHeight, labels, xray, showGrid,
       overview: null};
   }
   function restoreViewState(state) {
     if (!state || disposed) return; const vector = value => Array.isArray(value) && value.length === 3 && value.every(Number.isFinite);
-    cancelTransition(); gap = Math.max(0, Math.min(12, Number(state.gap) || 0)); showWalls = state.showWalls !== false; cutaway = !!state.cutaway;
+    cancelTransition(); gap = Math.max(0, Math.min(12, Number(state.gap) || 0)); showWalls = state.showWalls !== false; cutaway = state.cutaway !== false;
     cutHeight = Number.isFinite(state.cutHeight) ? Math.max(.4, Math.min(2.4, state.cutHeight)) : 1.15; labels = state.labels !== false; xray = !!state.xray; showGrid = state.showGrid !== false; grid.visible = showGrid;
     focused = groups.has(state.focused) ? state.focused : null; const ids = Array.isArray(state.visible) ? state.visible.filter(id => groups.has(id)) : [...groups.keys()];
     for (const [id, group] of groups) group.visible = focused ? id === focused : ids.includes(id);
@@ -336,7 +352,7 @@ function mount(container, data, options = {}) {
     refreshOcclusion(true); notifyVisibility();
   }
   function dispose() {
-    if (disposed) return; disposed = true; transition = null; renderer.setAnimationLoop(null); observer.disconnect(); controls.removeEventListener('start', controlStart); controls.removeEventListener('end', controlEnd); controls.dispose();
+    if (disposed) return; disposed = true;torch.dispose();for(const m of outdoor.children)m.geometry.dispose(); transition = null; renderer.setAnimationLoop(null); observer.disconnect();renderer.domElement.removeEventListener('pointerdown',editDown,true);renderer.domElement.removeEventListener('pointermove',editMove,true);renderer.domElement.removeEventListener('pointerup',editUp,true);renderer.domElement.removeEventListener('pointercancel',editCancel,true);handleMaterial.dispose();for(const c of editHandles.children)c.geometry.dispose(); controls.removeEventListener('start', controlStart); controls.removeEventListener('end', controlEnd); controls.dispose();
     for (const [name, fn] of Object.entries(listeners)) renderer.domElement.removeEventListener(name, fn);
     renderer.domElement.removeEventListener('webglcontextlost', contextLost);window.removeEventListener('blur',blur);
     for (const label of [...sprites, ...roomLabels]) {label.material.map.dispose(); label.material.dispose(); if (label.geometry && !label.isSprite) label.geometry.dispose();}
@@ -346,11 +362,11 @@ function mount(container, data, options = {}) {
     renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove(); scene.clear(); pointerIds.clear();
   }
   return {
-    fit, dispose, showAll, isolate, hoverFloor, adjacentFloor, getViewState, restoreViewState, syncActiveFloor,
+    selectRoom, setWalk, fit, dispose, showAll, isolate, hoverFloor, adjacentFloor, getViewState, restoreViewState, syncActiveFloor,
     zoomBy(factor) {if (!Number.isFinite(factor) || factor <= 0) return; const delta = camera.position.clone().sub(controls.target), distance = THREE.MathUtils.clamp(delta.length() * factor, controls.minDistance, controls.maxDistance); moveCamera(controls.target.clone().add(delta.normalize().multiplyScalar(distance)), controls.target, false);},
     setGrid(value) {showGrid = !!value; grid.visible = showGrid;},
     getFocusedFloor() {return focused;},
-    setFloor(id, visible) {const group = groups.get(id); if (!group) return; cancelTransition(); group.visible = !!visible; focused = null; hoverFloor(null); updateMatrices(); refreshOcclusion(true); notifyVisibility();},
+    setFloor(id, visible) {const group = groups.get(id); if (!group) return; cancelTransition(); group.visible = !!visible; focused = null; selectRoom(null,null); hoverFloor(null); updateMatrices(); refreshOcclusion(true); notifyVisibility();},
     setExplode(value) {const nextGap = Math.max(0, Math.min(12, Number(value) || 0)); if (nextGap === gap) return; const previousElevation = floorY(navigationFloor); gap = nextGap; hoverFloor(null); updateMatrices(); if (focused) followFloor(focused, !!transition); else {cancelTransition(); navigationY += floorY(navigationFloor) - previousElevation;} refreshOcclusion(true);},
     setWalls(value) {showWalls = !!value; updateMatrices(); refreshOcclusion(true);},
     setCutaway(value) {cutaway = !!value; updateMatrices(); refreshOcclusion(true);},

@@ -49,7 +49,7 @@ function syncModeUI(){
  const three=isThreeMode();document.body.dataset.viewMode=viewMode;
  $('canvas').hidden=three;$('buildingpreview3d').hidden=!three;$('floors').hidden=three;$('threefloorpanel').hidden=!three;
  document.querySelector('.floorsheading').hidden=three;document.querySelector('.floorproperties').hidden=three;
- $('inspector').hidden=three;document.querySelector('.asidehead').hidden=three;$('threeoptions').hidden=!three;
+ $('inspector').hidden=three&&!document.body.classList.contains('editing3d');document.querySelector('.asidehead').hidden=three&&!document.body.classList.contains('editing3d');$('threeoptions').hidden=!three;
  document.querySelector('.editbar').hidden=three;document.querySelector('.historytools').hidden=three;
  $('mode2d').setAttribute('aria-pressed',String(!three));$('mode3d').setAttribute('aria-pressed',String(three));
  $('buildingmenu').hidden=three;for(const id of ['import','archive'])$(id).disabled=three;
@@ -62,7 +62,7 @@ const controlIds=['threefit','threeall','threeexplode','threewalls','threecutawa
 function failedThree(message){$('threestatus').hidden=false;$('threestatus').textContent=message+' Switch to 2D to edit, or open Vertical stack.';$('save3dpng').disabled=true;for(const id of controlIds)$(id).disabled=true;for(const node of $('threefloors').querySelectorAll('input,button'))node.disabled=true}
 function syncThreeSettings(state={}){
  $('threeexplode').value=String(state.gap??0);$('explodelabel').textContent=$('threeexplode').value+' m';$('threeexplode').setAttribute('aria-valuetext',$('threeexplode').value+' metres');
- for(const [id,value]of [['threewalls',state.showWalls??true],['threecutaway',state.cutaway??false],['threelabels',state.labels??true],['threexray',state.xray??false],['threegrid',state.showGrid??true]])$(id).checked=value;
+ for(const [id,value]of [['threewalls',state.showWalls??true],['threecutaway',state.cutaway??true],['threelabels',state.labels??true],['threexray',state.xray??false],['threegrid',state.showGrid??true]])$(id).checked=value;
  $('threecutheight').value=String(state.cutHeight??1.15);$('threecutheightlabel').textContent=Number($('threecutheight').value).toFixed(2)+' m';$('threecutheight').setAttribute('aria-valuetext',Number($('threecutheight').value).toFixed(2)+' metres');$('threecutheightfield').hidden=!$('threecutaway').checked;
 }
 async function mountThree(){
@@ -72,10 +72,10 @@ async function mountThree(){
  try{data=currentGeometry();$('threeassumptions').textContent=data.assumptions;$('threewarningcount').textContent=data.warnings.length;$('threewarninglist').innerHTML=data.warnings.length?data.warnings.map(w=>`<p>${esc(w)}</p>`).join(''):'<p>No geometry warnings from this preview.</p>';
   $('threefloors').innerHTML=[...data.levels].reverse().map(l=>`<div class="three-floor-row"><input type="checkbox" checked disabled data-floor3d="${esc(l.id)}" aria-label="Show ${esc(l.id)} · ${esc(l.name)}"><button disabled data-isolate3d="${esc(l.id)}" aria-pressed="false" title="Focus ${esc(l.id)} · ${esc(l.name)}"><b>${esc(l.id)}</b><span class="three-floor-name">${esc(l.name)}</span><small>${fmt(l.z)}</small></button></div>`).join('');
   const library=await loadThree();if(token!==threeToken||!isThreeMode())return;
-  threeView=library.mount($('threeviewport'),data,{activeFloor,viewState:saved,onHover:level=>{$('threehover').hidden=!level||!!threeView?.getFocusedFloor?.();$('threehover').textContent=level?level.id+' · '+level.name+' · click to focus':''},onVisibilityChanged:(ids,focused)=>{if(!mounting)syncEditorFloor(focused);syncFloorChecks(ids,focused);const index=data.levels.findIndex(l=>l.id===focused),level=data.levels[index];$('threefocusstatus').hidden=true;$('threefocusnav').hidden=!focused;$('threefocuslabel').textContent=focused||'';$('threefocuslabel').title=level?level.name+' · '+fmt(level.z):'';$('threefloorup').disabled=index<0||index>=data.levels.length-1;$('threefloordown').disabled=index<=0;if(focused)$('threehover').hidden=true},onContextLost:()=>{rememberThree();disposeThree();failedThree('The graphics context was lost.')}});
+  threeView=library.mount($('threeviewport'),data,{activeFloor,viewState:saved,onRoomSelect:(fid,rid)=>window.KERN_EXPLORER?.selectRoom(fid,rid),onRoomEdit:(fid,rid,rect)=>window.KERN_EXPLORER?.editRoom(fid,rid,rect),onContext:p=>window.KERN_EXPLORER?.menu(p),onHover:level=>{$('threehover').hidden=!level||!!threeView?.getFocusedFloor?.();$('threehover').textContent=level?level.id+' · '+level.name+' · click to focus':''},onVisibilityChanged:(ids,focused)=>{if(!focused){document.body.classList.remove('editing3d');$('room3dedit')&&($('room3dedit').hidden=true);syncModeUI();}if(!mounting)syncEditorFloor(focused);syncFloorChecks(ids,focused);const index=data.levels.findIndex(l=>l.id===focused),level=data.levels[index];$('threefocusstatus').hidden=true;$('threefocusnav').hidden=!focused;$('threefocuslabel').textContent=focused||'';$('threefocuslabel').title=level?level.name+' · '+fmt(level.z):'';$('threefloorup').disabled=index<0||index>=data.levels.length-1;$('threefloordown').disabled=index<=0;if(focused)$('threehover').hidden=true},onContextLost:()=>{rememberThree();disposeThree();failedThree('The graphics context was lost.')}});
   mounting=false;syncEditorFloor(threeView.getFocusedFloor?.());$('threestatus').hidden=true;$('save3dpng').disabled=false;for(const id of controlIds)$(id).disabled=false;for(const node of $('threefloors').querySelectorAll('input,button'))node.disabled=false;
   if(!data.levels.some(l=>l.boxes.length)){$('threestatus').hidden=false;$('threestatus').textContent='This building is empty. Switch to 2D and draw a room to give it a 3D shape.'}
-  focusWorkspace($('threeviewport').querySelector('canvas'));
+  window.KERN_EXPLORER?.sync();focusWorkspace($('threeviewport').querySelector('canvas'));
  }catch(error){if(token===threeToken){disposeThree();failedThree(/WebGL|graphics context/i.test(error.message)?'3D needs WebGL 2, which is unavailable in this browser.':error.message)}}
 }
 async function setWorkspaceMode(mode){
@@ -102,5 +102,5 @@ function snapshotSheet(plan,source,id,name){
  const oldModel=model,oldFloor=floorId,oldVariant=variant;
  try{model=clone(plan);variant=source||'custom';floorId=id;return floorSheet(id,name)}finally{model=oldModel;floorId=oldFloor;variant=oldVariant}
 }
-window.BuildingExports={snapshotSheet,floorSheet,stackSheet,currentGeometry,svgToPNG,openStack,openThree,disposeThree,setWorkspaceMode,isThreeMode,syncWorkspace,focusThreeFloor:id=>threeView?.isolate(id)};syncModeUI();
+window.BuildingExports={getViewer:()=>threeView,snapshotSheet,floorSheet,stackSheet,currentGeometry,svgToPNG,openStack,openThree,disposeThree,setWorkspaceMode,isThreeMode,syncWorkspace,focusThreeFloor:id=>threeView?.isolate(id)};syncModeUI();
 })();

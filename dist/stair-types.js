@@ -72,16 +72,17 @@ function build(input){
 }
 function spiralMarkup(d){
  const poly=p=>p.map(q=>q.map(round).join(',')).join(' '),path=p=>p.map((q,i)=>(i?'L':'M')+q.map(round).join(' ')).join(' '),r=d.footprint;
- let s='<g class="stair-detail" pointer-events="none"><title>'+esc(d.name+' · '+d.clearanceNote)+'</title>';
+ let badges='';let s='<g class="stair-detail" pointer-events="none"><title>'+esc(d.name+' · '+d.clearanceNote)+'</title>';
  if(d.preview){s+='<g opacity=".15">';for(const f of d.ghostFlights||[])for(const t of f.treads)s+='<polygon points="'+poly(t.polygon)+'" fill="#bdc6d2" stroke="#66736e" stroke-width=".025"/>';s+='</g>';}
  for(const l of d.displayLandings||[])s+='<polygon points="'+poly(l.polygon)+'" fill="#f2e9ca" stroke="#476777" stroke-width=".045"/>';
  for(const f of d.displayFlights||[]){const color=f.direction==='up'?'#216c7b':'#a2612c';for(const t of f.treads)s+='<polygon points="'+poly(t.polygon)+'" fill="'+(f.direction==='up'?'#dbeaed':'#eee1cf')+'" stroke="'+color+'" stroke-width=".025"/>';
   const points=f.arrowPath,cut=points[Math.min(points.length-1,Math.max(1,Math.floor(1.2/f.riserHeight)))];s+='<path d="'+path(points)+'" fill="none" stroke="'+color+'" stroke-width=".075" stroke-dasharray=".16 .08"/>';
   const a=points.at(-2),b=points.at(-1),len=Math.hypot(b[0]-a[0],b[1]-a[1]),ux=(b[0]-a[0])/len,uy=(b[1]-a[1])/len;s+='<path d="M'+(b[0]-ux*.25-uy*.13)+' '+(b[1]-uy*.25+ux*.13)+'L'+b.join(' ')+'L'+(b[0]-ux*.25+uy*.13)+' '+(b[1]-uy*.25-ux*.13)+'" fill="none" stroke="'+color+'" stroke-width=".075"/>';
   s+='<path class="stair-cut-line" d="M'+(cut[0]-.18)+' '+(cut[1]-.18)+'l.36 .36m-.36 0l.36 -.36" stroke="'+color+'" stroke-width=".06"/>';
-  const q=points[Math.floor(points.length/3)];s+='<text x="'+q[0]+'" y="'+q[1]+'" font-family="system-ui,Segoe UI,sans-serif" letter-spacing="normal" word-spacing="normal" font-size=".25" font-weight="bold" text-anchor="middle" fill="'+color+'">'+esc(f.label)+'</text>';
+  const q=points[Math.floor(points.length/3)],label=f.direction==='up'?'UP':'DOWN';badges+='<g aria-label="'+esc(f.label)+'"><rect x="'+(q[0]-.65)+'" y="'+(q[1]-.32)+'" width="1.3" height=".64" rx=".08" fill="#f7f7f2" stroke="'+color+'" stroke-width=".04"/><text x="'+q[0]+'" y="'+(q[1]+.09)+'" style="font-size:.26px;font-weight:700;letter-spacing:0" font-family="Arial,sans-serif" text-anchor="middle" fill="'+color+'">'+label+'</text></g>';
+
  }
- s+='<text x="'+(r.x+r.w/2)+'" y="'+(r.y+r.h/2+.08)+'" text-anchor="middle" font-family="system-ui,Segoe UI,sans-serif" letter-spacing="normal" word-spacing="normal" font-size=".23" fill="#476777">'+esc(d.datumLabel)+'</text>';return s+'</g>';
+ s+='<text x="'+(r.x+r.w/2)+'" y="'+(r.y+r.h/2+.08)+'" text-anchor="middle" font-family="system-ui,Segoe UI,sans-serif" letter-spacing="normal" word-spacing="normal" font-size=".23" fill="#476777">'+esc(d.datumLabel)+'</text>';return s+badges+'</g>';
 }
 const api={build,spiralMarkup,overlap};root.KERN_STAIR_TYPES=api;if(typeof module!=='undefined'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
