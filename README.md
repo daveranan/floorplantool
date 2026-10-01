@@ -32,6 +32,7 @@ node test-ui.cjs
 node test-preview.cjs
 node test-three-scene.cjs
 node test-ui-static.cjs
+node test-typography.cjs
 python test-compact-layout.py
 ```
 

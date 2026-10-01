@@ -187,10 +187,10 @@ function markup(detail){
   const [a,b]=f.arrowPath,dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len,from=[a[0]+ux*.25,a[1]+uy*.25],to=[b[0]-ux*.25,b[1]-uy*.25];
   s+=`<path d="M${from.map(n).join(' ')}L${to.map(n).join(' ')}m${n(-ux*.28-uy*.15)} ${n(-uy*.28+ux*.15)}L${to.map(n).join(' ')}l${n(-ux*.28+uy*.15)} ${n(-uy*.28-ux*.15)}" fill="none" stroke="${c}" stroke-width=".095"/>`;
   const cx=(a[0]+b[0])/2,cy=(a[1]+b[1])/2,rotation=detail.runAxis==='y'?-90:0,label=f.label;
-  s+=`<g transform="translate(${n(cx)} ${n(cy)}) rotate(${rotation})"><rect x="${n(-Math.min(2.2,label.length*.077))}" y="-.22" width="${n(Math.min(4.4,label.length*.154))}" height=".44" rx=".08" fill="#f7f7f2" fill-opacity=".97"/><text x="0" y=".105" text-anchor="middle" font-family="sans-serif" font-size=".3" font-weight="bold" fill="${c}">${esc(label)}</text></g>`;
+  s+=`<g transform="translate(${n(cx)} ${n(cy)}) rotate(${rotation})"><rect x="${n(-Math.min(2.2,label.length*.077))}" y="-.22" width="${n(Math.min(4.4,label.length*.154))}" height=".44" rx=".08" fill="#f7f7f2" fill-opacity=".97"/><text x="0" y=".105" text-anchor="middle" font-family="system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" letter-spacing="normal" word-spacing="normal" font-size=".3" font-weight="bold" fill="${c}">${esc(label)}</text></g>`;
  }
  const near=detail.displayLandings.find(l=>l.role==='floor')||detail.displayLandings[0];
- if(near){const x=near.rect.x+near.rect.w/2,y=near.rect.y+near.rect.h/2;s+=`<text x="${n(x)}" y="${n(y+.1)}" text-anchor="middle" font-family="sans-serif" font-size=".28" fill="${color}">${esc(detail.datumLabel)}</text>`}
+ if(near){const x=near.rect.x+near.rect.w/2,y=near.rect.y+near.rect.h/2;s+=`<text x="${n(x)}" y="${n(y+.1)}" text-anchor="middle" font-family="system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" letter-spacing="normal" word-spacing="normal" font-size=".28" fill="${color}">${esc(detail.datumLabel)}</text>`}
  if(detail.status==='error')s+=`<rect x="${n(r.x+.08)}" y="${n(r.y+.08)}" width="${n(Math.max(.1,r.w-.16))}" height="${n(Math.max(.1,r.h-.16))}" fill="none" stroke="#b73e31" stroke-width=".14" stroke-dasharray=".2 .12"/>`;
  return s+'</g>';
 }
