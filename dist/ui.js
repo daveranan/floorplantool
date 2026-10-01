@@ -204,7 +204,7 @@
       const next = event.key === 'Home' ? 0 : event.key === 'End' ? n - 1 : event.key === 'ArrowDown' ? (i + 1 + n) % n : i < 0 ? n - 1 : (i - 1 + n) % n;
       focus(items[next]);
     };
-    panel.addEventListener('click', event => { if (event.target.closest('button,a')) { details.open = false; if (!document.querySelector('dialog[open]')) focus(summary); } });
+    panel.addEventListener('click', event => { if (event.target.closest('button,a')) { details.open = false; if (!document.querySelector('dialog[open]') && event.detail === 0) focus(summary); } });
   }
   window.addEventListener('resize', () => closeToolbarMenus());
   function setInspector(open) {
@@ -217,6 +217,7 @@
   $('collapseinspector').onclick = () => setInspector(false);
 
   const icons = {
+    'tool-door': '<path d="M5 20V4h12v16M5 4l9 4v12H5m5-7h1"/>',
     'tool-select': '<path d="m4 3 6 17 3-7 7-3L4 3Z"/>',
     'tool-connect': '<path d="m10 13 4-4m-7 6-2 2a4 4 0 0 1-6-6l4-4a4 4 0 0 1 6 0m2-2 2-2a4 4 0 0 1 6 6l-4 4a4 4 0 0 1-6 0" transform="translate(2 2) scale(.85)"/>',
     'tool-disconnect': '<path d="m4 4 16 16M8 5l2-2a4 4 0 0 1 6 6l-1 1M9 14l-1 1a4 4 0 0 1-6-6l2-2" transform="translate(2 2) scale(.9)"/>',
@@ -230,8 +231,9 @@
     button.innerHTML = `<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg><span>${button.innerHTML}</span>`;
   }
   $('undo').setAttribute('aria-label', 'Undo'); $('redo').setAttribute('aria-label', 'Redo');
-  for (const [id, shortcut] of Object.entries({'tool-connect': 'C', 'tool-disconnect': 'X', 'tool-draw': 'P', undo: 'Control+Z Meta+Z', redo: 'Control+Shift+Z Meta+Shift+Z'})) $(id).setAttribute('aria-keyshortcuts', shortcut);
+  for (const [id, shortcut] of Object.entries({'tool-select':'V', 'tool-door':'D', 'tool-connect': 'C', 'tool-disconnect': 'X', 'tool-draw': 'P', undo: 'Control+Z Meta+Z', redo: 'Control+Shift+Z Meta+Shift+Z'})) $(id).setAttribute('aria-keyshortcuts', shortcut);
   for (const button of document.querySelectorAll('button:not([type])')) button.type = 'button';
+  $('opennotes').onclick=()=>{$('planinfodialog').showModal()};$('closenotes').onclick=()=>$('planinfodialog').close();$('openchecks').onclick=()=>{$('checksDialog').showModal()};$('closechecks').onclick=()=>$('checksDialog').close();
   $('loadstatus').hidden = true;
   window.KERN_UI = {sync, syncStorage, toast, openManagement, submitManagement, closeManagement};
   sync();

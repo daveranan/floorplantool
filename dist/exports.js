@@ -39,28 +39,30 @@ $('openstack').onclick=openStack;$('closestack').onclick=()=>$('stackdialog').cl
 function loadThree(){if(window.Building3D)return Promise.resolve(window.Building3D);if(!threePromise)threePromise=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='preview3d.js';const timer=setTimeout(()=>{threePromise=null;script.remove();reject(Error('Loading the 3D renderer timed out. Close the preview and try again.'))},20000);script.onload=()=>{clearTimeout(timer);window.Building3D?resolve(window.Building3D):reject(Error('The 3D renderer did not start.'))};script.onerror=()=>{clearTimeout(timer);threePromise=null;script.remove();reject(Error('The 3D renderer could not load. Check your connection and try again.'))};document.head.appendChild(script)});return threePromise}
 function disposeThree(){threeToken++;threeView?.dispose();threeView=null;$('threeviewport').innerHTML='';$('save3dpng').disabled=true}
 function syncFloorChecks(ids){for(const input of $('threefloors').querySelectorAll('input'))input.checked=ids.includes(input.dataset.floor3d)}
-function failedThree(message){$('threestatus').hidden=false;$('threestatus').textContent=message+' The floor-plan editor still works; use Vertical stack below.';$('save3dpng').disabled=true;for(const id of ['threefit','threeall','threeexplode','threewalls','threecutaway','threelabels'])$(id).disabled=true}
+function failedThree(message){$('threestatus').hidden=false;$('threestatus').textContent=message+' The floor-plan editor still works; use Vertical stack below.';$('save3dpng').disabled=true;for(const id of ['threefit','threeall','threeexplode','threewalls','threecutaway','threelabels','threexray'])$(id).disabled=true}
 async function openThree(){
  prepare();disposeThree();const token=threeToken;threeName=currentBuilding().name;let data;
  $('preview3dtitle').textContent=`${threeName} · 3D`;$('threestatus').hidden=false;$('threestatus').textContent='Loading 3D preview…';$('threefloors').innerHTML='';$('threewarnings').open=false;$('save3dpng').disabled=true;
- $('threeexplode').value='0';$('explodelabel').textContent='0 m';$('threeexplode').setAttribute('aria-valuetext','0 metres');$('threewalls').checked=true;$('threecutaway').checked=false;$('threelabels').checked=true;
- for(const id of ['threefit','threeall','threeexplode','threewalls','threecutaway','threelabels'])$(id).disabled=true;
+ $('threeexplode').value='0';$('explodelabel').textContent='0 m';$('threeexplode').setAttribute('aria-valuetext','0 metres');$('threewalls').checked=true;$('threecutaway').checked=false;$('threelabels').checked=true;$('threexray').checked=true;$('threehover').hidden=true;$('threefocusstatus').hidden=true;
+ for(const id of ['threefit','threeall','threeexplode','threewalls','threecutaway','threelabels','threexray'])$(id).disabled=true;
  $('buildingpreview3d').showModal();
  try{data=currentGeometry();$('threeassumptions').textContent=data.assumptions;$('threewarningcount').textContent=data.warnings.length;$('threewarninglist').innerHTML=data.warnings.length?data.warnings.map(w=>`<p>${esc(w)}</p>`).join(''):'<p>No geometry warnings from this preview.</p>';
   $('threefloors').innerHTML=[...data.levels].reverse().map(l=>`<div><label><input type="checkbox" checked data-floor3d="${esc(l.id)}"><span><b>${esc(l.id)}</b> ${esc(l.name)}<small>${fmt(l.z)}</small></span></label><button data-isolate3d="${esc(l.id)}" title="Show only ${esc(l.id)}" aria-label="Show only ${esc(l.id)}">Only</button></div>`).join('');
   const library=await loadThree();if(token!==threeToken||!$('buildingpreview3d').open)return;
-  threeView=library.mount($('threeviewport'),data,{onContextLost:()=>{disposeThree();failedThree('The graphics context was lost. Close and reopen the preview.')}});$('threestatus').hidden=true;$('save3dpng').disabled=false;
-  for(const id of ['threefit','threeall','threeexplode','threewalls','threecutaway','threelabels'])$(id).disabled=false;
+  threeView=library.mount($('threeviewport'),data,{onHover:level=>{$('threehover').hidden=!level;$('threehover').textContent=level?level.id+' · '+level.name+' · click to focus':''},onVisibilityChanged:(ids,focused)=>{syncFloorChecks(ids);$('threefocusstatus').hidden=!focused;$('threefocusstatus').textContent=focused?'Focused: '+focused+' · Escape or Show all returns to the overview':''},onContextLost:()=>{disposeThree();failedThree('The graphics context was lost. Close and reopen the preview.')}});$('threestatus').hidden=true;$('save3dpng').disabled=false;
+  for(const id of ['threefit','threeall','threeexplode','threewalls','threecutaway','threelabels','threexray'])$(id).disabled=false;
   if(!data.levels.some(l=>l.boxes.length)){$('threestatus').hidden=false;$('threestatus').textContent='This building is empty. Draw a room in the editor to give it a 3D shape.'}
  }catch(error){if(token===threeToken){disposeThree();failedThree(/WebGL|context|renderer/i.test(error.message)?'3D needs WebGL 2, which is unavailable in this browser.':error.message)}}
 }
 $('open3d').onclick=openThree;$('close3d').onclick=()=>$('buildingpreview3d').close();$('buildingpreview3d').onclose=disposeThree;
-$('threefit').onclick=()=>threeView?.fit();$('threeall').onclick=()=>{threeView?.showAll();syncFloorChecks(Object.keys(model.floors));threeView?.fit()};
+$('threefit').onclick=()=>threeView?.fit();$('threeall').onclick=()=>{threeView?.showAll();syncFloorChecks(Object.keys(model.floors))};
 $('threefloors').onchange=e=>{if(e.target.dataset.floor3d)threeView?.setFloor(e.target.dataset.floor3d,e.target.checked)};
 $('threefloors').onclick=e=>{const id=e.target.closest('button')?.dataset.isolate3d;if(id){threeView?.isolate(id);syncFloorChecks([id])}};
 $('threeexplode').oninput=e=>{$('explodelabel').textContent=`${e.target.value} m`;$('threeexplode').setAttribute('aria-valuetext',`${e.target.value} metres`);threeView?.setExplode(e.target.value)};
-$('threeexplode').onchange=()=>threeView?.fit();$('threewalls').onchange=e=>threeView?.setWalls(e.target.checked);$('threecutaway').onchange=e=>threeView?.setCutaway(e.target.checked);$('threelabels').onchange=e=>threeView?.setLabels(e.target.checked);
+$('threeexplode').onchange=()=>threeView?.fit();$('threewalls').onchange=e=>threeView?.setWalls(e.target.checked);$('threecutaway').onchange=e=>threeView?.setCutaway(e.target.checked);$('threelabels').onchange=e=>threeView?.setLabels(e.target.checked);$('threexray').onchange=e=>threeView?.setXray?.(e.target.checked);
 $('threefallback').onclick=()=>{$('buildingpreview3d').close();openStack()};
+$('buildingpreview3d').addEventListener('cancel',e=>{if(threeView?.getFocusedFloor?.()){e.preventDefault();threeView.showAll()}});
+$('threefloors').addEventListener('pointerover',e=>{const row=e.target.closest('[data-isolate3d]')||e.target.closest('div')?.querySelector('[data-isolate3d]');if(row)threeView?.hoverFloor?.(row.dataset.isolate3d)});$('threefloors').addEventListener('pointerleave',()=>threeView?.hoverFloor?.(null));
 $('save3dpng').onclick=async()=>{if(!threeView)return;const viewer=threeView,name=threeName;$('save3dpng').disabled=true;try{downloadBlob(`${fileName(name)}-3d-preview.png`,await viewer.png());notify('3D snapshot downloaded')}catch(error){$('threestatus').hidden=false;$('threestatus').textContent='Could not save the snapshot. '+error.message}finally{if(viewer===threeView)$('save3dpng').disabled=false}};
 window.BuildingExports={floorSheet,stackSheet,currentGeometry,svgToPNG,openStack,openThree,disposeThree};
 })();
