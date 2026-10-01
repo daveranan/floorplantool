@@ -9,7 +9,7 @@ function sheetBounds(f){
  const rs=f.rooms||[];if(!rs.length)return{x:-2,y:-2,w:24,h:18};
  const xs=rs.flatMap(r=>[r.x,r.x+r.w]),ys=rs.flatMap(r=>[r.y,r.y+r.h]);
  for(const e of f.externals||[f.external].filter(Boolean)){const r=rs.find(r=>r.id===e.room);if(!r)continue;const vertical=['e','w'].includes(e.side),x=vertical?(e.side==='e'?r.x+r.w:r.x):r.x+r.w/2,y=vertical?r.y+r.h/2:(e.side==='s'?r.y+r.h:r.y),dx=e.side==='e'?1:e.side==='w'?-1:0,dy=e.side==='s'?1:e.side==='n'?-1:0,half=String(e.label||'').length*.12;xs.push(x+dx*4,x+dx*3-half,x+dx*3+half);ys.push(y+dy*4,y+dy*3+1.1)}
- for(const a of f.annotations||[]){const half=String(a.text||'').length*.12;xs.push(a.x-half,a.x+half);ys.push(a.y-.5,a.y+.5)}
+
  const x=Math.min(...xs)-3,y=Math.min(...ys)-3;return{x,y,w:Math.max(...xs)+3-x,h:Math.max(...ys)+3-y};
 }
 function floorSheet(id=floorId){

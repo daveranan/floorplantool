@@ -63,7 +63,7 @@ function mount(container, data, options = {}) {
   controls.minDistance = 1; controls.maxDistance = 1600; controls.screenSpacePanning = true;
   controls.mouseButtons = {LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.PAN, RIGHT: THREE.MOUSE.PAN};
   controls.touches = {ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN};
-  const unit = new THREE.BoxGeometry(1, 1, 1), materials = new Map(), groups = new Map(), sprites = [], roomLabels = [], meshes = [], primaryMeshes = [], decorations = [];
+  const unit = new THREE.BoxGeometry(1, 1, 1), materials = new Map(), groups = new Map(), sprites = [], roomLabels = [], meshes = [], primaryMeshes = [], decorations = [], shapedMeshes = [];
   const material = (color, fade = false) => {
     const key = color + (fade ? ':xray' : '');
     if (!materials.has(key)) materials.set(key, new THREE.MeshStandardMaterial({color, roughness: .88, metalness: 0, transparent: fade, opacity: fade ? .5 : 1, depthWrite: !fade}));
@@ -113,6 +113,13 @@ function mount(container, data, options = {}) {
         mesh.userData.fadeMesh = fade; group.add(fade); meshes.push(fade);
       }
     }
+    for (const polygon of level.polygons || []) {
+      const shape = new THREE.Shape(polygon.polygon.map(p => new THREE.Vector2(p[0], -p[1])));
+      const geometry = new THREE.ExtrudeGeometry(shape, {depth: polygon.height, bevelEnabled: false, steps: 1});
+      geometry.rotateX(-Math.PI / 2); geometry.translate(0, polygon.z, 0);
+      const mesh = new THREE.Mesh(geometry, material(polygon.color)); mesh.userData = {level: level.id, stair: polygon.stair};
+      group.add(mesh); shapedMeshes.push(mesh);
+    }
     const outline = new THREE.Box3Helper(new THREE.Box3(new THREE.Vector3(bounds.minX, level.z + .04, bounds.minY), new THREE.Vector3(bounds.maxX, level.z + .07, bounds.maxY)), 0x7cc4ff);
     outline.visible = false; outline.material.depthTest = true; outline.material.transparent = true; outline.material.opacity = .95; outline.userData.floorHighlight = level.id;
     group.add(outline); decorations.push(outline);
@@ -130,6 +137,20 @@ function mount(container, data, options = {}) {
       leader.visible = false; leader.userData.floorLeader = level.id; group.add(leader); decorations.push(leader);
     }
     for (const room of level.rooms || []) roomLabel(room, level, group);
+    for (const annotation of level.annotations || []) {
+      const name = String(annotation.text || ''), fontSize = annotation.fontSize || .45;
+      if (!name) continue;
+      const worldWidth = Math.min(30, Math.max(fontSize, name.length * fontSize * .58)), worldHeight = fontSize * 1.3;
+      const canvas = document.createElement('canvas'); canvas.width = Math.ceil(worldWidth * 64); canvas.height = Math.ceil(worldHeight * 64);
+      const ctx = canvas.getContext('2d'); if (!ctx) continue;
+      ctx.font = `${fontSize * 64}px system-ui,Segoe UI,sans-serif`; ctx.fillStyle = '#53686d'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(name, canvas.width / 2, canvas.height / 2, canvas.width);
+      const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace;
+      const label = new THREE.Mesh(new THREE.PlaneGeometry(worldWidth, worldHeight), new THREE.MeshBasicMaterial({map: texture, transparent: true, alphaTest: .06, depthTest: true, depthWrite: false}));
+      const source = level.rooms.find(r => r.id === annotation.sourceRoom) || level.rooms.find(r => annotation.x >= r.x && annotation.x <= r.x+r.w && annotation.y >= r.y && annotation.y <= r.y+r.h);
+      label.rotation.x = -Math.PI / 2; label.position.set(annotation.x, (source?.z ?? level.z) + .008, annotation.y); label.renderOrder = 2;
+      label.userData = {level: level.id, annotationLabel: true, annotation: annotation.id, name}; group.add(label); roomLabels.push(label);
+    }
   }
   const size = Math.max(b.maxX - b.minX, b.maxY - b.minY, 15) * 1.35;
   const grid = new THREE.GridHelper(size, Math.min(100, Math.ceil(size)), 0x677b92, 0x303a48);
@@ -272,7 +293,7 @@ function mount(container, data, options = {}) {
   function hitFloor(event) {
     const rect = renderer.domElement.getBoundingClientRect(); if (!rect.width || !rect.height) return null;
     mouse.set((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1); camera.updateMatrixWorld(true); scene.updateMatrixWorld(true); raycaster.setFromCamera(mouse, camera);
-    const targets = [...meshes, ...sprites, ...roomLabels].filter(o => o.visible && groups.get(o.userData.level)?.visible), hit = raycaster.intersectObjects(targets, false)[0];
+    const targets = [...meshes, ...shapedMeshes, ...sprites, ...roomLabels].filter(o => o.visible && groups.get(o.userData.level)?.visible), hit = raycaster.intersectObjects(targets, false)[0];
     const levelId = hit?.object.userData.level, box = hit?.object.userData.boxes?.[hit.instanceId], roomId = hit?.object.userData.room || box?.room;
     const room = data.levels.find(level => level.id === levelId)?.rooms?.find(room => room.id === roomId);
     renderer.domElement.title = room ? room.name : '';

@@ -2,6 +2,7 @@
 (function(root){
 'use strict';
 const connections=root.KERN_CONNECTIONS||(typeof require==='function'?require('./geometry.js'):null);
+const objects=root.KERN_OBJECTS||(typeof require==='function'?require('./objects.js'):null);
 const EPS=1e-6,finite=(x,d=0)=>Number.isFinite(x)?x:d,round=x=>Math.round(x*1e6)/1e6;
 const palette={tech:'#91afbd',living:'#c9ad83',service:'#9eafa2',circulation:'#c6cbd1',core:'#9da9b6',terrace:'#c7ba92',cave:'#b5ad9c',courtyard:'#8dad82',secret:'#bb9277',solid:'#727c8a'};
 function intersect(a,b){const x=Math.max(a.x,b.x),y=Math.max(a.y,b.y),w=Math.min(a.x+a.w,b.x+b.w)-x,h=Math.min(a.y+a.h,b.y+b.h)-y;return w>EPS&&h>EPS?{x,y,w,h}:null}
@@ -19,6 +20,7 @@ function build(plan,stairHelper){
  for(const level of levels){const f=plan.floors[level.id];for(const r of f.rooms||[]){let d=null;try{d=stairHelper?.build(plan,level.id,r.id)}catch(error){warnings.push(`${level.id}: stair geometry could not be calculated for ${r.name}.`)}if(!d)continue;const key=d.connectionId||`${level.id}:${r.id}`;if(seenStairs.has(key))continue;seenStairs.add(key);details.push(d);for(const w of d.warnings||[])warnings.push(`${r.name}: ${w.text}`);}}
  for(const d of details)for(const o of d.openings||[]){if(byId[o.floor]&&o.rect)byId[o.floor].holes.push({...o.rect,reason:'required-stair-opening'})}
  for(const level of levels){const f=plan.floors[level.id],rooms=f.rooms||[],edges=new Map(),holes=level.holes;
+  level.annotations=objects?.annotations(plan,level.id)||[];level.polygons=[];
   for(const r of rooms)if(r.type==='void'||r.type==='courtyard')holes.push({x:r.x,y:r.y,w:r.w,h:r.h,reason:r.type});
   if(plan.courtyard&&level.z>=finite(plan.courtyard.z,0)-EPS)holes.push({...plan.courtyard,reason:'courtyard'});
   const stairRooms=new Set();for(const d of details)if((d.stops||[]).some(s=>s.floor===level.id))stairRooms.add(d.roomId);
@@ -35,8 +37,8 @@ function build(plan,stairHelper){
   for(const o of level.openings){if(o.height<=EPS)continue;const t=.055,z=o.z+.015;add(level,{x:o.axis==='h'?o.start:o.fixed-t,y:o.axis==='h'?o.fixed-t:o.start,w:o.axis==='h'?o.end-o.start:t*2,h:o.axis==='h'?t*2:o.end-o.start,z,height:o.blocked?Math.min(o.height,1.3):.035,kind:'opening-marker',color:o.blocked?'#cb776b':o.kind==='passage'?'#7cbd9d':'#d8b66f',door:o.id})}
  }
  // True calculated treads and landings, once per stair stack, grouped with their departure floor.
- for(const d of details){const stairSeen=new Set();for(const flight of d.flights||[]){const segment=(d.segments||[]).find(s=>s.id===flight.segmentId),level=byId[segment?.from]||byId[d.floorId];if(!level)continue;for(const t of flight.treads||[]){const key=flight.id+':'+t.index;if(stairSeen.has(key))continue;stairSeen.add(key);add(level,{...t.rect,z:t.z-Math.min(.15,flight.riserHeight||.15),height:Math.min(.15,flight.riserHeight||.15),kind:'stair',color:'#bdc6d2',stair:d.connectionId})}}
-  for(const landing of d.landings||[]){const stop=(d.stops||[]).find(s=>Math.abs(s.z-landing.z)<EPS),segment=(d.segments||[]).find(s=>s.id===landing.segmentId),level=byId[stop?.floor]||byId[segment?.from]||byId[d.floorId];if(level)add(level,{...landing.rect,z:landing.z-.18,height:.18,kind:'landing',color:'#bdc6d2',stair:d.connectionId})}
+ for(const d of details){const stairSeen=new Set();for(const flight of d.flights||[]){const segment=(d.segments||[]).find(s=>s.id===flight.segmentId),level=byId[segment?.from]||byId[d.floorId];if(!level)continue;for(const t of flight.treads||[]){const key=flight.id+':'+t.index;if(stairSeen.has(key))continue;stairSeen.add(key);const shape={...t.rect,z:t.z-Math.min(.15,flight.riserHeight||.15),height:Math.min(.15,flight.riserHeight||.15),kind:'stair',color:'#bdc6d2',stair:d.connectionId};if(t.curved)level.polygons.push({...shape,polygon:t.polygon});else add(level,shape);}}
+  for(const landing of d.landings||[]){const stop=(d.stops||[]).find(s=>Math.abs(s.z-landing.z)<EPS),segment=(d.segments||[]).find(s=>s.id===landing.segmentId),level=byId[stop?.floor]||byId[segment?.from]||byId[d.floorId];if(level){const shape={...landing.rect,z:landing.z-.18,height:.18,kind:'landing',color:'#bdc6d2',stair:d.connectionId};if(d.stairType==='spiral')level.polygons.push({...shape,polygon:landing.polygon});else add(level,shape);}}
  }
  const boxes=levels.flatMap(l=>l.boxes),bounds=boxes.length?{minX:Math.min(...boxes.map(b=>b.x)),maxX:Math.max(...boxes.map(b=>b.x+b.w)),minY:Math.min(...boxes.map(b=>b.y)),maxY:Math.max(...boxes.map(b=>b.y+b.h)),minZ:Math.min(...boxes.map(b=>b.z)),maxZ:Math.max(...boxes.map(b=>b.z+b.height))}:{minX:-5,maxX:5,minY:-5,maxY:5,minZ:levels[0].z,maxZ:levels.at(-1).z+3};
  return{schema:'building-preview-1',units:'metres',levels,bounds,warnings:[...new Set(warnings)],assumptions:'Concept preview. Unspecified wall heights use 3 m; slabs use 0.3 m unless specified. Required stair and courtyard openings are shown. No roofs, structural engineering or traversal certification.'};

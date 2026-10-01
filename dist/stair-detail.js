@@ -48,6 +48,9 @@ function build(plan,floorId,roomId,options={}){
  const stops=connection?arr(c.floors).map(id=>{const f=plan.floors[id],r=arr(f?.rooms).find(a=>a?.id===roomId);return f&&r?{floor:id,z:finite(r.z,f.z),room:r}:null}).filter(Boolean).sort((a,b)=>a.z-b.z):[{floor:floorId,z:finite(c.lowerZ,finite(room.lowerZ,room.z)),room},{floor:floorId,z:finite(c.upperZ,finite(room.upperZ,floor.z)),room}];
  if(stops.length<2||stops.some(s=>!Number.isFinite(s.z))){warn('missing-levels','Connected stair needs two explicit, finite floor elevations');return{roomId,floorId,warnings,status:'error',flights:[],landings:[],openings:[],access:[],segments:[],metrics:{},displayFlights:[],displayLandings:[]}}
  for(const stop of stops){if(['x','y','w','h'].some(k=>Math.abs(stop.room[k]-room[k])>.01))warn('alignment',`${stop.floor}: stair footprint does not align with ${floorId}`)}
+ const stairType=room.stairType||c.stairType||'switchback';
+ if(['straight','spiral'].includes(stairType))return (root.KERN_STAIR_TYPES||(typeof require==='function'?require('./stair-types.js'):null)).build({plan,floorId,room,c,spec,axis,end,stops,warnings});
+ if(stairType!=='switchback')warn('unsupported-type','Unsupported stair type: '+String(stairType));
  const flights=[],landings=[],segments=[],openings=[],walkSurfaces=[],obstacles=[];
  const p=spec.perimeter,C=spec.clearWidth,L=spec.landingDepth,G=spec.treadDepth;
  const nearEnd=p+L,farEnd=frame.long-p;
@@ -177,6 +180,7 @@ function slice(detail,levelIdOrZ){
 }
 function markup(detail){
  if(!detail)return'';const r=detail.footprint;if(!r)return'';
+ if(detail.stairType==='spiral')return (root.KERN_STAIR_TYPES||(typeof require==='function'?require('./stair-types.js'):null)).spiralMarkup(detail);
  const n=v=>round(v),poly=p=>p.map(a=>a.map(n).join(',')).join(' '),color=detail.status==='error'?'#b73e31':'#476777';
  const title=`${detail.name}: ${detail.metrics.clearWidth.toFixed(2)} m clear; ${detail.metrics.requiredHeadroom.toFixed(2)} m target headroom. ${detail.clearanceNote}`;
  let s=`<g class="stair-detail" data-stair="${esc(detail.roomId)}" pointer-events="none"><title>${esc(title)}</title>`;
@@ -185,6 +189,7 @@ function markup(detail){
  const drawn=new Set();for(const l of detail.displayLandings||[]){const key=poly(l.polygon);if(drawn.has(key))continue;drawn.add(key);s+=`<polygon points="${key}" fill="#f2e9ca" fill-opacity=".86" stroke="${color}" stroke-width=".055"/>`}
  for(const f of detail.displayFlights||[]){const c=f.direction==='up'?'#216c7b':'#a2612c',dashed=f.role==='continuation';s+=`<polygon points="${poly(f.polygon)}" fill="${f.direction==='up'?'#dbeaed':'#eee1cf'}" fill-opacity=".85" stroke="${c}" stroke-width=".065"${dashed?' stroke-dasharray=".14 .11"':''}/>`;
   for(const t of f.treads)s+=`<path d="M${t.line[0].map(n).join(' ')}L${t.line[1].map(n).join(' ')}" stroke="${c}" stroke-width=".035"/>`;
+  const cutTread=f.treads[Math.min(f.treads.length-1,Math.max(0,Math.floor(1.2/f.riserHeight)-1))];if(cutTread){const [a,b]=cutTread.line;s+=`<path class="stair-cut-line" d="M${a[0]} ${a[1]}L${b[0]} ${b[1]}" stroke="${c}" stroke-width=".08" stroke-dasharray=".13 .07"/>`;}
   const [a,b]=f.arrowPath,dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len,from=[a[0]+ux*.25,a[1]+uy*.25],to=[b[0]-ux*.25,b[1]-uy*.25];
   s+=`<path d="M${from.map(n).join(' ')}L${to.map(n).join(' ')}m${n(-ux*.28-uy*.15)} ${n(-uy*.28+ux*.15)}L${to.map(n).join(' ')}l${n(-ux*.28+uy*.15)} ${n(-uy*.28-ux*.15)}" fill="none" stroke="${c}" stroke-width=".095"/>`;
   const cx=(a[0]+b[0])/2,cy=(a[1]+b[1])/2,rotation=detail.runAxis==='y'?-90:0,label=f.label;

@@ -1,5 +1,19 @@
 # Current editor regression checks
 
+## October 1, 2026: compact copy, objects, services and stair types
+
+Run `npm test` for all **26 current JavaScript suites**. The original 24 plus `test-objects-services.cjs` and `test-stair-types.cjs` pass. The added suites exercise legacy annotation migration without selection-time document changes; ID remapping, internal/exterior connection graphs and cross-floor clipboard transfers; atomic undo and native text exceptions; repeated/interrupted outline and service tools; independent overlay persistence and JSON roundtrip; straight and left/right spiral metrics, exact polygon treads, beam/headroom rejection, skipped floors and complete linked-stack copies. Scissor geometry is explicitly rejected.
+
+Run `npm start`, then `npm run test:browser` in another terminal on Windows with Chrome installed in its standard Program Files path. The runner uses an isolated profile and localhost DevTools. Chrome **154.0.8037.58** passed **32 actual browser checks**, including real pointer drags, canceled route drawing, hatch placement, route-only selection, editable service height, cross-floor clipboard/move/undo, linked spiral copies, staircase fit previews, 2D/3D preservation, browser-local reload, independent building import, mobile palette bounds/target separation and keyboard focus restoration. There were **zero uncaught runtime exceptions**. SVG, PNG and building JSON were downloaded by Chrome and checked for readable nonempty bytes. Screenshots and the result JSON are written to ignored `qa/`.
+
+The rendered desktop B1/B2 plans, service mode, straight/spiral dialogs, spiral 3D scene and 390 × 844 phone editor/palette were visually inspected. Chrome rendered WebGL using software SwiftShader. This establishes browser drawing, not hardware-GPU or physical-touch behavior. The 3D service/symbol layer remains a 2D authoring overlay; stairs use the same exact polygon geometry in the 3D preview.
+
+All seven floor extents are unchanged from V11. Upper L1/L2/L3 room and door data is identical; the V11 seed and JSON are byte-unchanged. V12 has zero placed equipment/furniture outlines or service terminals, and only the two explicitly provisional service route proposals. Vehicle turning, clinical operation, service-network connectivity, structural/code compliance and runtime traversal remain unverified.
+
+The supported Library consumer helper could not install the supplied PNG references on Windows: its unchanged helper raised `AttributeError: module 'os' has no attribute 'setxattr'`. No workaround was used. The parent inspected the reference images and supplied their door, stair and HVAC visual requirements. Windows screenshot evidence uses locally rendered app output.
+
+The historical `python test-compact-layout.py` still has its pre-existing `floorbrief`-inside-`aside` assertion failure. It is not included among the 26 passing JavaScript suites. The older milestone notes below describe their original environments; their browser-blocked statements have been superseded by this Windows Chrome evidence.
+
 Run from the project root:
 
 - `node test-buildings.cjs`: legacy migration across 13 variants, failure recovery, isolation, view state, undo, archive, floor operations, imports, widths and cancellation

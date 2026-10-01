@@ -1,5 +1,7 @@
 # FloorPlanTool source export
 
+This guide and `SOURCE_MANIFEST.json` record the **original** October 1 source export. Subsequent local feature work is tracked in Git; use the current README and TESTING.md for the compact V12 copy, authoring features and Windows browser evidence. The historical hashes below are not a manifest of the updated working tree.
+
 Source snapshot: `56cd3c20437b15847a27c9a2a0245991601a7949`  
 Packaged: 2026-10-01 UTC
 
