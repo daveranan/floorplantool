@@ -12,11 +12,11 @@ function sheetBounds(f){
 
  const x=Math.min(...xs)-3,y=Math.min(...ys)-3;return{x,y,w:Math.max(...xs)+3-x,h:Math.max(...ys)+3-y};
 }
-function floorSheet(id=floorId){
+function floorSheet(id=floorId,titleOverride){
  const f=model.floors[id];if(!f)throw Error('That floor no longer exists.');
  const previous=floorId,b=sheetBounds(f);let markup;
  try{floorId=id;markup=planMarkup(true,false)}finally{floorId=previous}
- const width=1800,planHeight=Math.max(420,Math.min(2000,(width-120)*b.h/b.w)),height=planHeight+235,title=currentBuilding().name;
+ const width=1800,planHeight=Math.max(420,Math.min(2000,(width-120)*b.h/b.w)),height=planHeight+235,title=titleOverride||currentBuilding().name;
  const size=Math.max(18,Math.min(34,1600/(Math.max(1,title.length)*.58))),caption=`${id} / ${f.name} / ${fmt(f.z||0)}`,captionSize=Math.max(12,Math.min(24,1600/(Math.max(1,caption.length)*.58)));
  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img"><title>${esc(title)} · ${esc(id)} · ${esc(f.name)}</title><rect width="100%" height="100%" fill="#f7f7f2"/><g font-family="system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" letter-spacing="normal" word-spacing="normal" fill="#253240"><text x="60" y="57" font-size="${size}" font-weight="bold">${esc(title)}</text><text x="60" y="94" font-size="${captionSize}">${esc(caption)}</text><text x="60" y="128" font-size="15" fill="#596979">CURRENT FLOOR PLAN · METRES · ${esc(new Date().toISOString().slice(0,10))}</text></g><svg x="60" y="153" width="1680" height="${planHeight}" viewBox="${b.x} ${b.y} ${b.w} ${b.h}" preserveAspectRatio="xMidYMid meet">${markup}</svg><line x1="60" x2="1740" y1="${height-54}" y2="${height-54}" stroke="#c8cfd3"/><text x="60" y="${height-27}" font-family="system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" letter-spacing="normal" word-spacing="normal" font-size="14" fill="#65717d">Concept plan · not a construction or life-safety drawing · current edits, no selection overlays</text></svg>`;
 }
@@ -98,5 +98,9 @@ $('buildingpreview3d').addEventListener('cancel',e=>{e.preventDefault();threeVie
 $('threegrid').onchange=e=>threeView?.setGrid?.(e.target.checked);
 $('threefloors').addEventListener('pointerover',e=>{const row=e.target.closest('[data-isolate3d]')||e.target.closest('div')?.querySelector('[data-isolate3d]');if(row)threeView?.hoverFloor?.(row.dataset.isolate3d)});$('threefloors').addEventListener('pointerleave',()=>threeView?.hoverFloor?.(null));
 $('save3dpng').onclick=async()=>{if(!threeView)return;const viewer=threeView,name=threeName;$('save3dpng').disabled=true;try{downloadBlob(`${fileName(name)}-3d-preview.png`,await viewer.png());notify('3D snapshot downloaded')}catch(error){if(viewer===threeView){$('threestatus').hidden=false;$('threestatus').textContent='Could not save the snapshot. '+error.message}}finally{if(viewer===threeView)$('save3dpng').disabled=false}};
-window.BuildingExports={floorSheet,stackSheet,currentGeometry,svgToPNG,openStack,openThree,disposeThree,setWorkspaceMode,isThreeMode,syncWorkspace,focusThreeFloor:id=>threeView?.isolate(id)};syncModeUI();
+function snapshotSheet(plan,source,id,name){
+ const oldModel=model,oldFloor=floorId,oldVariant=variant;
+ try{model=clone(plan);variant=source||'custom';floorId=id;return floorSheet(id,name)}finally{model=oldModel;floorId=oldFloor;variant=oldVariant}
+}
+window.BuildingExports={snapshotSheet,floorSheet,stackSheet,currentGeometry,svgToPNG,openStack,openThree,disposeThree,setWorkspaceMode,isThreeMode,syncWorkspace,focusThreeFloor:id=>threeView?.isolate(id)};syncModeUI();
 })();

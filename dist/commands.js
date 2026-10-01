@@ -9,6 +9,7 @@ function commands(){
  add('stairs','Create connected stairs','Drawing',click('createstairs'));add('clear-selection','Clear selection','Drawing',()=>{setSelection();render()});
  add('tool-place','Place outlines, text or HVAC','Drawing',()=>window.KERN_PLACE?.open(),'B','Categorized previews; drag to the plan or click to place');
  add('place-hvac','Choose HVAC route or terminal','Drawing',()=>window.KERN_PLACE?.open('hvac'),'','Height, location and use settings are in the inspector');
+ add('showversionhistory','Show version history','View',()=>window.KERN_HISTORY?.show());add('save-named-version','Save named version','Files',()=>window.KERN_HISTORY?.named(),'Ctrl / ⌘ Alt S');
  add('undo','Undo','Edit',click('undo'),'Ctrl / ⌘ Z','',!history.length);add('redo','Redo','Edit',click('redo'),'Ctrl / ⌘ Shift Z','',!future.length);
  for(const [id,label]of [['newbuilding','New building'],['duplicatebuilding','Duplicate building'],['renamebuilding','Rename building'],['addfloor','Add floor'],['managefloor','Edit floor details'],['removefloor','Remove current floor']])add(id,label,'Buildings & floors',click(id),'','',id==='removefloor'&&floorId==='L0');
  for(const [id,f]of Object.entries(model.floors).sort((a,b)=>b[1].z-a[1].z))add('floor-'+id,'Go to '+id+' · '+f.name,'Floors',()=>{if(three){window.BuildingExports.focusThreeFloor(id);return}finishDrag(true);floorId=id;setSelection();render();saveView()},'',(f.z>0?'+':'')+f.z+' m',three&&$('threefit').disabled);
