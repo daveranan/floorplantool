@@ -105,7 +105,7 @@ function mount(container, data, options = {}) {
     const batches = new Map();
     for (const box of [...level.boxes,...data.levels.flatMap(other=>other.id===level.id?[]:other.boxes.filter(b=>['stair','landing'].includes(b.kind)&&b.z<level.z&&data.stairs?.some(st=>st.connectionId===b.stair&&st.stops.some(stop=>stop.floor===level.id)&&b.z>=Math.max(...st.stops.filter(stop=>stop.z<level.z).map(stop=>stop.z))-.2)).map(b=>({...b,contextOnly:true})))]) {const key = `${box.color}:${box.kind}:${!!box.contextOnly}`; if (!batches.has(key)) batches.set(key, []); batches.get(key).push(box);}
     for (const boxes of batches.values()) {
-      const mesh = new THREE.InstancedMesh(unit, material(boxes[0].color), boxes.length);
+      const mesh = new THREE.InstancedMesh(unit, material(boxes[0].color,boxes[0].kind==='window'), boxes.length);
       mesh.frustumCulled = false; mesh.userData = {boxes, level: level.id, faded: new Set()}; group.add(mesh); meshes.push(mesh); primaryMeshes.push(mesh);
       if (boxes[0].kind === 'wall') {
         const fade = new THREE.InstancedMesh(unit, material(boxes[0].color, true), boxes.length);
@@ -158,14 +158,14 @@ function mount(container, data, options = {}) {
   // Draw the datum before opaque slabs so coplanar grid lines never stripe room floors.
   grid.renderOrder = -10;
   for (const m of Array.isArray(grid.material) ? grid.material : [grid.material]) {m.transparent = false; m.opacity = 1; m.depthWrite = false;}
-  let gap = 0, disposed = false, showWalls = true, cutaway = true, cutHeight = 1.15, labels = true, xray = false, showGrid = true, hovered = null, focused = null, physical = [], lastOcclusion = '', clickStart = null, transition = null, interacting = false, xraySignature = '', xrayChangedAt = 0, xrayPending = false;
+  let gap = 0, disposed = false, showWalls = true, showCeilings = false, showSlabs = true, cutaway = true, cutHeight = 1.15, labels = true, xray = false, showGrid = true, hovered = null, focused = null, physical = [], lastOcclusion = '', clickStart = null, transition = null, interacting = false, xraySignature = '', xrayChangedAt = 0, xrayPending = false;
   let navigationFloor = groups.has(options.activeFloor) ? options.activeFloor : ground?.id || data.levels[groundRank]?.id, navigationY = groups.get(navigationFloor)?.userData.z || 0;
   const floorY = id => {const group = groups.get(id); return group ? group.userData.z + group.userData.rank * gap : navigationY;};
   const motionPreference = window.matchMedia?.('(prefers-reduced-motion: reduce)');
   const pointerIds = new Set(), raycaster = new THREE.Raycaster(), mouse = new THREE.Vector2();
   const visibleIds = () => [...groups].filter(([, group]) => group.visible).map(([id]) => id);
   const notifyVisibility = () => options.onVisibilityChanged?.(visibleIds(), focused);
-  function heightFor(box, level) {let height = box.height;if(box.contextOnly&&focused!==level.id)return 0;if(box.kind==='ceiling'&&cutaway)return 0; const wall = box.kind === 'wall' || box.kind === 'solid'; if (cutaway && wall) height = Math.max(0, Math.min(height, (box.baseZ ?? level.z) + cutHeight - box.z)); if (wall && !showWalls) height = 0; return height;}
+  function heightFor(box, level) {let height = box.height;if(box.contextOnly&&focused!==level.id)return 0;if(box.kind==='slab'&&!walking&&!showSlabs)return 0;if(box.kind==='ceiling'&&!walking&&(!showCeilings||cutaway))return 0; const wall = box.kind === 'wall' || box.kind === 'solid'; if (cutaway && wall) height = Math.max(0, Math.min(height, (box.baseZ ?? level.z) + cutHeight - box.z)); if (wall && !showWalls) height = 0; return height;}
   function updateMatrices() {
     const transform = new THREE.Object3D(); physical = [];
     for (const group of groups.values()) group.position.y = group.userData.rank * gap;
@@ -327,19 +327,19 @@ function mount(container, data, options = {}) {
   const torch=new THREE.SpotLight(0xffefd2,55,35,Math.PI/7,.65,1.3);torch.visible=false;scene.add(torch);scene.add(torch.target);
   const outdoor=new THREE.Group();const outsideRect={x:centerX-(size+50)/2,y:centerY-(size+50)/2,w:size+50,h:size+50};for(const r of window.BuildingPreviewGeometry.subtractAll(outsideRect,(ground?.rooms||[]).filter(r=>!['courtyard','terrace'].includes(r.type)))){const mesh=new THREE.Mesh(new THREE.PlaneGeometry(r.w,r.h),material('#535c62'));mesh.rotation.x=-Math.PI/2;mesh.position.set(r.x+r.w/2,groundZ-.02,r.y+r.h/2);outdoor.add(mesh);}outdoor.visible=false;scene.add(outdoor);
 
-  function updateWalk(){if(!walkState)return;camera.position.set(walkState.x,walkState.z+1.62,walkState.y);camera.rotation.order='YXZ';camera.rotation.set(walkPitch,walkYaw,0);const direction=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);torch.position.copy(camera.position);torch.target.position.copy(camera.position).add(direction.multiplyScalar(8));torch.visible=flashOn;}
+  function updateWalk(){if(!walkState)return;camera.position.set(walkState.x,walkState.z+(walkState.eyeHeight??1.62),walkState.y);camera.rotation.order='YXZ';camera.rotation.set(walkPitch,walkYaw,0);const direction=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);torch.position.copy(camera.position);torch.target.position.copy(camera.position).add(direction.multiplyScalar(8));torch.visible=flashOn;for(const sprite of sprites)sprite.visible=false;for(const label of roomLabels)label.visible=!label.userData.duplicate&&Math.abs(label.position.y-walkState.z)<.2;}
   function setWalk(state,yaw=0,pitch=0,flash=true){if(state){if(!walking){orbitState=getViewState();walking=true;scene.children.filter(n=>n.isHemisphereLight||n.isDirectionalLight).forEach(n=>{n.userData.originalIntensity=n.intensity;n.intensity=n.isHemisphereLight?.8:.3;});editHandles.visible=false;controls.enabled=false;transition=null;gap=0;showWalls=true;cutaway=false;xray=false;labels=false;focused=null;for(const g of groups.values())g.visible=true;grid.visible=false;outdoor.visible=true;updateMatrices();}walkState=state;walkYaw=yaw;walkPitch=pitch;flashOn=flash;updateWalk();}else if(walking){walking=false;scene.children.filter(n=>n.isHemisphereLight||n.isDirectionalLight).forEach(n=>n.intensity=n.userData.originalIntensity??n.intensity);editHandles.visible=true;walkState=null;torch.visible=false;outdoor.visible=false;controls.enabled=true;camera.rotation.order='XYZ';restoreViewState(orbitState);}}
   cleanupOnFailure = dispose;observer.observe(container); resize(); updateMatrices();
   if (options.viewState) restoreViewState(options.viewState); else fit();
   // Open in overview; floor isolation is an explicit click.
   renderer.setAnimationLoop(() => {if (disposed) return;if(walking){updateWalk();renderer.render(scene,camera);return;} if (!advanceCamera()) controls.update(); refreshOcclusion(); renderer.render(scene, camera);});
   function getViewState() {
-    return {position: camera.position.toArray(), target: controls.target.toArray(), focused, navigationFloor, navigationY, navigationElevation: floorY(navigationFloor), visible: visibleIds(), gap, showWalls, cutaway, cutHeight, labels, xray, showGrid,
+    return {position: camera.position.toArray(), target: controls.target.toArray(), focused, navigationFloor, navigationY, navigationElevation: floorY(navigationFloor), visible: visibleIds(), gap, showWalls, showCeilings, showSlabs, cutaway, cutHeight, labels, xray, showGrid,
       overview: null};
   }
   function restoreViewState(state) {
     if (!state || disposed) return; const vector = value => Array.isArray(value) && value.length === 3 && value.every(Number.isFinite);
-    cancelTransition(); gap = Math.max(0, Math.min(12, Number(state.gap) || 0)); showWalls = state.showWalls !== false; cutaway = state.cutaway !== false;
+    cancelTransition(); gap = Math.max(0, Math.min(12, Number(state.gap) || 0)); showWalls = state.showWalls !== false;showCeilings=!!state.showCeilings;showSlabs=state.showSlabs!==false; cutaway = state.cutaway !== false;
     cutHeight = Number.isFinite(state.cutHeight) ? Math.max(.4, Math.min(2.4, state.cutHeight)) : 1.15; labels = state.labels !== false; xray = !!state.xray; showGrid = state.showGrid !== false; grid.visible = showGrid;
     focused = groups.has(state.focused) ? state.focused : null; const ids = Array.isArray(state.visible) ? state.visible.filter(id => groups.has(id)) : [...groups.keys()];
     for (const [id, group] of groups) group.visible = focused ? id === focused : ids.includes(id);
@@ -368,6 +368,8 @@ function mount(container, data, options = {}) {
     getFocusedFloor() {return focused;},
     setFloor(id, visible) {const group = groups.get(id); if (!group) return; cancelTransition(); group.visible = !!visible; focused = null; selectRoom(null,null); hoverFloor(null); updateMatrices(); refreshOcclusion(true); notifyVisibility();},
     setExplode(value) {const nextGap = Math.max(0, Math.min(12, Number(value) || 0)); if (nextGap === gap) return; const previousElevation = floorY(navigationFloor); gap = nextGap; hoverFloor(null); updateMatrices(); if (focused) followFloor(focused, !!transition); else {cancelTransition(); navigationY += floorY(navigationFloor) - previousElevation;} refreshOcclusion(true);},
+    setSlabs(value){showSlabs=!!value;updateMatrices();refreshOcclusion(true);},
+    setCeilings(value){showCeilings=!!value;updateMatrices();refreshOcclusion(true);},
     setWalls(value) {showWalls = !!value; updateMatrices(); refreshOcclusion(true);},
     setCutaway(value) {cutaway = !!value; updateMatrices(); refreshOcclusion(true);},
     setCutHeight(value) {const height = Number(value); if (!Number.isFinite(height)) return; cutHeight = Math.max(.4, Math.min(2.4, height)); updateMatrices(); refreshOcclusion(true);},
