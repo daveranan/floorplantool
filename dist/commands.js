@@ -7,6 +7,8 @@ function commands(){
  const three=window.BuildingExports?.isThreeMode?.()||false;const out=[],add=(id,label,group,action,shortcut='',detail='',disabled=false)=>out.push({id,label,group,action,shortcut,detail,disabled:disabled||$(id)?.disabled===true||three&&(['Drawing','Edit','Buildings & floors'].includes(group)||id.startsWith('snap-')||id.startsWith('connection-type-')||['dimensions','lower-floors','import','archive'].includes(id))});
  for(const [id,label,key,detail]of [['select','Select objects','V / Esc','Drag empty canvas to box-select; Shift adds or removes'],['door','Draw a door on a wall','D','Hover a shared or outside wall, then click'],['connect','Connect rooms or Outside','C','Drag across a shared or exposed wall'],['disconnect','Disconnect rooms','X','Click a connection or drag between connected rooms'],['draw','Draw a room','P','Drag a rectangle using the current grid']])add('tool-'+id,label,'Drawing',click('tool-'+id),key,detail);
  add('stairs','Create connected stairs','Drawing',click('createstairs'));add('clear-selection','Clear selection','Drawing',()=>{setSelection();render()});
+ add('tool-place','Place outlines, text or HVAC','Drawing',()=>window.KERN_PLACE?.open(),'B','Categorized previews; drag to the plan or click to place');
+ add('place-hvac','Choose HVAC route or terminal','Drawing',()=>window.KERN_PLACE?.open('hvac'),'','Height, location and use settings are in the inspector');
  add('undo','Undo','Edit',click('undo'),'Ctrl / ⌘ Z','',!history.length);add('redo','Redo','Edit',click('redo'),'Ctrl / ⌘ Shift Z','',!future.length);
  for(const [id,label]of [['newbuilding','New building'],['duplicatebuilding','Duplicate building'],['renamebuilding','Rename building'],['addfloor','Add floor'],['managefloor','Edit floor details'],['removefloor','Remove current floor']])add(id,label,'Buildings & floors',click(id),'','',id==='removefloor'&&floorId==='L0');
  for(const [id,f]of Object.entries(model.floors).sort((a,b)=>b[1].z-a[1].z))add('floor-'+id,'Go to '+id+' · '+f.name,'Floors',()=>{if(three){window.BuildingExports.focusThreeFloor(id);return}finishDrag(true);floorId=id;setSelection();render();saveView()},'',(f.z>0?'+':'')+f.z+' m',three&&$('threefit').disabled);
@@ -23,7 +25,7 @@ function commands(){
  for(const [id,label]of [['threexray','X-ray foreground walls'],['threewalls','Walls'],['threecutaway','Low-wall cutaway'],['threelabels','Floor and room labels'],['threegrid','Ground grid']])add(id,'3D · '+label,'3D',toggle(id),'',$(id).checked?'On':'Off',!three);
  add('help','Keyboard shortcuts & editor help','Help',click('help'),'Ctrl / ⌘ /','Persistent C / X / P / D tools; V / Escape returns to selection. Space, marquee, groups, Undo and exports');
  add('pan-help','Pan the floor plan','Shortcuts',click('help'),'Space + drag','Middle-mouse drag also pans; two fingers zoom on touch');
- add('group-help','Add or remove selection objects','Shortcuts',click('help'),'Shift + click','Shift-drag toggles the objects enclosed by a selection box');
+ add('group-help','Add or remove selection objects','Shortcuts',click('help'),'Shift + click','Shift boxes toggle; Ctrl boxes only subtract. Boxes exclude doors.');
  add('nudge-help','Move selection by one grid step','Shortcuts',click('help'),'Arrow keys','Shift moves four grid steps; Ctrl / ⌘ Z undoes');
  return out;
 }
