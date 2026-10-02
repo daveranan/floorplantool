@@ -60,7 +60,7 @@
   }
   let state = load();
   function persist() {
-    if (locked) { syncStatus(); return false; }
+    if (locked || buildingState.locked) { if(buildingState.locked)status='Workspace organization is protected while saved buildings need recovery.';syncStatus(); return false; }
     try {
       const current = localStorage.getItem(KEY);
       if (current !== baseline) { locked = true; throw Error('Workspace settings changed in another tab. Reload after backing up any unsaved building edits.'); }
@@ -139,6 +139,7 @@
     $w('workspace-projects').innerHTML = navRow('recent','Recents','recent',all.filter(b=>state.lastOpened[b.id]).length)+navRow('all','All buildings','grid',all.length)+navRow('unsorted','Unsorted','project',all.filter(b=>!projectFor(b.id)).length)+'<div class="workspace-project-label">Projects</div>'+state.projects.map(p=>navRow(p.id,p.name,'project',all.filter(b=>projectFor(b.id)===p.id).length)).join('');
   }
   function thumbnail(b) {
+    if(b.recoveryIssue)return `<div class="workspace-thumbnail workspace-thumbnail-empty">${icon('building')}<span>${escape(b.recoveryStatus)}</span></div>`;
     const floors = b.plan?.floors || {}, keys = Object.keys(floors), preferred = b.view?.floorId;
     const fid = floors[preferred] ? preferred : floors.L0 ? 'L0' : keys[0], f = floors[fid];
     const rooms = (f?.rooms || []).filter(r => ['x','y','w','h'].every(k=>Number.isFinite(r[k])));
@@ -158,7 +159,7 @@
     rows = [...rows].sort((a,b)=>state.selectedProject==='recent'?(state.lastOpened[b.id]||0)-(state.lastOpened[a.id]||0):(Date.parse(b.updatedAt)||0)-(Date.parse(a.updatedAt)||0));
     $w('workspace-heading').textContent = ({all:'All buildings',recent:'Recents',unsorted:'Unsorted'})[state.selectedProject] || title(state.selectedProject);
     $w('workspace-count').textContent = `${rows.length} building${rows.length===1?'':'s'} · stored in this browser`;
-    $w('workspace-grid').innerHTML = rows.map(b=>`<article class="workspace-card"><button class="workspace-card-open" data-open-building="${escape(b.id)}" aria-label="Open ${escape(b.name)}">${thumbnail(b)}<span class="workspace-card-info">${icon('building')}<span><strong title="${escape(b.name)}">${escape(b.name)}</strong><small>${Object.keys(b.plan.floors).length} floors · ${escape(relative(b.updatedAt))}</small></span></span></button><footer><button class="workspace-project-chip" data-move-building="${escape(b.id)}" title="Move to project">${icon('project')}<span>${escape(title(projectFor(b.id)))}</span></button><button data-open-building="${escape(b.id)}" class="workspace-card-arrow" aria-label="Open ${escape(b.name)}">↗</button></footer></article>`).join('');
+    $w('workspace-grid').innerHTML = rows.map(b=>`<article class="workspace-card"><button class="workspace-card-open" data-open-building="${escape(b.id)}" aria-label="Open ${escape(b.name)}">${thumbnail(b)}<span class="workspace-card-info">${icon('building')}<span><strong title="${escape(b.name)}">${escape(b.name)}</strong><small>${b.recoveryStatus?escape(b.recoveryStatus):Object.keys(b.plan.floors).length+' floors · '+escape(relative(b.updatedAt))}</small></span></span></button><footer><button class="workspace-project-chip" data-move-building="${escape(b.id)}" title="Move to project">${icon('project')}<span>${escape(title(projectFor(b.id)))}</span></button><button data-open-building="${escape(b.id)}" class="workspace-card-arrow" aria-label="Open ${escape(b.name)}">↗</button></footer></article>`).join('');
     $w('workspace-empty').hidden = rows.length !== 0;
     $w('workspace-empty-title').textContent = search ? 'No matching buildings' : state.selectedProject==='recent' ? 'Your recent buildings will appear here' : 'No buildings here yet';
     $w('workspace-empty-copy').textContent = search ? 'Try another name or choose All buildings.' : state.selectedProject==='recent' ? 'Open a building from All buildings to get started.' : 'Create a building or move one into this project.';

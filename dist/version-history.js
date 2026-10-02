@@ -73,7 +73,7 @@ window.addEventListener('keydown',e=>{
 window.addEventListener('pagehide',()=>{for(const id of [...pending.keys()])flush(id);});
 window.addEventListener('storage',e=>{if(e.key===KEY&&!panel.hidden)renderList();});
 node('building').addEventListener('change',()=>{closePreview();if(!panel.hidden)renderList();});
-function pruneAutosaves(){try{const db=database();let removed=0;for(const id of Object.keys(db.buildings)){const old=db.buildings[id];db.buildings[id]=old.filter(x=>x.kind!=='auto');removed+=old.length-db.buildings[id].length;}if(!removed)return false;localStorage.setItem(KEY,JSON.stringify(db));status('Older autosaves were cleared to keep space for your current plan. Named versions are preserved.');return true;}catch{return false}}
+function pruneAutosaves(){if(buildingState.locked)return false;try{const db=database();let removed=0;for(const id of Object.keys(db.buildings)){const old=db.buildings[id];db.buildings[id]=old.filter(x=>x.kind!=='auto');removed+=old.length-db.buildings[id].length;}if(!removed)return false;localStorage.setItem(KEY,JSON.stringify(db));status('Older autosaves were cleared to keep space for your current plan. Named versions are preserved.');return true;}catch{return false}}
 window.KERN_HISTORY={show,named,recordCurrent,flush,entries,pruneAutosaves,close:hide};
 try{if(!entries(currentBuilding().id).length)storeSnapshot(capture(),'History started','auto');}catch(e){status(e.message);}
 })();

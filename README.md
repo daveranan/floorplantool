@@ -110,3 +110,13 @@ Select a room and use **Edit points**, then click a corner. **Corner style** off
 For a tall room, select its source room and edit **Room clear height · m**. This is measured upward from the room's surface elevation; **Use floor default** removes its override. Clear-height diagram labels now reflect the actual numeric value. Linked upper-level voids and solid caps retain their intentional types; the inspector explains those linked footprints rather than treating a solid cap as the room interior.
 
 Walking now follows the highest reachable stair/floor support without being pinned beneath a rising flight by retained flooring. Active stair-contact masks keep under-tread remnants from snagging the walker while preserving real overhead and side obstacles. The visible, height-bounded stair cutouts are unchanged.
+
+## Protected recovery and backups
+
+A malformed building no longer replaces the visible workspace with a sample. The planner shows every recoverable building, marks unreadable records explicitly, and can display a matching previous building snapshot read-only. In recovery mode, collection, workspace/project metadata, and version history remain protected from writes. The original current/previous records are retained unchanged.
+
+When saving is blocked or fails, either JSON export action downloads a `kern-storage-recovery` version-1 bundle. Its `raw` object preserves exact browser-storage strings, `latestRaw` records a new read, `loadedBaseline` retains the collection opened by the tab, and `visibleWorkspace` preserves the in-memory view separately. `readErrors` identifies any records that could not be read. Recovery import only adds independent copies when the original collection validates and the visible workspace has no conflicting content. Invalid or divergent saved/unsaved records require review; import never silently chooses an older copy or a placeholder.
+
+Every collection write validates first. Camera, selection, and active-tab changes no longer rotate the previous document checkpoint. Polygon validation uses the same representable world extent as the editor's bounded origin plus dimensions without changing saved coordinates. Repeated door nudges retain at most 80 undo entries.
+
+The recovery warning also offers **Restore recovered collection…** for a reviewed, valid full-collection JSON. It requires the same complete building-ID set, downloads the original raw backup, asks for confirmation, checks that storage has not changed since opening, and replaces only the current collection. It never resets the previous snapshot or history. Null window positions are never automatically repaired. Window edits with no valid grid position now reject atomically; use Ctrl for an intentional free position.
