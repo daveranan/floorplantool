@@ -18,7 +18,7 @@ input.onchange=async()=>{
   // Rehydration invokes render/saveView hooks. Keep every automatic writer blocked.
   buildingState.locked=true;try{buildingHistories.clear();loadBuilding(currentBuilding());render();}finally{buildingState.locked=false;}
   $('saved').dataset.state='saved';$('saved').textContent='Recovered · saved in this browser';$('saved').title='The recovered collection is saved; original previous snapshots and version history remain.';window.KERN_UI.syncStorage();
-  window.KERN_WORKSPACE?.sync();notify(count+' buildings restored · previous snapshots and history preserved');
+  window.KERN_WORKSPACE?.refreshAfterRecovery();notify(count+' buildings restored · previous snapshots and history preserved');
  }catch(error){notify('Recovery not completed: '+error.message);$('savewarningtext').textContent=error.message;}
  finally{input.value='';button.disabled=false;sync();}
 };

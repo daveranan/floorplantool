@@ -326,7 +326,8 @@
   };
   window.addEventListener('pagehide',()=>{rememberCurrent();persist();});
   window.addEventListener('storage',event=>{if(event.key===KEY&&event.newValue!==baseline){locked=true;status='Workspace settings changed in another tab. Organization changes here are in memory only until you reload.';syncStatus();}});
-  window.KERN_WORKSPACE={isHome,showHome,openBuilding,closeTab,selectProject,createProject,moveBuilding,projectFor,sync,handleKeydown,thumbnail,getState:()=>JSON.parse(JSON.stringify(state)),storageKeys:{current:KEY,previous:PREVIOUS}};
+  function refreshAfterRecovery(){if(status==='Workspace organization is protected while saved buildings need recovery.')status='';if(state.activeTab!=='home'){state.activeTab=currentBuilding().id;if(!state.openTabs.includes(state.activeTab))state.openTabs.push(state.activeTab)}sync();}
+  window.KERN_WORKSPACE={isHome,showHome,openBuilding,closeTab,selectProject,createProject,moveBuilding,projectFor,sync,refreshAfterRecovery,handleKeydown,thumbnail,getState:()=>JSON.parse(JSON.stringify(state)),storageKeys:{current:KEY,previous:PREVIOUS}};
   // First use deliberately starts at Home; subsequent visits restore the saved surface.
   const initial=state.activeTab;
   state.activeTab='home';setSurface();sync();

@@ -122,7 +122,7 @@ The combined release also includes `test-stair-walk-contacts.cjs` in the aggrega
 
 Final combined checkpoint: all 28 targeted suites listed above (including the four new suites) passed after integration, preview bundle build passed, and whitespace checks passed. The final aggregate was rerun with the stair-contact suite included and again stops only when it reaches the known legacy building-seed failure. No physical browser/GPU pass is claimed.
 
-## Recovery safeguard verification (unpublished)
+## Recovery safeguard verification (v56)
 
 `node test-persistence-recovery.cjs` loads the actual production script order. It verifies four-building recovery isolation, matching previous snapshots, exact storage preservation through startup/render/switch/Home/pagehide/history timers/pruning, raw+in-memory recovery exports, malformed/empty/missing/future-schema snapshots, rejected invalid writes before either storage update, successful correction, view-only checkpoint preservation, unchanged polygon-boundary roundtrip, safe recovery import, quota failure, blocked storage reads, and refusal to silently import stale saved data over different in-memory work.
 
