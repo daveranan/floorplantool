@@ -17,7 +17,7 @@ $('editservices').onclick=()=>startService(inServiceMode()?'select':'service-sel
 $('drawservice').onclick=()=>startService('service-draw');
 $('servicevisible').onchange=e=>setVisible(e.target.checked);
 $('outerdimensions').onchange=e=>{currentBuilding().view.outerDimensions=e.target.checked;draw();saveView();};
-$('compactvariant').onclick=()=>{closeToolbarMenus();const b=window.KERN_BUILDINGS.building('KERN · Compact functional revision',window.KERN_V12,'v12');b.view.serviceVisibility={B2:true,B3:true};addBuilding(b);notify('Compact revision opened as a separate editable building. Your previous plans are preserved.');};
+$('compactvariant').onclick=()=>{closeToolbarMenus();const source=window.KERN_PUBLISHED_MAIN.building,b=window.KERN_BUILDINGS.building('KERN · Main layout · copy',source.plan,'main');b.view=clone(source.view||window.KERN_BUILDINGS.view());addBuilding(b);};
 for(const id of ['stairtype','spiralhand'])$(id).onchange=renderStairCreation;
 const escapeKeys=e=>{if(e.key==='Escape'&&($( 'symbolmenu').open||$('servicemenu').open)){e.preventDefault();e.stopImmediatePropagation();closeToolbarMenus(true);}};document.addEventListener('keydown',escapeKeys,true);
 function clipboard(key){

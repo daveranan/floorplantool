@@ -1,5 +1,5 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert'),{JSDOM}=require('jsdom');
-const scripts=['seed','seed-v2','seed-v3','seed-v4','seed-v5','seed-v6','seed-v7','seed-v8initial','seed-v8','seed-v9','seed-useredit20260930','seed-v10','seed-v11','seed-v12','objects','stair-types','geometry','stair-detail','stair-author','buildings','app','ui','preview-geometry','exports','commands','symbol-art','object-editor','place-picker'];
+const scripts=['seed','seed-v2','seed-v3','seed-v4','seed-v5','seed-v6','seed-v7','seed-v8initial','seed-v8','seed-v9','seed-useredit20260930','seed-v10','seed-v11','seed-v12','objects','stair-types','geometry','stair-detail','stair-author','seed-main','buildings','app','ui','preview-geometry','exports','commands','symbol-art','object-editor','place-picker'];
 function boot(initial={}){
  const dom=new JSDOM(fs.readFileSync('dist/index.html','utf8'),{url:'https://example.test',runScripts:'outside-only',pretendToBeVisual:true});
  const w=dom.window,doc=w.document;w.alert=m=>{throw Error('Unexpected native alert: '+m)};w.prompt=()=>{throw Error('Unexpected native prompt')};w.confirm=()=>{throw Error('Unexpected native confirmation')};

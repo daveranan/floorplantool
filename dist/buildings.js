@@ -2,8 +2,8 @@
 (function(root){
 'use strict';
 const KEY='kern-buildings-v1',BACKUP='kern-buildings-migration-backup-v1',PREVIOUS=KEY+'.previous';
-const variants=['v11','v10','useredit20260930','v9','v8','v8initial','v7','v6','v5','v4','v3','v2','v1'];
-const labels={v11:'V11 · Concealed concrete L2',v10:'V10 · Polished user edits',useredit20260930:'Your uploaded edits',v9:'V9 · Dropped garage / circulation',v8:'V8 · Double-size garage',v8initial:'V8 · Earlier garage',v7:'V7 · Approved crown baseline',v6:'V6 · Bent arrival',v5:'V5 · Compact court',v4:'V4 · Square / sequence',v3:'V3 · Balanced',v2:'V2 · Room clusters',v1:'V1 · Original'};
+const variants=['v12','v11','v10','useredit20260930','v9','v8','v8initial','v7','v6','v5','v4','v3','v2','v1'];
+const labels={v12:'V12 · Compact functional revision',v11:'V11 · Concealed concrete L2',v10:'V10 · Polished user edits',useredit20260930:'Your uploaded edits',v9:'V9 · Dropped garage / circulation',v8:'V8 · Double-size garage',v8initial:'V8 · Earlier garage',v7:'V7 · Approved crown baseline',v6:'V6 · Bent arrival',v5:'V5 · Compact court',v4:'V4 · Square / sequence',v3:'V3 · Balanced',v2:'V2 · Room clusters',v1:'V1 · Original'};
 const copy=x=>JSON.parse(JSON.stringify(x));
 function id(){return 'building-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10)}
 function view(){return {floorId:'L0',selected:null,selectedDoor:null,zoom:1,pan:{x:0,y:0},viewBounds:null,showBelow:true,dimensions:true}}
@@ -13,7 +13,7 @@ function validate(data,validatePlan){
  if(data?.format!=='kern-buildings'||data.schemaVersion!==1||!Array.isArray(data.buildings)||!data.buildings.length||data.buildings.length>100)throw Error('Expected a building backup');
  const ids=new Set();for(const b of data.buildings){if(!b||typeof b.id!=='string'||ids.has(b.id)||typeof b.name!=='string'||!b.name.trim()||b.name.length>100)throw Error('Invalid building');ids.add(b.id);validatePlan(b.plan)}
  if(!ids.has(data.activeBuildingId))throw Error('Missing active building');
- if(data.archive!==undefined&&(!Array.isArray(data.archive)||data.archive.length>200||data.archive.some(a=>!a||typeof a.id!=='string'||typeof a.name!=='string'||a.name.length>180||!variants.includes(a.sourceVariant)||a.saved!==null&&typeof a.saved!=='string')))throw Error('Invalid archive');
+ if(data.archive!==undefined&&(!Array.isArray(data.archive)||data.archive.length>200||data.archive.some(a=>!a||typeof a.id!=='string'||typeof a.name!=='string'||a.name.length>180||![...variants,'custom','main'].includes(a.sourceVariant)||a.saved!==null&&typeof a.saved!=='string')))throw Error('Invalid archive');
  return data;
 }
 function load(storage,seedFor,validatePlan){
@@ -39,7 +39,7 @@ function load(storage,seedFor,validatePlan){
   }
  }catch(error){locked=true;message='Storage is unavailable or full. Changes are in memory only. Download a backup before closing.'}
  if(!data){const b=building('KERN',seedFor('v11'),'v11');data={format:'kern-buildings',schemaVersion:1,activeBuildingId:b.id,buildings:[b],archive:variants.map(v=>({id:v,name:labels[v],sourceVariant:v,saved:null}))}}
- return {data,baseline,locked,message,migrated};
+ let state={data,baseline,locked,message,migrated};const published=root.KERN_PUBLISHED_MAIN;if(published&&!locked&&data.publishedMainRevision!==published.revision){const next=copy(data);try{validatePlan(published.building.plan);const archived=next.buildings.map(b=>({id:'saved-'+b.id+'-'+published.revision,name:b.name,sourceVariant:[...variants,'custom','main'].includes(b.sourceVariant)?b.sourceVariant:'custom',savedOnly:true,saved:JSON.stringify(b.plan),buildingSnapshot:copy(b)}));next.archive??=[];if(next.archive.length+archived.length>200)throw Error('Archive capacity reached');next.archive.push(...archived);const main=copy(published.building);main.id=id();main.name='KERN · Main layout';main.sourceVariant='main';next.buildings=[main];next.activeBuildingId=main.id;next.publishedMainRevision=published.revision;validate(next,validatePlan);const staged={...state,data:next};persist(storage,staged);state=staged;state.message='Uploaded main layout opened. Previous buildings are in Archive.';}catch(error){state.message='Could not switch to the uploaded layout. Your existing buildings are preserved; export a backup to free storage.';}}return state;
 }
 function persist(storage,state){
  if(state.locked)throw Error('Local saving is blocked. Export a backup before closing.');
