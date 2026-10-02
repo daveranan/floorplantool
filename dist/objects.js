@@ -12,7 +12,7 @@ const catalog=[
 function bounds(o){
  if(o.text!==undefined){const size=o.fontSize||.45;return{x:o.x-Math.max(1,o.text.length)*size*.29,y:o.y-size,w:Math.max(1,o.text.length)*size*.58,h:size*1.3}}
  if(o.points){const xs=o.points.map(p=>p.x),ys=o.points.map(p=>p.y),half=o.width/2;return{x:Math.min(...xs)-half,y:Math.min(...ys)-half,w:Math.max(...xs)-Math.min(...xs)+o.width,h:Math.max(...ys)-Math.min(...ys)+o.width}}
- return{x:o.x,y:o.y,w:o.w,h:o.h};
+ if(o.rotationSpace||o.kind==='hatch'||o.kind==='vent'){const a=(o.rotation||0)*Math.PI/180,w=Math.abs(o.w*Math.cos(a))+Math.abs(o.h*Math.sin(a)),h=Math.abs(o.w*Math.sin(a))+Math.abs(o.h*Math.cos(a));return{x:o.x+o.w/2-w/2,y:o.y+o.h/2-h/2,w,h};}return{x:o.x,y:o.y,w:o.w,h:o.h};
 }
 function transform(o,from,to){
  const sx=to.w/from.w,sy=to.h/from.h,xy=p=>({x:round(to.x+(p.x-from.x)*sx),y:round(to.y+(p.y-from.y)*sy)});
@@ -30,6 +30,7 @@ function validateFloor(f){
   if(f[key]!==undefined&&(!Array.isArray(f[key])||f[key].length>300))throw Error('Invalid '+key+' collection');
   for(const o of arr(f[key])){
    if(!o||typeof o.id!=='string'||!o.id||o.id.length>150||ids.has(o.id)||key!=='annotations'&&(typeof o.name!=='string'||o.name.length>150))throw Error('Invalid or duplicate '+key+' ID');ids.add(o.id);
+   if(o.rotation!==undefined&&!number(o.rotation,0,360))throw Error('Invalid object rotation');
    if(key==='annotations'){if(typeof o.text!=='string'||o.text.length>300||!number(o.x,-150,150)||!number(o.y,-150,150)||!number(o.fontSize,.1,3))throw Error('Invalid annotation');continue;}
    if(key==='symbols'&&!catalog.some(s=>s.kind===o.kind))throw Error('Unknown outline symbol');
    if(key==='services'){
@@ -40,7 +41,7 @@ function validateFloor(f){
     }else if(o.points)throw Error('A terminal needs a rectangular footprint');
    }
    if(!o.points&&['x','y','w','h'].some(k=>!number(o[k],k==='w'||k==='h'?.1:-150,150)))throw Error('Invalid outline dimensions');
-   if(o.rotation!==undefined&&![0,90,180,270].includes(o.rotation))throw Error('Invalid symbol rotation');
+   if(o.rotation!==undefined&&!number(o.rotation,0,360))throw Error('Invalid symbol rotation');
   }
  }
  for(const o of arr(f.services))if(o.routeId!==undefined&&!arr(f.services).some(r=>r.id===o.routeId&&r.points))throw Error('Missing linked service route');
