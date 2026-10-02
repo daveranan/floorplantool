@@ -82,3 +82,7 @@ Focused tests `test-rotate-tool.cjs`, `test-corner-rotation-scene.cjs`, `test-mu
 ## October 2: unified toolbar
 
 `test-shared-toolbar.cjs` covers shared R/E/S/V modes, Local steps/Edge steps, inspector width, unsupported tool gating and restoration, typing guards, and the same full-stair destination dialog without premature model edits. `test-authoring3d-scene.cjs` uses the shared viewer authoring API and verifies there is no separate canvas toolbar. Mobile toolbar-specific 3D layout overrides were removed; responsive browser rendering remains unverified.
+
+## October 2: navigation, selected points and courtyard concept
+
+`test-navigation-workspace.cjs` uses the actual renderer with mocked GPU to verify selection persistence through Tab mode switches, F framing, Alt orbit/right zoom without model mutation, and the fixed zero ground/grid after moving a whole floor. `test-transform-modifiers.cjs` checks proportional/centered resizing, D/window correction, Shift shortcuts and 2D Alt pan/zoom. `test-point-transform.cjs` checks point marquee and group move/resize/rotate with untouched unselected vertices, undo, directional radius dragging and double-click reset. `test-concept-copy.cjs` verifies original preservation, independent concept import and clean Plan/preview checks. The concept asset's route validation separately covers 17 simulated walkthrough routes. Real browser/GPU/physical-input QA remains unperformed.

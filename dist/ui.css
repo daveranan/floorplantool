@@ -103,3 +103,5 @@ body.editing3d[data-view-mode=3d] #inspector{padding:12px 14px;overflow:auto;max
 #heightdialog{width:min(600px,94vw);max-height:85dvh}.height-row{padding:10px 0;border-bottom:1px solid var(--line)}.height-row>strong{display:block;margin-bottom:8px;font-size:12px}.height-room{padding:10px 0;border-top:1px solid var(--line);margin-top:10px}#heightconflicts{color:var(--danger);margin-top:15px}
 
 .walking .historytools{visibility:hidden}.editbar button:disabled{opacity:.45;cursor:not-allowed}
+
+body:not([data-active-tool="select"]) #plan,body:not([data-active-tool="select"]) #plan *{cursor:var(--active-tool-cursor,default)!important}

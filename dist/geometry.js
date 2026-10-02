@@ -16,7 +16,7 @@ if(typeof module!=='undefined'&&module.exports)module.exports=KERN_CONNECTIONS;
 // Metric, rectilinear level-design geometry. x east, y south, z up.
 function buildGeometry(plan){
 if(plan.variant==='v8')throw new Error('V8 is a floor-plan-only revision. Use Save JSON or the plan exports; the Blender model remains V7.');
-const zDefault={L1:4.2,L0:0,B1:-4.5,B2:-9},result={schema:'kern-blockout-2',units:'metres',axes:{x:'east',y:'south',z:'up'},sourcePlan:plan,siteGroundZ:plan.siteGroundZ??plan.floors.L0?.z??0,levels:{},verticalConnections:[],courtyard:plan.courtyard||null,envelope:plan.envelope||null};
+const zDefault={L1:4.2,L0:0,B1:-4.5,B2:-9},result={schema:'kern-blockout-2',units:'metres',axes:{x:'east',y:'south',z:'up'},sourcePlan:plan,siteGroundZ:0,levels:{},verticalConnections:[],courtyard:plan.courtyard||null,envelope:plan.envelope||null};
 for(const [id,f]of Object.entries(plan.floors)){
 const z=f.z??zDefault[id],height=f.clearHeight??(id==='L1'?3.9:id==='L0'?3.9:4.2),edges=new Map(),openings=[];
 const rect=r=>[[r.x,r.y],[r.x+r.w,r.y],[r.x+r.w,r.y+r.h],[r.x,r.y+r.h]];

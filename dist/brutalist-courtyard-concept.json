@@ -1,0 +1,1686 @@
+{
+  "format": "kern-building",
+  "schemaVersion": 1,
+  "building": {
+    "id": "building-brutalist-courtyard-concept-20261002",
+    "name": "KERN \u00b7 Brutalist courtyard concept",
+    "sourceVariant": "custom",
+    "createdAt": "2026-10-02T18:00:00.000Z",
+    "updatedAt": "2026-10-02T18:00:00.000Z",
+    "plan": {
+      "version": 1,
+      "variant": "custom",
+      "title": "KERN \u00b7 Brutalist courtyard concept",
+      "units": "metres",
+      "geometryVersion": 6,
+      "siteGroundZ": 0,
+      "floors": {
+        "B1": {
+          "name": "Garage / concealed service allowance",
+          "z": -7.2,
+          "elevation": "-7.20 m",
+          "clearHeight": 3,
+          "rooms": [
+            {
+              "id": "service-stair",
+              "name": "Secondary service stair",
+              "x": 40,
+              "y": 34,
+              "w": 4,
+              "h": 8,
+              "type": "core",
+              "runAxis": "y",
+              "landingEnd": "north",
+              "stairType": "switchback",
+              "stairStackId": "service-stack",
+              "editGroup": "service-stack",
+              "stairTransition": true
+            },
+            {
+              "id": "garage",
+              "name": "Garage / loading allowance",
+              "x": 4,
+              "y": 24,
+              "w": 18,
+              "h": 18,
+              "type": "service",
+              "height": 8.1,
+              "diagramLabel": "GARAGE / LOADING\n\u22127.20 m \u00b7 8.1 m clear\nVehicle approach unresolved"
+            },
+            {
+              "id": "garage-north-bay",
+              "name": "Garage turning margin",
+              "x": 0,
+              "y": 24,
+              "w": 4,
+              "h": 10,
+              "type": "service",
+              "height": 8.1,
+              "diagramLabel": ""
+            },
+            {
+              "id": "garage-south-bay",
+              "name": "Garage rear margin",
+              "x": 0,
+              "y": 40,
+              "w": 4,
+              "h": 2,
+              "type": "service",
+              "height": 8.1,
+              "diagramLabel": ""
+            },
+            {
+              "id": "freight",
+              "name": "Freight shaft",
+              "x": 0,
+              "y": 34,
+              "w": 4,
+              "h": 6,
+              "type": "core",
+              "height": 8.1
+            },
+            {
+              "id": "service-hall",
+              "name": "Basement service hall",
+              "x": 22,
+              "y": 34,
+              "w": 18,
+              "h": 4,
+              "type": "circulation"
+            },
+            {
+              "id": "hidden-allowance",
+              "name": "Concealed room allowance",
+              "x": 22,
+              "y": 26,
+              "w": 8,
+              "h": 8,
+              "type": "secret"
+            },
+            {
+              "id": "tunnel-stub",
+              "name": "Underground route allowance",
+              "x": 24,
+              "y": 20,
+              "w": 3,
+              "h": 6,
+              "type": "cave"
+            }
+          ],
+          "doors": [
+            {
+              "id": "garage-garage-north-bay-0",
+              "a": "garage",
+              "b": "garage-north-bay",
+              "width": 2,
+              "offset": 0.5,
+              "kind": "open"
+            },
+            {
+              "id": "garage-garage-south-bay-1",
+              "a": "garage",
+              "b": "garage-south-bay",
+              "width": 2,
+              "offset": 0.5,
+              "kind": "open"
+            },
+            {
+              "id": "garage-freight-2",
+              "a": "garage",
+              "b": "freight",
+              "width": 2.4,
+              "offset": 0.5
+            },
+            {
+              "id": "garage-service-hall-3",
+              "a": "garage",
+              "b": "service-hall",
+              "width": 2,
+              "offset": 0.5
+            },
+            {
+              "id": "service-hall-service-stair-4",
+              "a": "service-hall",
+              "b": "service-stair",
+              "width": 1.2,
+              "offset": 0.04
+            },
+            {
+              "id": "service-hall-hidden-allowance-5",
+              "a": "service-hall",
+              "b": "hidden-allowance",
+              "width": 1.2,
+              "offset": 0.45,
+              "label": "CONCEALED THRESHOLD"
+            },
+            {
+              "id": "hidden-allowance-tunnel-stub-6",
+              "a": "hidden-allowance",
+              "b": "tunnel-stub",
+              "width": 1.2,
+              "offset": 0.5
+            }
+          ],
+          "entrances": [
+            "service-stair"
+          ],
+          "symbols": [],
+          "services": [],
+          "annotations": [
+            {
+              "id": "vehicle-note",
+              "text": "West vehicle portal / ground ramp: reserved, unresolved",
+              "x": 11,
+              "y": 25.2,
+              "fontSize": 0.32
+            },
+            {
+              "id": "tunnel-note",
+              "text": "Future underground continuation; not a detailed cave network",
+              "x": 25.5,
+              "y": 21,
+              "fontSize": 0.25
+            }
+          ]
+        },
+        "L0": {
+          "name": "Raised lobby / garden stair / control chamber",
+          "z": 1.2,
+          "elevation": "+1.20 m",
+          "clearHeight": 3,
+          "rooms": [
+            {
+              "id": "lobby",
+              "name": "Arrival / low concrete lobby",
+              "x": 4,
+              "y": 34,
+              "w": 36,
+              "h": 8,
+              "type": "circulation",
+              "height": 4.2,
+              "diagramLabel": "ARRIVAL / LOBBY\n+1.20 m \u00b7 4.2 m clear"
+            },
+            {
+              "id": "west-passage",
+              "name": "Ground garden passage",
+              "x": 10,
+              "y": 18,
+              "w": 3,
+              "h": 16,
+              "type": "terrace",
+              "outdoor": true
+            },
+            {
+              "id": "lab",
+              "name": "Lab / artifact processing",
+              "x": 0,
+              "y": 18,
+              "w": 10,
+              "h": 10,
+              "type": "tech"
+            },
+            {
+              "id": "workshop",
+              "name": "Workshop / equipment repair",
+              "x": 0,
+              "y": 28,
+              "w": 10,
+              "h": 6,
+              "type": "service"
+            },
+            {
+              "id": "freight",
+              "name": "Freight shaft",
+              "x": 0,
+              "y": 34,
+              "w": 4,
+              "h": 6,
+              "type": "core",
+              "height": 4.2,
+              "liftDetail": "Schematic shaft connecting garage and lobby. Car, pit and capacity unresolved."
+            },
+            {
+              "id": "utility",
+              "name": "Utility / cleaning store",
+              "x": 0,
+              "y": 40,
+              "w": 4,
+              "h": 2,
+              "type": "service"
+            },
+            {
+              "id": "court-ground",
+              "name": "Open-sky garden / concrete court",
+              "x": 13,
+              "y": 3,
+              "w": 22,
+              "h": 22,
+              "type": "terrace",
+              "outdoor": true,
+              "groundSurface": true,
+              "diagramLabel": "OPEN-SKY GARDEN\n+1.20 m"
+            },
+            {
+              "id": "garden-west",
+              "name": "Low grove",
+              "x": 14,
+              "y": 9,
+              "w": 4.8,
+              "h": 4,
+              "type": "courtyard",
+              "groundSurface": true,
+              "outdoor": true,
+              "shape": {
+                "vertices": [
+                  {
+                    "id": "garden-west-v0",
+                    "x": 0,
+                    "y": 0,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-west-v1",
+                    "x": 0.8333333333333333,
+                    "y": 0,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-west-v2",
+                    "x": 1,
+                    "y": 0.5,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-west-v3",
+                    "x": 0.7291666666666665,
+                    "y": 1,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-west-v4",
+                    "x": 0,
+                    "y": 1,
+                    "r": 0
+                  }
+                ]
+              },
+              "throughOnly": true,
+              "program": false,
+              "landscape": true,
+              "note": "Planting surface; not a room or a required circulation destination."
+            },
+            {
+              "id": "garden-north",
+              "name": "Tree / boulder garden",
+              "x": 25,
+              "y": 5,
+              "w": 8,
+              "h": 7,
+              "type": "courtyard",
+              "groundSurface": true,
+              "outdoor": true,
+              "shape": {
+                "vertices": [
+                  {
+                    "id": "garden-north-v0",
+                    "x": 0,
+                    "y": 0,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-north-v1",
+                    "x": 0.875,
+                    "y": 0,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-north-v2",
+                    "x": 1,
+                    "y": 0.42857142857142855,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-north-v3",
+                    "x": 0.75,
+                    "y": 1,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-north-v4",
+                    "x": 0,
+                    "y": 1,
+                    "r": 0
+                  }
+                ]
+              },
+              "throughOnly": true,
+              "program": false,
+              "landscape": true,
+              "note": "Planting surface; not a room or a required circulation destination."
+            },
+            {
+              "id": "garden-south",
+              "name": "Grass / fern court",
+              "x": 15,
+              "y": 20,
+              "w": 18,
+              "h": 4,
+              "type": "courtyard",
+              "groundSurface": true,
+              "outdoor": true,
+              "shape": {
+                "vertices": [
+                  {
+                    "id": "garden-south-v0",
+                    "x": 0,
+                    "y": 0,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-south-v1",
+                    "x": 0.8333333333333334,
+                    "y": 0,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-south-v2",
+                    "x": 1,
+                    "y": 0.5,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-south-v3",
+                    "x": 0.8888888888888888,
+                    "y": 1,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-south-v4",
+                    "x": 0,
+                    "y": 1,
+                    "r": 0
+                  }
+                ]
+              },
+              "throughOnly": true,
+              "program": false,
+              "landscape": true,
+              "note": "Planting surface; not a room or a required circulation destination."
+            },
+            {
+              "id": "garden-pocket-west",
+              "name": "Faceted low planting",
+              "x": 20,
+              "y": 28,
+              "w": 5,
+              "h": 2,
+              "type": "courtyard",
+              "groundSurface": true,
+              "outdoor": true,
+              "shape": {
+                "vertices": [
+                  {
+                    "id": "garden-pocket-west-v0",
+                    "x": 0,
+                    "y": 0,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-pocket-west-v1",
+                    "x": 0.8,
+                    "y": 0,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-pocket-west-v2",
+                    "x": 1,
+                    "y": 0.5,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-pocket-west-v3",
+                    "x": 0.8,
+                    "y": 1,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-pocket-west-v4",
+                    "x": 0,
+                    "y": 1,
+                    "r": 0
+                  }
+                ]
+              },
+              "throughOnly": true,
+              "program": false,
+              "landscape": true,
+              "note": "Planting surface; not a room or a required circulation destination."
+            },
+            {
+              "id": "garden-pocket-east",
+              "name": "Faceted low planting",
+              "x": 27,
+              "y": 28,
+              "w": 7,
+              "h": 3,
+              "type": "courtyard",
+              "groundSurface": true,
+              "outdoor": true,
+              "shape": {
+                "vertices": [
+                  {
+                    "id": "garden-pocket-east-v0",
+                    "x": 0.14285714285714285,
+                    "y": 0,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-pocket-east-v1",
+                    "x": 0.8571428571428571,
+                    "y": 0,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-pocket-east-v2",
+                    "x": 1,
+                    "y": 0.3333333333333333,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-pocket-east-v3",
+                    "x": 0.8571428571428571,
+                    "y": 1,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-pocket-east-v4",
+                    "x": 0.14285714285714285,
+                    "y": 1,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-pocket-east-v5",
+                    "x": 0,
+                    "y": 0.3333333333333333,
+                    "r": 0
+                  }
+                ]
+              },
+              "throughOnly": true,
+              "program": false,
+              "landscape": true,
+              "note": "Planting surface; not a room or a required circulation destination."
+            },
+            {
+              "id": "arrival-landing",
+              "name": "Garden threshold",
+              "x": 34,
+              "y": 30,
+              "w": 4,
+              "h": 4,
+              "type": "terrace",
+              "outdoor": true,
+              "z": 1.2,
+              "shape": {
+                "vertices": [
+                  {
+                    "id": "arrival-landing-v0",
+                    "x": 0,
+                    "y": 0.25,
+                    "r": 0
+                  },
+                  {
+                    "id": "arrival-landing-v1",
+                    "x": 0.5,
+                    "y": 0,
+                    "r": 0
+                  },
+                  {
+                    "id": "arrival-landing-v2",
+                    "x": 1,
+                    "y": 0.25,
+                    "r": 0
+                  },
+                  {
+                    "id": "arrival-landing-v3",
+                    "x": 1,
+                    "y": 1,
+                    "r": 0
+                  },
+                  {
+                    "id": "arrival-landing-v4",
+                    "x": 0,
+                    "y": 1,
+                    "r": 0
+                  }
+                ]
+              }
+            },
+            {
+              "id": "garden-landing-a",
+              "name": "Boulder landing",
+              "x": 25,
+              "y": 30,
+              "w": 3,
+              "h": 4,
+              "type": "terrace",
+              "outdoor": true,
+              "z": 2.8,
+              "shape": {
+                "vertices": [
+                  {
+                    "id": "garden-landing-a-v0",
+                    "x": 0,
+                    "y": 0,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-landing-a-v1",
+                    "x": 0.6666666666666666,
+                    "y": 0,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-landing-a-v2",
+                    "x": 1,
+                    "y": 0.25,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-landing-a-v3",
+                    "x": 1,
+                    "y": 1,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-landing-a-v4",
+                    "x": 0.3333333333333333,
+                    "y": 1,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-landing-a-v5",
+                    "x": 0,
+                    "y": 0.75,
+                    "r": 0
+                  }
+                ]
+              }
+            },
+            {
+              "id": "garden-landing-b",
+              "name": "Folded upper landing",
+              "x": 14,
+              "y": 29,
+              "w": 5,
+              "h": 5,
+              "type": "terrace",
+              "outdoor": true,
+              "z": 4.4,
+              "shape": {
+                "vertices": [
+                  {
+                    "id": "garden-landing-b-v0",
+                    "x": 0.6,
+                    "y": 0,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-landing-b-v1",
+                    "x": 1,
+                    "y": 0,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-landing-b-v2",
+                    "x": 1,
+                    "y": 0.8,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-landing-b-v3",
+                    "x": 0.6,
+                    "y": 1,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-landing-b-v4",
+                    "x": 0,
+                    "y": 1,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-landing-b-v5",
+                    "x": 0,
+                    "y": 0.6,
+                    "r": 0
+                  },
+                  {
+                    "id": "garden-landing-b-v6",
+                    "x": 0.6,
+                    "y": 0.6,
+                    "r": 0
+                  }
+                ]
+              }
+            },
+            {
+              "id": "entry-steps",
+              "name": "Raised entry steps",
+              "x": 19,
+              "y": 42,
+              "w": 6,
+              "h": 3,
+              "type": "terrace",
+              "outdoor": true,
+              "localSteps": true,
+              "stairTransition": true,
+              "z": 0,
+              "lowerZ": 0,
+              "upperZ": 1.2,
+              "cutoutFor": [
+                "lobby"
+              ]
+            },
+            {
+              "id": "garden-flight-a",
+              "name": "Garden ascent I",
+              "x": 28,
+              "y": 31,
+              "w": 6,
+              "h": 3,
+              "type": "terrace",
+              "outdoor": true,
+              "localSteps": true,
+              "stairTransition": true,
+              "z": 1.2,
+              "lowerZ": 1.2,
+              "upperZ": 2.8,
+              "cutoutFor": [
+                "arrival-landing",
+                "garden-landing-a"
+              ]
+            },
+            {
+              "id": "garden-flight-b",
+              "name": "Garden ascent II",
+              "x": 19,
+              "y": 30,
+              "w": 6,
+              "h": 3,
+              "type": "terrace",
+              "outdoor": true,
+              "localSteps": true,
+              "stairTransition": true,
+              "z": 2.8,
+              "lowerZ": 2.8,
+              "upperZ": 4.4,
+              "cutoutFor": [
+                "garden-landing-a",
+                "garden-landing-b"
+              ]
+            },
+            {
+              "id": "garden-flight-c",
+              "name": "Garden ascent III",
+              "x": 14,
+              "y": 28,
+              "w": 3,
+              "h": 4,
+              "type": "terrace",
+              "outdoor": true,
+              "localSteps": true,
+              "stairTransition": true,
+              "z": 4.4,
+              "lowerZ": 4.4,
+              "upperZ": 6,
+              "cutoutFor": [
+                "garden-landing-b"
+              ]
+            },
+            {
+              "id": "control",
+              "name": "Operations / tall control chamber",
+              "x": 0,
+              "y": 0,
+              "w": 10,
+              "h": 18,
+              "type": "tech",
+              "height": 8.8,
+              "diagramLabel": "CONTROL CHAMBER\nEntry from +6.00 m gallery\nFloor +1.20 m \u00b7 8.8 m clear",
+              "shape": {
+                "vertices": [
+                  {
+                    "id": "control-v0",
+                    "x": 0,
+                    "y": 0,
+                    "r": 0
+                  },
+                  {
+                    "id": "control-v1",
+                    "x": 0.7,
+                    "y": 0,
+                    "r": 0
+                  },
+                  {
+                    "id": "control-v2",
+                    "x": 0.7,
+                    "y": 0.8333333333333334,
+                    "r": 0
+                  },
+                  {
+                    "id": "control-v3",
+                    "x": 1,
+                    "y": 0.8333333333333334,
+                    "r": 0
+                  },
+                  {
+                    "id": "control-v4",
+                    "x": 1,
+                    "y": 1,
+                    "r": 0
+                  },
+                  {
+                    "id": "control-v5",
+                    "x": 0,
+                    "y": 1,
+                    "r": 0
+                  }
+                ]
+              }
+            },
+            {
+              "id": "control-descent",
+              "name": "Control chamber descent",
+              "x": 7,
+              "y": 6,
+              "w": 3,
+              "h": 9,
+              "type": "terrace",
+              "outdoor": true,
+              "localSteps": true,
+              "stairTransition": true,
+              "z": 1.2,
+              "lowerZ": 6,
+              "upperZ": 1.2,
+              "cutoutFor": [
+                "control"
+              ]
+            },
+            {
+              "id": "service-stair",
+              "name": "Secondary service stair",
+              "x": 40,
+              "y": 34,
+              "w": 4,
+              "h": 8,
+              "type": "core",
+              "runAxis": "y",
+              "landingEnd": "north",
+              "stairType": "switchback",
+              "stairStackId": "service-stack",
+              "editGroup": "service-stack",
+              "stairTransition": true
+            }
+          ],
+          "doors": [
+            {
+              "id": "lobby-west-passage-0",
+              "a": "lobby",
+              "b": "west-passage",
+              "width": 2,
+              "offset": 0.5,
+              "kind": "open"
+            },
+            {
+              "id": "west-passage-lab-1",
+              "a": "west-passage",
+              "b": "lab",
+              "width": 1.8,
+              "offset": 0.45
+            },
+            {
+              "id": "west-passage-workshop-2",
+              "a": "west-passage",
+              "b": "workshop",
+              "width": 1.8,
+              "offset": 0.5
+            },
+            {
+              "id": "lobby-workshop-3",
+              "a": "lobby",
+              "b": "workshop",
+              "width": 1.8,
+              "offset": 0.5
+            },
+            {
+              "id": "lobby-freight-4",
+              "a": "lobby",
+              "b": "freight",
+              "width": 2.4,
+              "offset": 0.5
+            },
+            {
+              "id": "lobby-utility-5",
+              "a": "lobby",
+              "b": "utility",
+              "width": 0.9,
+              "offset": 0.5
+            },
+            {
+              "id": "west-passage-court-ground-6",
+              "a": "west-passage",
+              "b": "court-ground",
+              "width": 2,
+              "offset": 0.5,
+              "kind": "open"
+            },
+            {
+              "id": "lobby-arrival-landing-7",
+              "a": "lobby",
+              "b": "arrival-landing",
+              "width": 2,
+              "offset": 0.5,
+              "kind": "open"
+            },
+            {
+              "id": "control-outside-8",
+              "a": "control",
+              "b": "outside",
+              "width": 5.8,
+              "offset": 0,
+              "kind": "window",
+              "side": "e",
+              "edge": "control-v1",
+              "sill": 4.8,
+              "height": 3.8,
+              "label": "UPPER GALLERY OVERLOOK"
+            },
+            {
+              "id": "lobby-service-stair-9",
+              "a": "lobby",
+              "b": "service-stair",
+              "width": 1.2,
+              "offset": 0.02
+            }
+          ],
+          "entrances": [
+            "entry-steps",
+            "control-descent"
+          ],
+          "symbols": [],
+          "services": [],
+          "annotations": [
+            {
+              "id": "entry-portal-note",
+              "text": "Rounded recessed portal \u00b7 geometry allowance",
+              "x": 22,
+              "y": 41,
+              "fontSize": 0.35
+            },
+            {
+              "id": "oculus-0",
+              "text": "\u25cb 2.5 m oculus allowance",
+              "x": 10,
+              "y": 37,
+              "fontSize": 0.3
+            },
+            {
+              "id": "oculus-1",
+              "text": "\u25cb 2.5 m oculus allowance",
+              "x": 18,
+              "y": 37,
+              "fontSize": 0.3
+            },
+            {
+              "id": "oculus-2",
+              "text": "\u25cb 2.5 m oculus allowance",
+              "x": 26,
+              "y": 37,
+              "fontSize": 0.3
+            },
+            {
+              "id": "oculus-3",
+              "text": "\u25cb 2.5 m oculus allowance",
+              "x": 34,
+              "y": 37,
+              "fontSize": 0.3
+            },
+            {
+              "id": "court-note",
+              "text": "Open sky / planting; no roof or global void mask",
+              "x": 24,
+              "y": 18.9,
+              "fontSize": 0.32
+            },
+            {
+              "id": "garden-stair-note",
+              "text": "SCULPTED GARDEN ASCENT \u2192 +6.00 m",
+              "x": 27,
+              "y": 35,
+              "fontSize": 0.32
+            }
+          ],
+          "externals": [
+            {
+              "room": "entry-steps",
+              "side": "s",
+              "width": 5.6,
+              "offset": 0.5,
+              "label": "OUTSIDE +0.00 m"
+            }
+          ]
+        },
+        "L1": {
+          "name": "Square overlook / inward stair / crew rooms",
+          "z": 6,
+          "elevation": "+6.00 m",
+          "clearHeight": 3,
+          "rooms": [
+            {
+              "id": "ring-north",
+              "name": "North overlook",
+              "x": 10,
+              "y": 0,
+              "w": 28,
+              "h": 3,
+              "type": "terrace",
+              "outdoor": true
+            },
+            {
+              "id": "ring-east",
+              "name": "East overlook",
+              "x": 35,
+              "y": 3,
+              "w": 3,
+              "h": 25,
+              "type": "terrace",
+              "outdoor": true
+            },
+            {
+              "id": "ring-south",
+              "name": "Arrival overlook",
+              "x": 10,
+              "y": 25,
+              "w": 25,
+              "h": 3,
+              "type": "terrace",
+              "outdoor": true
+            },
+            {
+              "id": "ring-west",
+              "name": "West overlook / control threshold",
+              "x": 10,
+              "y": 3,
+              "w": 3,
+              "h": 22,
+              "type": "terrace",
+              "outdoor": true
+            },
+            {
+              "id": "inward-bridge",
+              "name": "Inward concrete bridge",
+              "x": 13,
+              "y": 15,
+              "w": 10,
+              "h": 3,
+              "type": "terrace",
+              "outdoor": true
+            },
+            {
+              "id": "inner-landing",
+              "name": "Inner stair turn",
+              "x": 20,
+              "y": 5,
+              "w": 3,
+              "h": 3,
+              "type": "terrace",
+              "outdoor": true,
+              "z": 8.4
+            },
+            {
+              "id": "inner-flight-a",
+              "name": "Inward ascent / north",
+              "x": 20,
+              "y": 8,
+              "w": 3,
+              "h": 7,
+              "type": "terrace",
+              "outdoor": true,
+              "localSteps": true,
+              "stairTransition": true,
+              "z": 6,
+              "lowerZ": 6,
+              "upperZ": 8.4,
+              "cutoutFor": [
+                "inward-bridge",
+                "inner-landing"
+              ]
+            },
+            {
+              "id": "inner-flight-b",
+              "name": "Inward ascent / west",
+              "x": 13,
+              "y": 5,
+              "w": 7,
+              "h": 3,
+              "type": "terrace",
+              "outdoor": true,
+              "localSteps": true,
+              "stairTransition": true,
+              "z": 8.4,
+              "lowerZ": 8.4,
+              "upperZ": 10.8,
+              "cutoutFor": [
+                "inner-landing"
+              ]
+            },
+            {
+              "id": "control-gallery",
+              "name": "Control entry / upper gallery",
+              "x": 7,
+              "y": 0,
+              "w": 3,
+              "h": 6,
+              "type": "terrace",
+              "outdoor": true
+            },
+            {
+              "id": "mess",
+              "name": "Crew common / mess",
+              "x": 0,
+              "y": 18,
+              "w": 10,
+              "h": 10,
+              "type": "living"
+            },
+            {
+              "id": "sleep-a",
+              "name": "Sleeping quarters A",
+              "x": 38,
+              "y": 0,
+              "w": 6,
+              "h": 7,
+              "type": "living"
+            },
+            {
+              "id": "sleep-b",
+              "name": "Sleeping quarters B",
+              "x": 38,
+              "y": 7,
+              "w": 6,
+              "h": 7,
+              "type": "living"
+            },
+            {
+              "id": "sleep-c",
+              "name": "Sleeping quarters C",
+              "x": 38,
+              "y": 14,
+              "w": 6,
+              "h": 7,
+              "type": "living"
+            },
+            {
+              "id": "washroom",
+              "name": "Shared washroom",
+              "x": 38,
+              "y": 21,
+              "w": 6,
+              "h": 4,
+              "type": "service"
+            },
+            {
+              "id": "reading",
+              "name": "Quiet lookout",
+              "x": 38,
+              "y": 25,
+              "w": 6,
+              "h": 3,
+              "type": "living"
+            },
+            {
+              "id": "service-return",
+              "name": "Crew service return",
+              "x": 40,
+              "y": 28,
+              "w": 4,
+              "h": 6,
+              "type": "circulation"
+            },
+            {
+              "id": "service-stair",
+              "name": "Secondary service stair",
+              "x": 40,
+              "y": 34,
+              "w": 4,
+              "h": 8,
+              "type": "core",
+              "runAxis": "y",
+              "landingEnd": "north",
+              "stairType": "switchback",
+              "stairStackId": "service-stack",
+              "editGroup": "service-stack",
+              "stairTransition": true
+            }
+          ],
+          "doors": [
+            {
+              "id": "ring-north-ring-east-0",
+              "a": "ring-north",
+              "b": "ring-east",
+              "width": 2,
+              "offset": 0.5,
+              "kind": "open"
+            },
+            {
+              "id": "ring-east-ring-south-1",
+              "a": "ring-east",
+              "b": "ring-south",
+              "width": 2,
+              "offset": 0.5,
+              "kind": "open"
+            },
+            {
+              "id": "ring-north-ring-west-2",
+              "a": "ring-north",
+              "b": "ring-west",
+              "width": 2,
+              "offset": 0.5,
+              "kind": "open"
+            },
+            {
+              "id": "ring-west-ring-south-3",
+              "a": "ring-west",
+              "b": "ring-south",
+              "width": 2,
+              "offset": 0.5,
+              "kind": "open"
+            },
+            {
+              "id": "ring-west-inward-bridge-4",
+              "a": "ring-west",
+              "b": "inward-bridge",
+              "width": 2,
+              "offset": 0.5,
+              "kind": "open"
+            },
+            {
+              "id": "ring-west-control-gallery-5",
+              "a": "ring-west",
+              "b": "control-gallery",
+              "width": 1.8,
+              "offset": 0.5,
+              "kind": "open",
+              "fullWidth": false
+            },
+            {
+              "id": "ring-west-mess-6",
+              "a": "ring-west",
+              "b": "mess",
+              "width": 1.8,
+              "offset": 0.5
+            },
+            {
+              "id": "ring-east-sleep-a-7",
+              "a": "ring-east",
+              "b": "sleep-a",
+              "width": 1.2,
+              "offset": 0.5
+            },
+            {
+              "id": "ring-east-sleep-b-8",
+              "a": "ring-east",
+              "b": "sleep-b",
+              "width": 1.2,
+              "offset": 0.5
+            },
+            {
+              "id": "ring-east-sleep-c-9",
+              "a": "ring-east",
+              "b": "sleep-c",
+              "width": 1.2,
+              "offset": 0.5
+            },
+            {
+              "id": "ring-east-washroom-10",
+              "a": "ring-east",
+              "b": "washroom",
+              "width": 1,
+              "offset": 0.5
+            },
+            {
+              "id": "ring-east-reading-11",
+              "a": "ring-east",
+              "b": "reading",
+              "width": 1.2,
+              "offset": 0.5
+            },
+            {
+              "id": "reading-service-return-12",
+              "a": "reading",
+              "b": "service-return",
+              "width": 1.2,
+              "offset": 0.5
+            },
+            {
+              "id": "service-return-service-stair-13",
+              "a": "service-return",
+              "b": "service-stair",
+              "width": 1.4,
+              "offset": 0.5
+            }
+          ],
+          "entrances": [
+            "ring-south",
+            "service-stair"
+          ],
+          "symbols": [],
+          "services": [],
+          "annotations": [
+            {
+              "id": "ring-route-note",
+              "text": "OVERLOOK LOOP \u00b7 turn inward to reach crown",
+              "x": 24,
+              "y": 1.5,
+              "fontSize": 0.35
+            },
+            {
+              "id": "inner-route-note",
+              "text": "INWARD ASCENT \u2192 +10.80 m",
+              "x": 17,
+              "y": 16.5,
+              "fontSize": 0.32
+            }
+          ]
+        },
+        "L2": {
+          "name": "Northwest observation crown",
+          "z": 10.8,
+          "elevation": "+10.80 m",
+          "clearHeight": 3,
+          "rooms": [
+            {
+              "id": "crown-terrace",
+              "name": "Crown arrival / overlook",
+              "x": 10,
+              "y": 0,
+              "w": 3,
+              "h": 14,
+              "type": "terrace",
+              "outdoor": true
+            },
+            {
+              "id": "crown-room",
+              "name": "Observation / communications",
+              "x": 0,
+              "y": 0,
+              "w": 10,
+              "h": 14,
+              "type": "tech",
+              "height": 3.4
+            }
+          ],
+          "doors": [
+            {
+              "id": "crown-terrace-crown-room-0",
+              "a": "crown-terrace",
+              "b": "crown-room",
+              "width": 1.8,
+              "offset": 0.5
+            }
+          ],
+          "entrances": [
+            "crown-terrace"
+          ],
+          "symbols": [],
+          "services": [],
+          "annotations": []
+        }
+      },
+      "verticalConnections": [
+        {
+          "id": "service-stack",
+          "type": "stair",
+          "room": "service-stair",
+          "floors": [
+            "B1",
+            "L0",
+            "L1"
+          ],
+          "footprint": {
+            "x": 40,
+            "y": 34,
+            "w": 4,
+            "h": 8
+          },
+          "runAxis": "y",
+          "landingEnd": "north",
+          "stairType": "switchback"
+        },
+        {
+          "id": "freight-stack",
+          "type": "lift",
+          "room": "freight",
+          "floors": [
+            "B1",
+            "L0"
+          ],
+          "footprint": {
+            "x": 0,
+            "y": 34,
+            "w": 4,
+            "h": 6
+          },
+          "stops": [
+            {
+              "floor": "B1",
+              "z": -7.2
+            },
+            {
+              "floor": "L0",
+              "z": 1.2
+            }
+          ],
+          "doorClearWidth": 2.4,
+          "note": "Schematic allowance. Lift travel is not simulated."
+        }
+      ],
+      "splitLevelConnections": [
+        {
+          "id": "route-entry-steps",
+          "localSteps": true,
+          "floor": "L0",
+          "room": "entry-steps",
+          "runAxis": "y",
+          "landingEnd": "south",
+          "start": {
+            "kind": "site"
+          },
+          "end": {
+            "kind": "room",
+            "floor": "L0",
+            "room": "lobby"
+          },
+          "targetRiser": 0.17,
+          "lowerZ": 0,
+          "upperZ": 1.2
+        },
+        {
+          "id": "route-garden-flight-a",
+          "localSteps": true,
+          "floor": "L0",
+          "room": "garden-flight-a",
+          "runAxis": "x",
+          "landingEnd": "east",
+          "start": {
+            "kind": "room",
+            "floor": "L0",
+            "room": "arrival-landing"
+          },
+          "end": {
+            "kind": "room",
+            "floor": "L0",
+            "room": "garden-landing-a"
+          },
+          "targetRiser": 0.17,
+          "lowerZ": 1.2,
+          "upperZ": 2.8
+        },
+        {
+          "id": "route-garden-flight-b",
+          "localSteps": true,
+          "floor": "L0",
+          "room": "garden-flight-b",
+          "runAxis": "x",
+          "landingEnd": "east",
+          "start": {
+            "kind": "room",
+            "floor": "L0",
+            "room": "garden-landing-a"
+          },
+          "end": {
+            "kind": "room",
+            "floor": "L0",
+            "room": "garden-landing-b"
+          },
+          "targetRiser": 0.17,
+          "lowerZ": 2.8,
+          "upperZ": 4.4
+        },
+        {
+          "id": "route-garden-flight-c",
+          "localSteps": true,
+          "floor": "L0",
+          "room": "garden-flight-c",
+          "runAxis": "y",
+          "landingEnd": "south",
+          "start": {
+            "kind": "room",
+            "floor": "L0",
+            "room": "garden-landing-b"
+          },
+          "end": {
+            "kind": "room",
+            "floor": "L1",
+            "room": "ring-south"
+          },
+          "targetRiser": 0.17,
+          "lowerZ": 4.4,
+          "upperZ": 6
+        },
+        {
+          "id": "route-inner-flight-a",
+          "localSteps": true,
+          "floor": "L1",
+          "room": "inner-flight-a",
+          "runAxis": "y",
+          "landingEnd": "south",
+          "start": {
+            "kind": "room",
+            "floor": "L1",
+            "room": "inward-bridge"
+          },
+          "end": {
+            "kind": "room",
+            "floor": "L1",
+            "room": "inner-landing"
+          },
+          "targetRiser": 0.17,
+          "lowerZ": 6,
+          "upperZ": 8.4
+        },
+        {
+          "id": "route-inner-flight-b",
+          "localSteps": true,
+          "floor": "L1",
+          "room": "inner-flight-b",
+          "runAxis": "x",
+          "landingEnd": "east",
+          "start": {
+            "kind": "room",
+            "floor": "L1",
+            "room": "inner-landing"
+          },
+          "end": {
+            "kind": "room",
+            "floor": "L2",
+            "room": "crown-terrace"
+          },
+          "targetRiser": 0.17,
+          "lowerZ": 8.4,
+          "upperZ": 10.8
+        },
+        {
+          "id": "route-control-descent",
+          "localSteps": true,
+          "floor": "L0",
+          "room": "control-descent",
+          "runAxis": "y",
+          "landingEnd": "north",
+          "start": {
+            "kind": "room",
+            "floor": "L1",
+            "room": "control-gallery"
+          },
+          "end": {
+            "kind": "room",
+            "floor": "L0",
+            "room": "control"
+          },
+          "targetRiser": 0.17,
+          "lowerZ": 6,
+          "upperZ": 1.2
+        }
+      ],
+      "floorModule": {
+        "occupiedClear": 3,
+        "serviceClear": 1.5,
+        "slab": 0.3,
+        "floorToFloor": 4.8,
+        "note": "Independent concept. Lobby and control override normal height."
+      },
+      "stairDesign": {
+        "clearWidth": 1.4,
+        "landingDepth": 1.4,
+        "treadDepth": 0.28,
+        "targetRiser": 0.17,
+        "maxRiser": 0.18,
+        "minHeadroom": 2.2,
+        "perimeter": 0.2,
+        "centerGap": 0.2,
+        "waistThickness": 0.2
+      },
+      "walkStart": {
+        "floor": "L0",
+        "x": 22,
+        "y": 46,
+        "z": 0,
+        "yaw": 3.141592653589793,
+        "floorZ": 1.2,
+        "baseZ": 1.2
+      },
+      "sourceBaseline": "New independent building from the 2026-10-02 reference sketch; protected main layout is not modified.",
+      "conceptAllowances": [
+        {
+          "kind": "rounded-portal",
+          "floor": "L0",
+          "x": 22,
+          "y": 42,
+          "width": 5,
+          "height": 3.4,
+          "note": "Recessed rounded concrete reveal; current renderer uses standard rectangular openings."
+        },
+        {
+          "kind": "circular-skylights",
+          "floor": "L0",
+          "centres": [
+            [
+              10,
+              38
+            ],
+            [
+              18,
+              38
+            ],
+            [
+              26,
+              38
+            ],
+            [
+              34,
+              38
+            ]
+          ],
+          "diameter": 2.5,
+          "note": "Ceiling-only oculus openings require dedicated renderer support; annotations only."
+        },
+        {
+          "kind": "guards-and-structure",
+          "note": "Ring, bridge and landings are traversable conceptual slabs. Guard profiles, structural supports, waterproofing and egress are not engineered."
+        },
+        {
+          "kind": "garage-approach",
+          "note": "Garage volume and pedestrian connection are placed. Exterior vehicle ramp/portal remain schematic pending terrain."
+        }
+      ],
+      "routeStudy": {
+        "main": [
+          "L0:entry-steps",
+          "L0:lobby",
+          "L0:arrival-landing",
+          "L0:garden-flight-a",
+          "L0:garden-landing-a",
+          "L0:garden-flight-b",
+          "L0:garden-landing-b",
+          "L0:garden-flight-c",
+          "L1:ring-south",
+          "L1:ring-east",
+          "L1:ring-north",
+          "L1:ring-west",
+          "L1:inward-bridge",
+          "L1:inner-flight-a",
+          "L1:inner-landing",
+          "L1:inner-flight-b",
+          "L2:crown-terrace",
+          "L2:crown-room"
+        ],
+        "control": [
+          "L1:ring-west",
+          "L1:control-gallery",
+          "L0:control-descent",
+          "L0:control"
+        ],
+        "staff": [
+          "B1:garage",
+          "B1:service-hall",
+          "B1:service-stair",
+          "L0:service-stair",
+          "L1:service-stair",
+          "L1:service-return",
+          "L1:reading",
+          "L1:ring-east"
+        ],
+        "artifact": [
+          "B1:garage",
+          "B1:freight",
+          "L0:freight",
+          "L0:lobby",
+          "L0:west-passage",
+          "L0:lab"
+        ],
+        "undergroundAllowance": [
+          "B1:service-hall",
+          "B1:hidden-allowance",
+          "B1:tunnel-stub"
+        ]
+      },
+      "designSequence": [
+        "Raised exterior steps at outside datum 0 lead to the +1.2 m broad low lobby.",
+        "Three separate flights and faceted landings traverse the garden transition to the +6 m ring.",
+        "The ring turns around a true open court; the upper path branches inward before ascending to the partial +10.8 m crown.",
+        "Control is entered at +6 m and descends to a tall +1.2 m chamber. No slab bisects that chamber.",
+        "Back-of-house service stair joins the garage, lobby and sleeping wing without crossing a washroom."
+      ]
+    },
+    "view": {
+      "floorId": "L0",
+      "selected": null,
+      "selectedDoor": null,
+      "zoom": 1,
+      "pan": {
+        "x": 0,
+        "y": 0
+      },
+      "viewBounds": {
+        "x": -2,
+        "y": -2,
+        "w": 48,
+        "h": 49
+      },
+      "showBelow": false,
+      "dimensions": true,
+      "outerDimensions": true
+    }
+  }
+}

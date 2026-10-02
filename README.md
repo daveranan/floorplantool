@@ -71,3 +71,15 @@ Grid snapping is the default. Hold Ctrl during room movement, rectangle resizing
 Local steps also supports a free rectangular footprint in 3D. Draw from one surface to a different-height surface. The inspector retains Start/End surface selectors, precise heights and a Facing control. Rotation shows dashed radial/arc guides and a live degree label near the pointer in 2D and 3D.
 
 The separate in-canvas 3D tool row has been removed. Full stairs drawn in 3D opens the same destination-floor dialog as 2D. Edge steps also works in 2D. R/E/S/V retain their shared meanings, and the command palette reflects supported 3D tools. Room drawing remains active after creation.
+
+## Selection, navigation and point transforms
+
+Tab switches 2D/3D (close an open dialog first), preserving room selections. F frames the 3D selection. The external ground datum and grid stay at 0 m while floor surfaces move independently. Alt-left drag orbits in 3D and pans in 2D; Alt-right drag zooms in either view; Alt-middle remains pan. Resize handles take priority over navigation. Shift locks resize proportions; Alt centers resizing; both can be combined. Selection width/depth readouts update during resizing.
+
+In Edit points, drag a marquee to select vertices; Shift adds and Ctrl subtracts. Drag a selected vertex or the group box to move points together, use the padded handles to resize, or the amber rotation handle to rotate them. Unselected vertices remain fixed, and invalid crossing polygons are rejected. Corner-radius knobs stay 28 screen pixels from their vertex; only movement along the inward bisector changes radius. Double-click the knob to reset it to zero.
+
+Shift+S selects Local steps; Shift+E selects Edge steps. D explicitly selects a door and W a window. Tool cursors and stair-mode badges identify the active operation.
+
+## Brutalist courtyard concept
+
+The Building menu's **Open courtyard concept as a copy** imports an independent 44 × 45 m sketch-based plan. It preserves existing browser buildings and can be opened repeatedly as editable copies. Its raised +1.2 m lobby, linked garden flights and polygonal landings lead to a +6 m ring and inward +10.8 m crown route; the control chamber is entered from above. The garage remains an allowance. Curved entrance portals, ceiling oculi, guards and structural supports are noted but not fully modeled.
