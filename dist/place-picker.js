@@ -5,6 +5,7 @@ const objects=window.KERN_OBJECTS,editor=window.KERN_OBJECT_UI;
 const legacy=document.querySelector('.object-tools');legacy.classList.add('placement-config');legacy.setAttribute('aria-hidden','true');
 const categories=[
  {id:'all',name:'All',icon:'core'},
+ {id:'special',name:'Special',icon:'walk-start',items:['walk-start']},
  {id:'medical',name:'Medical',icon:'scanner',items:['scanner','exam']},
  {id:'technical',name:'Technical',icon:'decoder',items:['decoder','panel']},
  {id:'storage',name:'Storage',icon:'rack',items:['rack','tools']},
@@ -13,7 +14,7 @@ const categories=[
  {id:'hvac',name:'HVAC',icon:'duct',items:['duct','crawlway','hatch','vent']}
 ];
 const services=[{kind:'duct',name:'Utility duct',w:2,h:.6,route:true},{kind:'crawlway',name:'Crawlway',w:2,h:.8,route:true},{kind:'hatch',name:'Access hatch',w:.8,h:.8},{kind:'vent',name:'Vent terminal',w:.8,h:.8}];
-const inventory=[...objects.catalog,{kind:'text',name:'Text annotation',w:2,h:.45},...services];
+const inventory=[{kind:'walk-start',name:'Walk start',w:.6,h:.6,singleton:true},...objects.catalog,{kind:'text',name:'Text annotation',w:2,h:.45},...services];
 let category='all',choice='scanner',paletteDrag=null,hover=null,frame=0,connectionsOpen=false,connectionsScope='',hvacOpen=false;
 let serviceState={width:.6,clearHeight:.6,offset:4.1,access:'utility',kind:'duct'};
 const root=document.createElement('details');root.id='placemenu';root.className='toolbar-popover place-tool';
@@ -21,13 +22,13 @@ root.innerHTML=`<summary id="tool-place" aria-keyshortcuts="B" title="B · Place
 $('tool-select').parentElement.appendChild(root);wireToolbarMenu('placemenu');
 const popup=root.querySelector('.place-popup'),tabs=root.querySelector('.place-categories'),items=$('placeitems');
 const isService=kind=>services.some(s=>s.kind===kind),isRoute=kind=>services.some(s=>s.kind===kind&&s.route),item=kind=>inventory.find(i=>i.kind===kind);
-function icon(kind){return window.KERN_SYMBOL_ART.icon(kind);}
+function icon(kind){if(kind==='walk-start')return '<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="5"><circle cx="50" cy="65" r="18"/><path d="M50 65V12M34 30L50 12L66 30"/></svg>';return window.KERN_SYMBOL_ART.icon(kind);}
 function positionPopup(){const canvas=$('plan').getBoundingClientRect(),width=Math.max(240,Math.min(680,canvas.width-24,innerWidth-24)),left=Math.max(12,Math.min(canvas.left+(canvas.width-width)/2,innerWidth-width-12));popup.style.left=left+'px';popup.style.width=width+'px';popup.style.top='auto';popup.style.bottom=Math.max(12,innerHeight-canvas.bottom+12)+'px';}
 function renderItems(){
  const c=categories.find(c=>c.id===category),list=category==='all'?inventory:inventory.filter(i=>c.items.includes(i.kind));
  tabs.innerHTML=categories.map(c=>`<button type="button" role="tab" aria-selected="${c.id===category}" aria-controls="placeitems" data-place-category="${c.id}" title="${c.name}">${icon(c.icon)}<span>${c.name}</span></button>`).join('');
  $('place-category-label').textContent=c.name;$('placecaption').textContent=category==='hvac'?'Routes: click to draw, or drag a 2 m starter segment · edit height and use in the inspector':'Editable outlines · dimensions in metres';
- items.innerHTML=list.map(i=>`<button type="button" class="place-card" data-place-kind="${i.kind}" aria-pressed="${i.kind===choice}" title="${i.name} · ${i.w} × ${i.h} m${i.route?' · starter segment':''}"><div class="place-illustration">${icon(i.kind)}</div><strong>${esc(i.name)}</strong><small>${i.w} × ${i.h} m${i.route?' · starter':''}</small></button>`).join('');items.scrollLeft=0;
+ items.innerHTML=list.map(i=>`<button type="button" class="place-card" data-place-kind="${i.kind}" aria-pressed="${i.kind===choice}" title="${i.name} · ${i.singleton?'One per building':i.w+' × '+i.h+' m'}${i.route?' · starter segment':''}"><div class="place-illustration">${icon(i.kind)}</div><strong>${esc(i.name)}</strong><small>${i.singleton?(model.walkStart?'Placed · reposition':'One per building'):i.w+' × '+i.h+' m'+(i.route?' · starter':'')}</small></button>`).join('');items.scrollLeft=0;
  for(const tab of tabs.querySelectorAll('[data-place-category]'))tab.onclick=()=>{category=tab.dataset.placeCategory;renderItems();};
  for(const card of items.querySelectorAll('[data-place-kind]')){card.onpointerdown=beginPaletteDrag;card.onclick=e=>{if(e.detail===0)choose(card.dataset.placeKind);else e.preventDefault();};}
 }
@@ -39,7 +40,7 @@ $('placeprev').onclick=()=>items.scrollBy({left:-300,behavior:'smooth'});$('plac
 popup.addEventListener('wheel',e=>{const rail=e.target.closest('.place-rail')||items;if(rail.scrollWidth>rail.clientWidth+1){const amount=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;rail.scrollLeft+=amount*(e.deltaMode===1?16:e.deltaMode===2?rail.clientWidth:1);e.preventDefault();e.stopPropagation();}},{passive:false});
 tabs.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();const i=categories.findIndex(c=>c.id===category);category=categories[(i+(e.key==='ArrowRight'?1:categories.length-1))%categories.length].id;renderItems();tabs.querySelector('[aria-selected=true]')?.focus();});
 function choose(kind){
- choice=kind;cancelPlacement();root.open=false;
+ choice=kind;cancelPlacement();root.open=false;if(kind==='walk-start'){window.KERN_START?.activate();return;}
  if(isService(kind)){$('servicekind').value=kind;serviceState.kind=kind;serviceState.clearHeight=$('serviceaccess').value==='player'?1.5:kind==='duct'?.6:.4;hvacOpen=true;$('drawservice').click();}
  else{$('symbolkind').value=kind;$('placesymbol').click();}
  syncPlace();
@@ -58,7 +59,7 @@ function cancelPlacement(){const d=paletteDrag;paletteDrag=null;hover=null;$('pl
 function drop(e){
  if(!paletteDrag||e.pointerId!==paletteDrag.pointerId)return;const d=paletteDrag;updateDrop(e);const place=d.moved&&d.valid&&d.buildingId===currentBuilding().id&&d.floorId===floorId;const p=d.point;cancelPlacement();
  if(!d.moved){choose(d.kind);return;}if(!place){notify('Drop on the plan to place an item.');return;}
- choose(d.kind);
+ if(d.kind==='walk-start'){root.open=false;window.KERN_START?.place(p);return;}choose(d.kind);
  if(isService(d.kind)){
   const points=isRoute(d.kind)?[{x:snap(p.x-1),y:snap(p.y)},{x:snap(p.x+1),y:snap(p.y)}]:null;
   const o=editor.newService(p,points,serviceDefaults()),next=clone(floor());next.services??=[];next.services.push(o);try{objects.validateFloor(next);commit(()=>{floor().services??=[];floor().services.push(o);setSelection({services:[o.id]});});setTool('service-select');notify('Service placed · edit its dimensions and height in the inspector');}catch(error){notify(error.message);}
