@@ -57,3 +57,9 @@ The selection inspector exposes floor surface elevation, independent outside gro
 Draw **Local steps** in 2D, then choose the start/end surfaces in the selection inspector. Endpoints can follow outside ground, this floor, a room, or an unlinked height. The stair endpoint's 3D handle previews the rise and step count and updates its linked surface on release. Floor, room and stair changes are undoable. Lowered courtyards gain an explicit walking surface. Plan checks flag inadequate run/width, missing or detached links, threshold differences and height/headroom conflicts. These are concept checks, not building-code certification.
 
 Run `npm run test:elevation` for focused split-level interaction, geometry, walking, interruption and validation coverage.
+
+## Corner rotation and geometry snapping
+
+Press E, click a corner to mark the pivot, then drag another corner to rotate around it. A click on another corner changes the pivot without rotating. Shift uses absolute 5° angles. This works in 2D and focused-floor 3D; connected structural stairs retain their constraints. The outer rotation arcs in Select remain the quick center-rotation control.
+
+Grid snapping is the default. Hold Ctrl during room movement, rectangle resizing, group movement, or point editing to snap to geometry; compatible edge constraints are solved together and shown as cyan guides. Alt bypasses snapping. Ctrl-drag empty space still removes items from a selection. Room right-click menus now expose a Room type picker in both 2D and 3D, preserving locks and undo.
