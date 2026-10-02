@@ -74,3 +74,7 @@ The historical aggregate `npm test` was attempted and stops at `test-buildings.c
 ## October 2: corner pivots, optional multi-edge snapping and room types
 
 Focused tests `test-rotate-tool.cjs`, `test-corner-rotation-scene.cjs`, `test-multi-snapping.cjs`, and `test-explorer-room-types.cjs` cover fixed-corner rotation, absolute 5° snapping, symbol pivots, cancel/undo, Three.js raycast handles with a renderer double, simultaneous orthogonal/angled constraints, a group translation solve, Ctrl geometry snapping versus default grid in rectangle resizing, and the integrated Explorer context menu with clicked-floor targeting and protected types. No browser/GPU visual pass is claimed.
+
+## October 2: 3D authoring and live dimensions
+
+`test-authoring3d.cjs` covers all four cardinal edge directions, automatic descent/ascent metrics, source/destination links, free stair/room footprints, quarter-metre drawing, one-commit undo and inspector refresh. `test-authoring3d-scene.cjs` exercises actual Three raycasts with a mock renderer for edge-tool preview, creation, one-shot reset, undo, Escape, floor-switch cancellation and disposal. Rotation/elevation scene tests cover fixed pivots and quarter-metre height snapping; DOM rotation tests assert the visible degree label and dashed feedback group. No physical pointer, real browser or GPU visual pass is claimed.

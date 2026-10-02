@@ -52,7 +52,7 @@ The browser runner uses an isolated headless Chrome profile, localhost DevTools 
 
 ## Split levels and local steps
 
-The selection inspector exposes floor surface elevation, independent outside ground, and room surface/relative offset. Moving a floor preserves explicit room offsets. Room clear height remains independent. In focused-floor 3D, drag the amber vertical handle on a selected room or local stair endpoint; with no room selected, the handle edits the whole floor. Shift snaps elevations to 17 cm increments. Escape cancels the drag.
+The selection inspector exposes floor surface elevation, independent outside ground, and room surface/relative offset. Moving a floor preserves explicit room offsets. Room clear height remains independent. In focused-floor 3D, drag the amber vertical handle on a selected room or local stair endpoint; with no room selected, the handle edits the whole floor. Elevations snap to 0.25 m; hold Alt for free movement. A live height and change-in-height dimension are shown. Escape cancels the drag.
 
 Draw **Local steps** in 2D, then choose the start/end surfaces in the selection inspector. Endpoints can follow outside ground, this floor, a room, or an unlinked height. The stair endpoint's 3D handle previews the rise and step count and updates its linked surface on release. Floor, room and stair changes are undoable. Lowered courtyards gain an explicit walking surface. Plan checks flag inadequate run/width, missing or detached links, threshold differences and height/headroom conflicts. These are concept checks, not building-code certification.
 
@@ -63,3 +63,9 @@ Run `npm run test:elevation` for focused split-level interaction, geometry, walk
 Press E, click a corner to mark the pivot, then drag another corner to rotate around it. A click on another corner changes the pivot without rotating. Shift uses absolute 5° angles. This works in 2D and focused-floor 3D; connected structural stairs retain their constraints. The outer rotation arcs in Select remain the quick center-rotation control.
 
 Grid snapping is the default. Hold Ctrl during room movement, rectangle resizing, group movement, or point editing to snap to geometry; compatible edge constraints are solved together and shown as cyan guides. Alt bypasses snapping. Ctrl-drag empty space still removes items from a selection. Room right-click menus now expose a Room type picker in both 2D and 3D, preserving locks and undo.
+
+## 3D authoring and transform feedback
+
+Focused-floor 3D has its own canvas toolbar: Draw room, Local steps, and Steps from edge. For edge steps, select a raised/lowered room, choose the tool, and drag outward from a straight grid-aligned edge. The clicked edge sets facing; the width field controls the span, and the outward drag sets the run. A live tread preview links the source room to the neighboring room or outside ground. It commits once on release and is undoable. Equal-height endpoints are rejected. Oblique/curved edge authoring is not supported.
+
+Local steps also supports a free rectangular footprint in 3D. Draw from one surface to a different-height surface. The inspector retains Start/End surface selectors, precise heights and a Facing control. Rotation shows dashed radial/arc guides and a live degree label near the pointer in 2D and 3D.
