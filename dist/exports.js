@@ -42,7 +42,7 @@ function loadThree(){if(window.Building3D)return Promise.resolve(window.Building
 function rememberFloorSelection(){const id=currentBuilding()?.id;if(!id)return;let floors=floorSelections.get(id);if(!floors)floorSelections.set(id,floors=new Map());floors.set(floorId,getSelection())}
 function syncEditorFloor(id){if(!id||id===floorId||!Object.hasOwn(model.floors,id))return;rememberFloorSelection();floorId=id;pendingRoom=null;hoverPointer=null;setSelection(floorSelections.get(currentBuilding().id)?.get(id));render()}
 function focusWorkspace(node){if(document.documentElement.dataset.inputMode==='keyboard')node?.focus?.({preventScroll:true})}
-function rememberThree(){if(threeView&&threeBuildingId&&threeView.getViewState)threeStates.set(threeBuildingId,threeView.getViewState())}
+function rememberThree(){if(threeView&&threeBuildingId&&threeView.getViewState)threeStates.set(threeBuildingId,threeView.getOrbitViewState?.()||threeView.getViewState())}
 function disposeThree(){threeToken++;threeView?.dispose();threeView=null;$('threeviewport').innerHTML='';$('save3dpng').disabled=true;$('threefocusnav').hidden=true}
 function isThreeMode(){return viewMode==='3d'}
 function syncModeUI(){

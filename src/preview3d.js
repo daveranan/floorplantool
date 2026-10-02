@@ -362,7 +362,7 @@ function mount(container, data, options = {}) {
     renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove(); scene.clear(); pointerIds.clear();
   }
   return {
-    cameraPose(){const d=camera.getWorldDirection(new THREE.Vector3());return{x:camera.position.x,y:camera.position.z,z:camera.position.y,yaw:Math.atan2(-d.x,-d.z),pitch:Math.asin(Math.max(-1,Math.min(1,d.y))),fov:camera.fov,roll:new THREE.Euler().setFromQuaternion(camera.quaternion,'YXZ').z};},selectRoom, setWalk, fit, dispose, showAll, isolate, hoverFloor, adjacentFloor, getViewState, restoreViewState, syncActiveFloor,
+    cameraPose(){const d=camera.getWorldDirection(new THREE.Vector3());return{x:camera.position.x,y:camera.position.z,z:camera.position.y,yaw:Math.atan2(-d.x,-d.z),pitch:Math.asin(Math.max(-1,Math.min(1,d.y))),fov:camera.fov,roll:new THREE.Euler().setFromQuaternion(camera.quaternion,'YXZ').z};},getOrbitViewState(){return walking&&orbitState?JSON.parse(JSON.stringify(orbitState)):getViewState();},selectRoom, setWalk, fit, dispose, showAll, isolate, hoverFloor, adjacentFloor, getViewState, restoreViewState, syncActiveFloor,
     zoomBy(factor) {if (!Number.isFinite(factor) || factor <= 0) return; const delta = camera.position.clone().sub(controls.target), distance = THREE.MathUtils.clamp(delta.length() * factor, controls.minDistance, controls.maxDistance); moveCamera(controls.target.clone().add(delta.normalize().multiplyScalar(distance)), controls.target, false);},
     setGrid(value) {showGrid = !!value; grid.visible = showGrid;},
     getFocusedFloor() {return focused;},
