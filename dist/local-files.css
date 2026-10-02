@@ -1,0 +1,16 @@
+.local-files-statusbar{display:flex;justify-content:flex-end;padding:2px 12px;background:var(--panel,#fff);border-bottom:1px solid var(--line,#ddd);min-height:29px;flex-shrink:0}
+.local-files-badge{margin-left:auto;flex-shrink:0;align-self:center;max-width:220px;font-size:11px;padding:6px 10px;border-radius:6px;color:var(--muted,#666)}
+.local-files-badge[data-state=saved]{color:var(--success,#397359)}
+.local-files-badge[data-state=error],.local-files-badge[data-state=pending]{color:var(--warning,#a46b21)}
+#local-files-dialog{width:min(820px,calc(100vw - 32px));max-height:90dvh;padding:0;overflow:auto;border:1px solid var(--line,#ddd);border-radius:12px;background:var(--panel,#fff);color:var(--ink,#222)}
+.local-files-heading{height:auto;min-height:0;background:var(--panel,#fff);color:var(--ink,#222);display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding:24px;border-bottom:1px solid var(--line,#ddd)}
+.local-files-heading h2{margin:0 0 8px;font-size:20px}.local-files-heading p{margin:0;font-size:13px;color:var(--muted,#666)}
+.local-files-section{padding:20px 24px;border-bottom:1px solid var(--line,#ddd)}.local-files-section h3{margin:0 0 12px;font-size:14px}.local-files-section p{font-size:13px;line-height:1.55;overflow-wrap:anywhere}.local-files-section .small{font-size:12px;color:var(--muted,#666)}
+.local-files-actions{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}.local-files-actions button{padding:8px 12px}
+#local-files-status{font-weight:650}#local-files-remember:empty,#local-files-result:empty{display:none}#local-files-remember,#local-files-import-warning{color:var(--warning,#95601d)}
+.local-files-building{display:grid;grid-template-columns:18px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line,#ddd);font-size:13px}.local-files-building input{width:16px;height:16px}.local-files-check{display:flex;align-items:center;gap:9px;margin:12px 0;font-size:12px}.local-files-check input{width:16px;height:16px}
+#local-files-preview{max-height:300px;overflow:auto;background:#f3f2ed;border:1px solid var(--line,#ddd);border-radius:6px;margin:12px 0}#local-files-preview svg{width:100%;height:auto;display:block}#local-files-preview-controls .field{margin-top:16px}
+@media(max-width:620px){.local-files-badge{max-width:130px;white-space:normal;font-size:10px}#local-files-dialog{width:calc(100vw - 16px)}.local-files-heading,.local-files-section{padding:16px}.local-files-actions button{flex:1 1 140px}}
+
+#local-files-dialog [hidden]{display:none!important}#local-files-dialog .field select{background:var(--raised,#fff);color:var(--ink,#222);border-color:var(--line,#ddd)}
+#local-files-dialog{max-width:calc(100vw - 16px)}.local-files-heading>button{margin:0;min-width:34px;min-height:34px;padding:4px 9px;color:var(--ink,#222);border-color:var(--line,#ddd);background:transparent;font-size:21px}.local-files-heading>button:hover{background:var(--raised,#eee)}

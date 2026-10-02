@@ -3,6 +3,8 @@ const { spawnSync } = require('node:child_process');
 
 const root = path.resolve(__dirname, '..');
 const suites = [
+  'test-local-files.cjs',
+  'test-local-files-interruptions.cjs',
   'test-persistence-recovery.cjs',
   'test-window-offset-persistence.cjs',
   'test-nudge-history.cjs',
