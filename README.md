@@ -99,3 +99,14 @@ Dropdowns, context menus, text fields and buttons keep their focus. Rebuilt insp
 Wall, slab and ceiling openings now follow each actual tread and landing polygon and its own elevation. They remove only the rendered stair body plus the headroom above that surface, rather than projecting a route's entire footprint through a floor or service zone. Gaps inside a bent route's bounding box, supporting material below stairs, higher ceilings beyond headroom and unrelated walls remain intact. Old local-step doorway extensions are limited to the explicitly linked room edge and endpoint height.
 
 Select editable stairs and use **Cutout headroom · m** in the inspector. The default is 2.2 m above each step/landing; the supported range is 0.5–5 m, with a warning below the 2.1 m concept-design minimum. This is a modeling control, not a building-code compliance check. Clearance warnings use the same configured height. The optional value is saved with the route, survives export/import, and is one undoable edit. Existing saved plans need no migration.
+
+
+## Corner windows and corner styles
+
+New exterior windows follow the room perimeter, including square bends, rounded corners and chamfers. Choose Window, hover any exposed wall or corner, and click; total width is measured along the wall. Select an existing exterior window and enable **Follow corners** to convert it. Drag the window around its perimeter; width, sill, height and the number of panes remain editable. A window is rejected if any leg overlaps a neighboring room or another opening. Existing straight windows and saved round corners keep their prior geometry.
+
+Select a room and use **Edit points**, then click a corner. **Corner style** offers Square, Rounded and Chamfer (straight cut). The chamfer dimension is the cutback measured along each adjoining edge. The size is clamped before adjacent corners meet. Multi-selected corners can be changed together, and changes/dragging remain undoable.
+
+For a tall room, select its source room and edit **Room clear height · m**. This is measured upward from the room's surface elevation; **Use floor default** removes its override. Clear-height diagram labels now reflect the actual numeric value. Linked upper-level voids and solid caps retain their intentional types; the inspector explains those linked footprints rather than treating a solid cap as the room interior.
+
+Walking now follows the highest reachable stair/floor support without being pinned beneath a rising flight by retained flooring. Active stair-contact masks keep under-tread remnants from snagging the walker while preserving real overhead and side obstacles. The visible, height-bounded stair cutouts are unchanged.

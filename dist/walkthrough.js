@@ -6,6 +6,8 @@ function polygon(p,vs){let hit=false;for(let i=0,j=vs.length-1;i<vs.length;j=i++
 function create(data){
  const boxes=data.levels.flatMap(l=>[...l.boxes,...(l.polygons||[]).filter(p=>!['stair','landing'].includes(p.kind))].map(b=>({...b,floor:l.id}))),walls=boxes.filter(b=>['wall','solid','ceiling','slab','landing','window','window-frame'].includes(b.kind)),surfaces=boxes.filter(b=>['slab','landing'].includes(b.kind));
  const ramps=(data.stairs||[]).flatMap(s=>(s.flights||[]).map(f=>({...f,stair:s})));const grounds=data.levels.find(l=>l.id==='L0')||data.levels.reduce((a,b)=>Math.abs(a.z)<Math.abs(b.z)?a:b),gz=Number.isFinite(data.siteGroundZ)?data.siteGroundZ:grounds.z;
+ const shapeTools=root.KERN_SHAPES||(typeof require==='function'?require('./room-shapes.js'):null),contactCache=new WeakMap();
+ const stairLandings=(data.stairs||[]).flatMap(stair=>(stair.landings||[]).map(landing=>({...landing,stair})));
  const radius=.3;let body=1.8;const bounds={x:data.bounds.minX-25,y:data.bounds.minY-25,w:data.bounds.maxX-data.bounds.minX+50,h:data.bounds.maxY-data.bounds.minY+50};
  // Arrival landing thresholds bridge the perimeter allowance only at validated stair doors.
  for(const s of data.stairs||[])for(const a of s.access||[])if(a.valid&&a.geometry){const g=a.geometry,t=.4;if(g.axis==='poly'){surfaces.push({...g,z:a.z-.18,height:.18,floor:a.floor||s.floorId,kind:'landing'});continue;}surfaces.push({x:g.axis==='h'?g.start:g.fixed-t,y:g.axis==='h'?g.fixed-t:g.start,w:g.axis==='h'?g.end-g.start:t*2,h:g.axis==='h'?t*2:g.end-g.start,z:a.z-.18,height:.18,floor:a.floor||s.floorId,kind:'landing'});}
@@ -14,8 +16,29 @@ function create(data){
  function heights(p){let out=surfaces.filter(b=>inside(p,b,.008)&&(!b.polygon||polygon(p,b.polygon))&&!(b.holes||[]).some(h=>polygon(p,h))).map(b=>({z:b.z+b.height,floor:b.floor}));for(const f of ramps){const z=rampHeight(p,f);if(z!==null)out.push({z,floor:(f.stair.stops||[]).reduce((best,s)=>Math.abs(s.z-z)<Math.abs(best.z-z)?s:best).floor});}
  // Ground exists outside enclosed footprints, never across shafts inside the building.
  const groundMasks=[...grounds.rooms,...data.levels.filter(l=>l.id!==grounds.id).flatMap(l=>l.rooms.filter(r=>r.groundSurface||r.localSteps&&data.stairs.some(st=>st.localSteps&&st.floorId===l.id&&st.roomId===r.id&&Math.min(...st.stops.map(s=>s.z))<=gz+.2&&Math.max(...st.stops.map(s=>s.z))>=gz-.2)))];const indoors=groundMasks.some(r=>(r.groundSurface||r.localSteps||!['courtyard','terrace'].includes(r.type))&&(r.routeStair?(data.stairs.find(s=>s.roomId===r.id&&s.floorId===grounds.id)?.footprintGeometry||[]).some(poly=>polygon(p,poly[0])&&!poly.slice(1).some(h=>polygon(p,h))):(r.polygon?polygon(p,r.polygon):inside(p,r))));if(!indoors&&inside(p,bounds))out.push({z:gz,floor:grounds.id});return out;}
- function circleHit(p,b){if(!b.polygon)return p.x+radius>b.x&&p.x-radius<b.x+b.w&&p.y+radius>b.y&&p.y-radius<b.y+b.h;if(polygon(p,b.polygon)&&!(b.holes||[]).some(h=>polygon(p,h)))return true;return [b.polygon,...(b.holes||[])].some(ps=>ps.some((a,i)=>{const q=ps[(i+1)%ps.length],dx=q[0]-a[0],dy=q[1]-a[1],t=Math.max(0,Math.min(1,((p.x-a[0])*dx+(p.y-a[1])*dy)/(dx*dx+dy*dy||1)));return Math.hypot(p.x-a[0]-dx*t,p.y-a[1]-dy*t)<radius;}));}function blocked(p){return walls.some(b=>!(['slab','landing'].includes(b.kind)&&b.z+b.height<=p.z+.32)&&p.z+body>b.z+.04&&p.z<b.z+b.height-.03&&circleHit(p,b));}
- function supported(p){const hs=heights(p).filter(h=>h.z<=p.z+.32&&h.z>=p.z-.4).sort((a,b)=>Math.abs(a.z-p.z)-Math.abs(b.z-p.z));for(const h of hs){const q={...p,z:h.z,floor:h.floor||p.floor};if(!blocked(q))return q;}return null;}
+ function circleHit(p,b){if(!b.polygon)return p.x+radius>b.x&&p.x-radius<b.x+b.w&&p.y+radius>b.y&&p.y-radius<b.y+b.h;if(polygon(p,b.polygon)&&!(b.holes||[]).some(h=>polygon(p,h)))return true;return [b.polygon,...(b.holes||[])].some(ps=>ps.some((a,i)=>{const q=ps[(i+1)%ps.length],dx=q[0]-a[0],dy=q[1]-a[1],t=Math.max(0,Math.min(1,((p.x-a[0])*dx+(p.y-a[1])*dy)/(dx*dx+dy*dy||1)));return Math.hypot(p.x-a[0]-dx*t,p.y-a[1]-dy*t)<radius;}));}
+ // The rendered staircase is stepped, but walking follows a smooth ramp. Treat
+ // material below the active stair's treads as foot support, rather than a wall
+ // against the cylinder's flat base. Keep the exact cutouts and all overhead or
+ // side material; a higher overlapping flight must never clear the lower one.
+ function stairContacts(p){
+  const active=ramps.filter(f=>{const z=rampHeight(p,f);return z!==null&&Math.abs(z-p.z)<.04;}),landings=stairLandings.filter(l=>Math.abs(l.z-p.z)<.04&&(l.polygon?polygon(p,l.polygon):inside(p,l.rect,.001)));
+  for(const l of landings)for(const f of ramps)if(f.stair===l.stair&&[f.fromLanding,f.toLanding].includes(l.id)&&!active.includes(f))active.push(f);
+  if(!active.length)return null;
+  for(const f of active)for(const l of stairLandings)if(l.stair===f.stair&&[f.fromLanding,f.toLanding].includes(l.id)&&!landings.includes(l))landings.push(l);
+  const key=active.map(f=>ramps.indexOf(f)).sort((a,b)=>a-b).join('|'),surfaces=active.flatMap(f=>f.treads||[]).concat(landings);return{key,surfaces};
+ }
+ function stairBodyHit(p,b,contacts){
+  if(!contacts||!shapeTools||!['wall','slab','ceiling'].includes(b.kind))return true;
+  let cache=contactCache.get(b);if(!cache)contactCache.set(b,cache=new Map());let pieces=cache.get(contacts.key);
+  if(!pieces){const top=b.z+b.height,masks=contacts.surfaces.filter(s=>top<=s.z+.03).map(s=>[[s.polygon||[[s.rect.x,s.rect.y],[s.rect.x+s.rect.w,s.rect.y],[s.rect.x+s.rect.w,s.rect.y+s.rect.h],[s.rect.x,s.rect.y+s.rect.h]]]]);
+   if(!masks.length)return true;const outline=b.polygon||[[b.x,b.y],[b.x+b.w,b.y],[b.x+b.w,b.y+b.h],[b.x,b.y+b.h]],remaining=shapeTools.difference([[outline,...b.holes||[]]],masks);pieces=remaining.map(rings=>({...b,...shapeTools.bounds(rings[0]),polygon:rings[0],holes:rings.slice(1)}));cache.set(contacts.key,pieces);
+  }return pieces.some(piece=>circleHit(p,piece));
+ }
+ function blocked(p){let contacts;return walls.some(b=>!(['slab','landing'].includes(b.kind)&&b.z+b.height<=p.z+.32)&&p.z+body>b.z+.04&&p.z<b.z+b.height-.03&&circleHit(p,b)&&stairBodyHit(p,b,contacts===undefined?(contacts=stairContacts(p)):contacts));}
+ // Climb the highest surface within the existing step limit, including a ramp
+ // above a retained floor; choosing the nearest height pins ascent to that floor.
+ function supported(p){const hs=heights(p).filter(h=>h.z<=p.z+.32&&h.z>=p.z-.4).sort((a,b)=>b.z-a.z);for(const h of hs){const q={...p,z:h.z,floor:h.floor||p.floor};if(!blocked(q))return q;}return null;}
  let spawn=null;const saved=data.walkStart;if(saved&&[saved.x,saved.y,saved.z,saved.yaw].every(Number.isFinite)&&data.levels.some(l=>l.id===saved.floor)){const q=supported(saved);if(q&&q.floor===saved.floor)spawn={...q,yaw:saved.yaw};}const invalidSaved=!!saved&&!spawn;for(const e of (spawn?[]:data.entrances)||[]){if(e.floor!==grounds.id)continue;const r=grounds.rooms.find(r=>r.id===e.room);if(!r)continue;const o=grounds.openings.find(o=>o.exterior&&!o.blocked&&o.a===r.id);const candidates=o?.axis==='poly'?[{x:(o.p0[0]+o.p1[0])/2,y:(o.p0[1]+o.p1[1])/2}]:o?[{x:o.axis==='h'?(o.start+o.end)/2:o.fixed,y:o.axis==='h'?o.fixed:(o.start+o.end)/2}, {x:r.x+r.w/2,y:r.y+r.h/2}]:[{x:r.x+r.w/2,y:r.y+r.h/2}];for(const c of candidates){const q=supported({...c,z:r.z});if(q){spawn={...q,yaw:0};break;}}if(spawn)break;}
  if(!spawn)for(const b of surfaces){const samples=[{x:b.x+b.w/2,y:b.y+b.h/2},...(b.polygon||[]).slice(1,-1).map((p,i)=>({x:(b.polygon[0][0]+p[0]+b.polygon[i+2][0])/3,y:(b.polygon[0][1]+p[1]+b.polygon[i+2][1])/3}))];for(const sample of samples){const q=supported({...sample,z:b.z+b.height});if(q){spawn={...q,yaw:0};break;}}if(spawn)break;}
  if(!spawn)spawn={x:bounds.x+2,y:bounds.y+2,z:gz,floor:grounds.id,yaw:0};
