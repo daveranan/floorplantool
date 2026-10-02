@@ -62,8 +62,8 @@ function drop(e){
  if(d.kind==='walk-start'){root.open=false;window.KERN_START?.place(p);return;}choose(d.kind);
  if(isService(d.kind)){
   const points=isRoute(d.kind)?[{x:snap(p.x-1),y:snap(p.y)},{x:snap(p.x+1),y:snap(p.y)}]:null;
-  const o=editor.newService(p,points,serviceDefaults()),next=clone(floor());next.services??=[];next.services.push(o);try{objects.validateFloor(next);commit(()=>{floor().services??=[];floor().services.push(o);setSelection({services:[o.id]});});setTool('service-select');notify('Service placed · edit its dimensions and height in the inspector');}catch(error){notify(error.message);}
- }else{editor.pointerDown({button:0,target:$('plan'),clientX:e.clientX,clientY:e.clientY,preventDefault(){}});notify('Outline placed · drag another preview, or click to place again');}
+  const o=editor.newService(p,points,serviceDefaults()),next=clone(floor());next.services??=[];next.services.push(o);try{objects.validateFloor(next);commit(()=>{floor().services??=[];floor().services.push(o);setSelection({services:[o.id]});});setTool('select');notify('Service placed · edit its dimensions and height in the inspector');}catch(error){notify(error.message);}
+ }else{editor.pointerDown({button:0,target:$('plan'),clientX:e.clientX,clientY:e.clientY,preventDefault(){}});notify('Outline placed · drag its handles to edit');}
 }
 document.addEventListener('pointermove',e=>{if(paletteDrag&&e.pointerId===paletteDrag.pointerId){updateDrop(e);return;}if(drag||!['symbol','service-draw'].includes(tool)){if(hover){hover=null;queueDraw();}return;}const kind=tool==='symbol'?$('symbolkind').value:$('servicekind').value,p=canvasPoint(e);hover=p?{kind,point:p,valid:validPlacement(kind,p)}:null;queueDraw();},true);
 document.addEventListener('pointerup',drop,true);

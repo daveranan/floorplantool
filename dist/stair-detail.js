@@ -199,7 +199,7 @@ function markup(detail){
  }
  const near=detail.displayLandings.find(l=>l.role==='floor')||detail.displayLandings[0];
  if(near){const x=near.rect.x+near.rect.w/2,y=near.rect.y+near.rect.h/2;s+=`<text x="${n(x)}" y="${n(y+.1)}" text-anchor="middle" font-family="system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" letter-spacing="normal" word-spacing="normal" font-size=".28" fill="${color}">${esc(detail.datumLabel)}</text>`}
- if(detail.status==='error')s+=`<rect x="${n(r.x+.08)}" y="${n(r.y+.08)}" width="${n(Math.max(.1,r.w-.16))}" height="${n(Math.max(.1,r.h-.16))}" fill="none" stroke="#b73e31" stroke-width=".14" stroke-dasharray=".2 .12"/>`;
+ if(detail.status==='error'&&!detail.routeStair&&!detail.localSteps)s+=`<rect x="${n(r.x+.08)}" y="${n(r.y+.08)}" width="${n(Math.max(.1,r.w-.16))}" height="${n(Math.max(.1,r.h-.16))}" fill="none" stroke="#b73e31" stroke-width=".14" stroke-dasharray=".2 .12"/>`;
  return s+badges+'</g>';
 }
 const api={build,markup,previewLevels,slice,defaults:{...DEFAULTS},doorGeometry};root.KERN_STAIR_DETAIL=api;if(typeof module!=='undefined'&&module.exports)module.exports=api;

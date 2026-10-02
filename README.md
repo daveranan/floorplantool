@@ -52,7 +52,7 @@ The browser runner uses an isolated headless Chrome profile, localhost DevTools 
 
 ## Split levels and local steps
 
-The selection inspector exposes floor surface elevation, independent outside ground, and room surface/relative offset. Moving a floor preserves explicit room offsets. Room clear height remains independent. In focused-floor 3D, drag the amber vertical handle on a selected room or local stair endpoint; with no room selected, the handle edits the whole floor. Elevations snap to 0.25 m; hold Alt for free movement. A live height and change-in-height dimension are shown. Escape cancels the drag.
+The selection inspector exposes floor surface elevation, independent outside ground, and room surface/relative offset. Moving a floor preserves explicit room offsets. Room clear height remains independent. In focused-floor 3D, drag the amber vertical handle on a selected room or local stair endpoint; with no room selected, the handle edits the whole floor. Elevations snap to 0.25 m; hold Ctrl for free movement. A live height and change-in-height dimension are shown. Escape cancels the drag.
 
 Draw **Local steps** in 2D, then choose the start/end surfaces in the selection inspector. Endpoints can follow outside ground, this floor, a room, or an unlinked height. The stair endpoint's 3D handle previews the rise and step count and updates its linked surface on release. Floor, room and stair changes are undoable. Lowered courtyards gain an explicit walking surface. Plan checks flag inadequate run/width, missing or detached links, threshold differences and height/headroom conflicts. These are concept checks, not building-code certification.
 
@@ -62,7 +62,7 @@ Run `npm run test:elevation` for focused split-level interaction, geometry, walk
 
 Press E, click a corner to mark the pivot, then drag another corner to rotate around it. A click on another corner changes the pivot without rotating. Shift uses absolute 5° angles. This works in 2D and focused-floor 3D; connected structural stairs retain their constraints. The outer rotation arcs in Select remain the quick center-rotation control.
 
-Grid snapping is the default. Hold Ctrl during room movement, rectangle resizing, group movement, or point editing to snap to geometry; compatible edge constraints are solved together and shown as cyan guides. Alt bypasses snapping. Ctrl-drag empty space still removes items from a selection. Room right-click menus now expose a Room type picker in both 2D and 3D, preserving locks and undo.
+Grid snapping is the default. Hold Ctrl to bypass snapping during movement, resizing and drawing. Ctrl+Shift aligns room and point movement or rectangle resizing to nearby geometry, with cyan guides. Alt keeps its camera-navigation and centered-resize roles. Ctrl-drag empty space still removes items from a selection. Room right-click menus now expose a Room type picker in both 2D and 3D, preserving locks and undo.
 
 ## 3D authoring and transform feedback
 
@@ -70,16 +70,26 @@ Grid snapping is the default. Hold Ctrl during room movement, rectangle resizing
 
 Local steps also supports a free rectangular footprint in 3D. Draw from one surface to a different-height surface. The inspector retains Start/End surface selectors, precise heights and a Facing control. Rotation shows dashed radial/arc guides and a live degree label near the pointer in 2D and 3D.
 
-The separate in-canvas 3D tool row has been removed. Full stairs drawn in 3D opens the same destination-floor dialog as 2D. Edge steps also works in 2D. R/E/S/V retain their shared meanings, and the command palette reflects supported 3D tools. Room drawing remains active after creation.
+The separate in-canvas 3D tool row has been removed. Full stairs drawn in 3D opens the same destination-floor dialog as 2D. Edge steps also works in 2D. R/E/S/V retain their shared meanings, and the command palette reflects supported 3D tools. Creation tools return to Select after one valid placement, with the new object selected and editable. Invalid placement keeps the tool active; multi-point paths finish before leaving creation mode.
 
 ## Selection, navigation and point transforms
 
-Tab switches 2D/3D (close an open dialog first), preserving room selections. F frames the 3D selection. The external ground datum and grid stay at 0 m while floor surfaces move independently. Alt-left drag orbits in 3D and pans in 2D; Alt-right drag zooms in either view; Alt-middle remains pan. Resize handles take priority over navigation. Shift locks resize proportions; Alt centers resizing; both can be combined. Selection width/depth readouts update during resizing.
+Tab switches 2D/3D (close an open dialog first), preserving room selections. F frames the 3D selection. The external ground datum and grid stay at 0 m while floor surfaces move independently. Alt-left drag orbits in 3D and pans in 2D; Alt-right drag horizontally zooms in either view (right in, left out; vertical movement has no effect); Alt-middle remains pan. Resize handles take priority over navigation. Shift locks resize proportions; Alt centers resizing; both can be combined. Selection width/depth readouts update during resizing.
 
-In Edit points, drag a marquee to select vertices; Shift adds and Ctrl subtracts. Drag a selected vertex or the group box to move points together, use the padded handles to resize, or the amber rotation handle to rotate them. Unselected vertices remain fixed, and invalid crossing polygons are rejected. Corner-radius knobs stay 28 screen pixels from their vertex; only movement along the inward bisector changes radius. Double-click the knob to reset it to zero.
+In Edit points, drag a marquee to select vertices; Shift adds and Ctrl subtracts. Drag a selected vertex or the group box to move points together, use the cyan outer frame’s square handles to resize, or the amber rotation handle to rotate them. Unselected vertices remain fixed, and invalid crossing polygons are rejected. Corner-radius knobs stay 28 screen pixels from their vertex; only movement along the inward bisector changes radius. Double-click the knob to reset it to zero.
 
 Shift+S selects Local steps; Shift+E selects Edge steps. D explicitly selects a door and W a window. Tool cursors and stair-mode badges identify the active operation.
 
 ## Brutalist courtyard concept
 
 The Building menu's **Open courtyard concept as a copy** imports an independent 44 × 45 m sketch-based plan. It preserves existing browser buildings and can be opened repeatedly as editable copies. Its raised +1.2 m lobby, linked garden flights and polygonal landings lead to a +6 m ring and inward +10.8 m crown route; the control chamber is entered from above. The garage remains an allowance. Curved entrance portals, ceiling oculi, guards and structural supports are noted but not fully modeled.
+
+Rotated rooms retain an oriented selection frame and resize along their local axes in both 2D and 3D. Shift preserves proportions, Alt resizes around the center, and Ctrl bypasses the local grid.
+
+## Command search, door defaults and batch types
+
+**Commands** or Ctrl/Cmd+/ opens searchable commands and settings; Ctrl/Cmd+K is also supported. Search “default door width” to set single and double door clear widths for future placements. These browser-local preferences apply to rectangular and polygonal walls in 2D and 3D, without resizing existing openings. C always enters the selected door/passage connection mode, even after placing windows with W.
+
+Multi-selection exposes compatible **Change selected types** fields for rooms, openings, outline items, service routes and service terminals. Mixed selections expose a separate field for each compatible group. Each change is one undoable operation, retains selection and dimensions, and rejects the whole change if a protected type or opening constraint would be broken. Room/stair links remain protected.
+
+Dropdowns, context menus, text fields and buttons keep their focus. Rebuilt inspectors restore the same logical field; an open search can be canceled without losing an unfinished text draft. Tab retains native control navigation when a control or menu has focus, and switches 2D/3D when used from the canvas.
