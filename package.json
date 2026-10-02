@@ -10,6 +10,12 @@
     "test:ui": "node test-ui.cjs",
     "test:preview": "node test-preview.cjs"
   },
-  "dependencies": {"three": "0.180.0"},
-  "devDependencies": {"esbuild": "0.25.10", "jsdom": "26.1.0"}
+  "dependencies": {
+    "polygon-clipping": "^0.15.7",
+    "three": "0.180.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.10",
+    "jsdom": "26.1.0"
+  }
 }

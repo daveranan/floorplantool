@@ -16,7 +16,7 @@ function segmentBox(origin, end, box) {
 
 // Labels use an existing horizontal slab or arrival landing, never the air over a stairwell.
 function roomLabelSurface(room, level) {
-  const surfaces = level.boxes.filter(box => (box.kind === 'slab' && (!box.room || box.room === room.id) || box.kind === 'landing') && Math.abs(box.z + box.height - room.z) < .01).map(box => {
+  if(room.polygon&&window.KERN_SHAPES){const ps=(level.polygons||[]).filter(p=>p.kind==='slab'&&p.room===room.id);const contains=p=>ps.some(s=>window.KERN_SHAPES.contains(p,s.polygon)&&!(s.holes||[]).some(h=>window.KERN_SHAPES.contains(p,h)));const anchor=window.KERN_SHAPES.centroid(room);if(contains(anchor))return{x:anchor.x-Math.min(room.w,4)/2,y:anchor.y-Math.min(room.h,2)/2,w:Math.min(room.w,4),h:Math.min(room.h,2),z:room.z};return null;}const surfaces = level.boxes.filter(box => (box.kind === 'slab' && (!box.room || box.room === room.id) || box.kind === 'landing') && Math.abs(box.z + box.height - room.z) < .01).map(box => {
     const x = Math.max(room.x, box.x), y = Math.max(room.y, box.y);
     return {x, y, w: Math.min(room.x + room.w, box.x + box.w) - x, h: Math.min(room.y + room.h, box.y + box.h) - y, z: box.z + box.height};
   }).filter(box => box.w > .35 && box.h > .35);
@@ -73,7 +73,7 @@ function mount(container, data, options = {}) {
   const ground = data.levels.find(l => l.id === 'L0'), groundZ = ground?.z ?? 0;
   const groundRank = ground ? data.levels.indexOf(ground) : data.levels.reduce((best, l, i) => Math.abs(l.z - groundZ) < Math.abs(data.levels[best].z - groundZ) ? i : best, 0);
   const levelBounds = level => {
-    const boxes = level.boxes;
+    const boxes = [...level.boxes,...(level.polygons||[])];
     return boxes.length ? {minX: Math.min(...boxes.map(q => q.x)), maxX: Math.max(...boxes.map(q => q.x + q.w)), minY: Math.min(...boxes.map(q => q.y)), maxY: Math.max(...boxes.map(q => q.y + q.h))} : b;
   };
   const roomLabel = (room, level, group) => {
@@ -115,9 +115,9 @@ function mount(container, data, options = {}) {
     }
     for (const polygon of [...(level.polygons||[]),...data.levels.flatMap(other=>other.id===level.id?[]:(other.polygons||[]).filter(p=>p.z<level.z&&data.stairs?.some(st=>st.connectionId===p.stair&&st.stops.some(stop=>stop.floor===level.id)&&p.z>=Math.max(...st.stops.filter(stop=>stop.z<level.z).map(stop=>stop.z))-.2)).map(p=>({...p,contextOnly:true})))]) {
       const shape = new THREE.Shape(polygon.polygon.map(p => new THREE.Vector2(p[0], -p[1])));
-      const geometry = new THREE.ExtrudeGeometry(shape, {depth: polygon.height, bevelEnabled: false, steps: 1});
-      geometry.rotateX(-Math.PI / 2); geometry.translate(0, polygon.z, 0);
-      const mesh = new THREE.Mesh(geometry, material(polygon.color)); mesh.userData = {level: level.id, stair: polygon.stair,contextOnly:!!polygon.contextOnly};
+      for(const hole of polygon.holes||[])shape.holes.push(new THREE.Path(hole.map(p=>new THREE.Vector2(p[0],-p[1]))));const geometry = new THREE.ExtrudeGeometry(shape, {depth: polygon.height, bevelEnabled: false, steps: 1});
+      geometry.rotateX(-Math.PI / 2);
+      const mesh = new THREE.Mesh(geometry, material(polygon.color,polygon.kind==='window'));mesh.position.y=polygon.z; mesh.userData = {level: level.id, stair: polygon.stair,contextOnly:!!polygon.contextOnly,room:polygon.room,kind:polygon.kind,shape:polygon};
       group.add(mesh); shapedMeshes.push(mesh);
     }
     const outline = new THREE.Box3Helper(new THREE.Box3(new THREE.Vector3(bounds.minX, level.z + .04, bounds.minY), new THREE.Vector3(bounds.maxX, level.z + .07, bounds.maxY)), 0x7cc4ff);
@@ -189,7 +189,7 @@ function mount(container, data, options = {}) {
       mesh.instanceMatrix.needsUpdate = true;
       if (fade) {fade.visible = xray && mesh.userData.boxes.some((box, index) => heightFor(box, level) > .001 && mesh.userData.faded.has(index)); fade.instanceMatrix.needsUpdate = true;}
     }
-    for(const mesh of shapedMeshes)mesh.visible=!mesh.userData.contextOnly||focused===mesh.userData.level;for (const sprite of sprites) sprite.visible = labels;
+    for(const mesh of shapedMeshes){const shape=mesh.userData.shape,level=data.levels.find(l=>l.id===mesh.userData.level),height=heightFor(shape,level);mesh.scale.y=height/shape.height;mesh.visible=height>.001&&(!mesh.userData.contextOnly||focused===mesh.userData.level);}for (const sprite of sprites) sprite.visible = labels;
     for (const label of roomLabels) label.visible = labels && (!focused||label.userData.level === focused) && !label.userData.duplicate;
     scene.updateMatrixWorld(true); lastOcclusion = '';
   }
@@ -221,6 +221,7 @@ function mount(container, data, options = {}) {
         }
       }
     }
+    if(updateXray){const fadeShapes=new Set(),walls=shapedMeshes.filter(m=>m.userData.kind==='wall'&&m.visible&&groups.get(m.userData.level)?.visible);if(xray&&showWalls){for(const level of data.levels){if(!groups.get(level.id)?.visible)continue;for(const room of (level.rooms||[]).slice(0,20)){const p=window.KERN_SHAPES?window.KERN_SHAPES.centroid(room):{x:room.x+room.w/2,y:room.y+room.h/2},target=new THREE.Vector3(p.x,room.z+.8+groups.get(level.id).position.y,p.y),delta=target.clone().sub(camera.position),distance=delta.length();const ray=new THREE.Raycaster(camera.position,delta.normalize(),.05,distance-.05);const hit=ray.intersectObjects(walls,false)[0];if(hit)fadeShapes.add(hit.object);}}}for(const mesh of shapedMeshes)if(mesh.userData.kind==='wall')mesh.material=material(mesh.userData.shape.color,fadeShapes.has(mesh));}
     let changed = false;
     if (updateXray) {for (const mesh of primaryMeshes) {const next = faded.get(mesh), previous = mesh.userData.faded;if (next.size !== previous.size || [...next].some(i => !previous.has(i))) changed = true; mesh.userData.faded = next;} xrayPending = false;}
     if (changed) updateMatrices();
@@ -264,7 +265,7 @@ function mount(container, data, options = {}) {
   }
   function fit(preserveDirection = false, animate = false) {
     const box = new THREE.Box3();
-    for (const group of groups.values()) if (group.visible) {const level = data.levels.find(l => l.id === group.userData.id); for (const shape of level.boxes) {box.expandByPoint(new THREE.Vector3(shape.x, shape.z + group.position.y, shape.y)); box.expandByPoint(new THREE.Vector3(shape.x + shape.w, shape.z + shape.height + group.position.y, shape.y + shape.h));}}
+    for (const group of groups.values()) if (group.visible) {const level = data.levels.find(l => l.id === group.userData.id); for (const shape of [...level.boxes,...(level.polygons||[])]) {box.expandByPoint(new THREE.Vector3(shape.x, shape.z + group.position.y, shape.y)); box.expandByPoint(new THREE.Vector3(shape.x + shape.w, shape.z + shape.height + group.position.y, shape.y + shape.h));}}
     if (box.isEmpty()) {box.min.set(b.minX, b.minZ - groundRank * gap, b.minY); box.max.set(b.maxX, b.maxZ + (data.levels.length - 1 - groundRank) * gap, b.maxY);}
     const center = box.getCenter(new THREE.Vector3()), dimensions = box.getSize(new THREE.Vector3()), radius = Math.max(dimensions.length() / 2, 8), angle = THREE.MathUtils.degToRad(camera.fov / 2), distance = radius / Math.sin(angle) * Math.max(1, 1 / camera.aspect) * 1.1;
     const direction = preserveDirection ? camera.position.clone().sub(controls.target).normalize() : new THREE.Vector3(1, .9, 1.2).normalize();
@@ -325,7 +326,7 @@ function mount(container, data, options = {}) {
   const contextLost = e => {e.preventDefault(); options.onContextLost?.();}; renderer.domElement.addEventListener('webglcontextlost', contextLost);
   let walking=false,flyingView=false,walkState=null,orbitState=null,walkYaw=0,walkPitch=0,flashOn=true;
   const torch=new THREE.SpotLight(0xffefd2,55,35,Math.PI/7,.65,1.3);torch.visible=false;scene.add(torch);scene.add(torch.target);
-  const outdoor=new THREE.Group();const outsideRect={x:centerX-(size+50)/2,y:centerY-(size+50)/2,w:size+50,h:size+50};for(const r of window.BuildingPreviewGeometry.subtractAll(outsideRect,(ground?.rooms||[]).filter(r=>!['courtyard','terrace'].includes(r.type)))){const mesh=new THREE.Mesh(new THREE.PlaneGeometry(r.w,r.h),material('#535c62'));mesh.rotation.x=-Math.PI/2;mesh.position.set(r.x+r.w/2,groundZ-.02,r.y+r.h/2);outdoor.add(mesh);}outdoor.visible=false;scene.add(outdoor);
+  const outdoor=new THREE.Group();const outsideRect={x:centerX-(size+50)/2,y:centerY-(size+50)/2,w:size+50,h:size+50};if(data.shapeAware&&window.KERN_SHAPES){const S=window.KERN_SHAPES,regions=S.difference(S.multi(outsideRect),(ground?.rooms||[]).filter(r=>!['courtyard','terrace'].includes(r.type)).map(r=>S.multi(r)));for(const rings of regions){const shape=new THREE.Shape(rings[0].map(p=>new THREE.Vector2(p[0],-p[1])));for(const h of rings.slice(1))shape.holes.push(new THREE.Path(h.map(p=>new THREE.Vector2(p[0],-p[1]))));const mesh=new THREE.Mesh(new THREE.ShapeGeometry(shape),material('#535c62'));mesh.rotation.x=-Math.PI/2;mesh.position.y=groundZ-.02;outdoor.add(mesh);}}else for(const r of window.BuildingPreviewGeometry.subtractAll(outsideRect,(ground?.rooms||[]).filter(r=>!['courtyard','terrace'].includes(r.type)))){const mesh=new THREE.Mesh(new THREE.PlaneGeometry(r.w,r.h),material('#535c62'));mesh.rotation.x=-Math.PI/2;mesh.position.set(r.x+r.w/2,groundZ-.02,r.y+r.h/2);outdoor.add(mesh);}outdoor.visible=false;scene.add(outdoor);
 
   function updateWalk(){if(!walkState)return;camera.position.set(walkState.x+(walkState.bobX||0)*Math.cos(walkYaw),walkState.z+(walkState.eyeHeight??1.6278874)+(walkState.bobY||0),walkState.y-(walkState.bobX||0)*Math.sin(walkYaw));camera.rotation.order='YXZ';camera.rotation.set(walkPitch,walkYaw,walkState.roll||0);const direction=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);torch.position.copy(camera.position);torch.target.position.copy(camera.position).add(direction.multiplyScalar(8));torch.visible=flashOn;if(walkState.fly)return;for(const sprite of sprites)sprite.visible=false;for(const label of roomLabels)label.visible=!label.userData.duplicate&&Math.abs(label.position.y-walkState.z)<.2;}
   function setWalk(state,yaw=0,pitch=0,flash=true,keepPose=false){if(state){if(!walking){orbitState=getViewState();camera.fov=state.fov??90;camera.updateProjectionMatrix();walking=true;flyingView=!!state.fly;scene.children.filter(n=>n.isHemisphereLight||n.isDirectionalLight).forEach(n=>{n.userData.originalIntensity=n.intensity;if(!state.fly)n.intensity=n.isHemisphereLight?.8:.3;});editHandles.visible=false;controls.enabled=false;transition=null;if(!state.fly){gap=0;showWalls=true;cutaway=false;xray=false;labels=false;focused=null;for(const g of groups.values())g.visible=true;grid.visible=false;outdoor.visible=true;}updateMatrices();}if(flyingView&&!state.fly){gap=0;showWalls=true;cutaway=false;xray=false;labels=false;focused=null;for(const g of groups.values())g.visible=true;grid.visible=false;outdoor.visible=true;flyingView=false;updateMatrices();}flyingView=!!state.fly;if(camera.fov!==(state.fov??90)){camera.fov=state.fov??90;camera.updateProjectionMatrix();}walkState=state;walkYaw=yaw;walkPitch=pitch;flashOn=flash;updateWalk();}else if(walking){const exitPosition=camera.position.clone(),exitDirection=camera.getWorldDirection(new THREE.Vector3());walking=false;flyingView=false;camera.fov=orbitState?.fov??42;camera.updateProjectionMatrix();scene.children.filter(n=>n.isHemisphereLight||n.isDirectionalLight).forEach(n=>n.intensity=n.userData.originalIntensity??n.intensity);editHandles.visible=true;walkState=null;torch.visible=false;outdoor.visible=false;controls.enabled=true;camera.rotation.order='XYZ';restoreViewState(keepPose?{...orbitState,position:exitPosition.toArray(),target:exitPosition.clone().add(exitDirection.multiplyScalar(10)).toArray()}:orbitState);}}
@@ -357,7 +358,7 @@ function mount(container, data, options = {}) {
     renderer.domElement.removeEventListener('webglcontextlost', contextLost);window.removeEventListener('blur',blur);
     for (const label of [...sprites, ...roomLabels]) {label.material.map.dispose(); label.material.dispose(); if (label.geometry && !label.isSprite) label.geometry.dispose();}
     for (const decoration of decorations) {decoration.geometry.dispose(); decoration.material.dispose();}
-    for (const m of materials.values()) m.dispose(); unit.dispose(); grid.geometry.dispose();
+    for(const mesh of shapedMeshes)mesh.geometry.dispose();for (const m of materials.values()) m.dispose(); unit.dispose(); grid.geometry.dispose();
     for (const m of Array.isArray(grid.material) ? grid.material : [grid.material]) m.dispose();
     renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.remove(); scene.clear(); pointerIds.clear();
   }
