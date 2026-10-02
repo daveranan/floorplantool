@@ -571,6 +571,7 @@ window.onkeydown=e=>{
   if(e.ctrlKey||e.metaKey||e.altKey)return;
   if(['Delete','Backspace'].includes(e.key)&&(selected||selectedDoor||extraSelection().length)){e.preventDefault();deleteSelection();return}
   if(e.code==='Space'||e.key===' '){e.preventDefault();if(!e.repeat&&!spaceHeld){finishDrag(true);spaceHeld=true;preview=true;pendingRoom=null;render()}return}
+  if(['w','s'].includes(e.key.toLowerCase())){e.preventDefault();if(!e.repeat)(e.key.toLowerCase()==='w'?$('tool-window'):$('createstairs'))?.click();return;}
   if(e.key.toLowerCase()==='v'){e.preventDefault();if(!e.repeat){resetTransient(true);setTool('select')}return}
   const mode={d:'door',c:'connect',x:'disconnect',r:'draw'}[e.key.toLowerCase()];
   if(mode){e.preventDefault();if(spaceHeld||pointers.size)return;if(!e.repeat)setTool(tool===mode?'select':mode);return}
