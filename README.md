@@ -93,3 +93,9 @@ Rotated rooms retain an oriented selection frame and resize along their local ax
 Multi-selection exposes compatible **Change selected types** fields for rooms, openings, outline items, service routes and service terminals. Mixed selections expose a separate field for each compatible group. Each change is one undoable operation, retains selection and dimensions, and rejects the whole change if a protected type or opening constraint would be broken. Room/stair links remain protected.
 
 Dropdowns, context menus, text fields and buttons keep their focus. Rebuilt inspectors restore the same logical field; an open search can be canceled without losing an unfinished text draft. Tab retains native control navigation when a control or menu has focus, and switches 2D/3D when used from the canvas.
+
+## Bounded stair cutouts (v54)
+
+Wall, slab and ceiling openings now follow each actual tread and landing polygon and its own elevation. They remove only the rendered stair body plus the headroom above that surface, rather than projecting a route's entire footprint through a floor or service zone. Gaps inside a bent route's bounding box, supporting material below stairs, higher ceilings beyond headroom and unrelated walls remain intact. Old local-step doorway extensions are limited to the explicitly linked room edge and endpoint height.
+
+Select editable stairs and use **Cutout headroom · m** in the inspector. The default is 2.2 m above each step/landing; the supported range is 0.5–5 m, with a warning below the 2.1 m concept-design minimum. This is a modeling control, not a building-code compliance check. Clearance warnings use the same configured height. The optional value is saved with the route, survives export/import, and is one undoable edit. Existing saved plans need no migration.
