@@ -79,7 +79,7 @@ async function mountThree(){
  }catch(error){if(token===threeToken){disposeThree();failedThree(/WebGL|graphics context/i.test(error.message)?'3D needs WebGL 2, which is unavailable in this browser.':error.message)}}
 }
 async function setWorkspaceMode(mode){
- if(!['2d','3d'].includes(mode))return;if(mode===viewMode)return;
+ if(!['2d','3d'].includes(mode))return;if(mode==='2d'&&window.KERN_EXPLORER?.active)window.KERN_EXPLORER.stop();if(mode===viewMode)return;
  closeToolbarMenus();closeConnectionMenu();if(mode==='3d'){rememberFloorSelection();twoDTools.set(currentBuilding().id,{tool,connectionKind});resetTransient(true,true);viewMode='3d';syncModeUI();return mountThree()}
  rememberThree();disposeThree();viewMode='2d';syncModeUI();render();focusWorkspace($('plan'));
 }

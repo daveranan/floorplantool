@@ -259,7 +259,7 @@ function connectionCandidate(a,b,p){
   if(!a||!b||a.id===b.id)return {valid:false,reason:'Choose a different room'};
   if(connectionKind!=='window'&&floor().doors.some(d=>d.kind!=='window'&&((d.a===a.id&&d.b===b.id)||(d.a===b.id&&d.b===a.id))))return {valid:false,reason:'These rooms are already connected'};
   const g=boundary(a,b);if(!g)return {valid:false,reason:'Rooms must share a wall'};
-  if(['void','solid'].includes(a.type)||['void','solid'].includes(b.type))return {valid:false,reason:'Voids and sealed concrete are not circulation rooms'};
+  if(a.type==='solid'||b.type==='solid'||connectionKind!=='window'&&(a.type==='void'||b.type==='void'))return {valid:false,reason:'Voids and sealed concrete are not circulation rooms'};
   const width=connectionKind==='single'?1.2:2,d={id:uniqueId('d'),a:a.id,b:b.id,width,offset:.5,kind:connectionKind==='window'?'window':connectionKind==='open'?'open':'door',leaves:connectionKind==='double'?2:1};
   if(d.kind==='open'){d.fullWidth=false;delete d.leaves}
   if(g.hi-g.lo<width+.2-1e-7)return {valid:false,reason:`Shared wall needs ${(width+.2).toFixed(1)} m for this connection`};

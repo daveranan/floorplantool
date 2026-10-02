@@ -1,0 +1,5 @@
+/* Flax DynamicNetworkFirstPersonCharacter gait port, metres. One stride is one footfall (PI phase). */
+(function(root){
+function create(){let phase=0,sequence=0,moving=false,weight=0;return{update(speed,dt,crouched=false,sprinting=false,active=true){dt=Math.max(0,dt);speed=Math.max(0,speed);if(!active||speed<.55)moving=false;else if(!moving){moving=true;sequence=(sequence+1)>>>0;if(!sequence)sequence=1;phase=sequence&1?Math.PI:0;}else{const advanced=phase+speed*dt/(sprinting&&!crouched?1.7:1.5)*Math.PI,contacts=Math.floor(advanced/Math.PI)-Math.floor(phase/Math.PI);if(contacts>0){sequence=(sequence+contacts)>>>0;if(!sequence)sequence=1;}phase=advanced%(Math.PI*2);}const target=active?Math.min(1,speed/(crouched?2:4)):0;weight+=(target-weight)*(1-Math.exp(-10*dt));return{phase,sequence,moving,weight,x:Math.sin(phase)*.05*weight,y:Math.cos(2*phase)*.03*weight};}};}
+const api={create};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.KERN_GAIT=api;
+})(typeof window!=='undefined'?window:globalThis);
