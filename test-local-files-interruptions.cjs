@@ -122,8 +122,10 @@ async function pickerInterruption() {
   t.w.setTimeout = (fn, ms) => { const id = ++serial; scheduled.set(id, { fn, ms }); return id; };
   t.w.clearTimeout = id => scheduled.delete(id);
   t.run("model.title='edit awaiting disk backup';save()");
-  const timer = [...scheduled.entries()].find(([, entry]) => entry.ms >= 2500);
+  const timer = [...scheduled.entries()].find(([, entry]) => entry.ms === 300000);
   assert(timer, 'Edit schedules a disk backup');
+  t.run("model.title='another edit before five minutes';save()");assert.equal(scheduled.get(timer[0]),timer[1],'Further edits do not restart the five-minute timer');
+  Object.defineProperty(t.doc,'visibilityState',{value:'hidden',configurable:true});t.doc.dispatchEvent(new t.w.Event('visibilitychange'));await delay(10);assert.equal(t.dir.files.size,1,'Hiding a tab must not bypass the five-minute interval');
   let cancelPicker;
   t.w.showSaveFilePicker = () => new Promise((resolve, reject) => { cancelPicker = reject; });
   const manual = api.saveCopy(true);

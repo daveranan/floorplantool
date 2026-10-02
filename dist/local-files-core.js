@@ -80,22 +80,46 @@ async function listFiles(dir){
  const files=[];for await(const [name,handle]of dir.entries())if(handle.kind==='file'&&NAME.test(name))files.push({name,handle});
  return files.sort((a,b)=>b.name.localeCompare(a.name));
 }
-async function safePrune(dir,keep,latest){
- if(![30,100].includes(keep))return {removed:0};
+function calendarParts(at,timeZone){
+ const parts=new Intl.DateTimeFormat('en-CA',{timeZone,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date(at));
+ const value=type=>Number(parts.find(p=>p.type===type)?.value),year=value('year'),month=value('month'),day=value('day');
+ const ordinal=Math.floor(Date.UTC(year,month-1,day)/86400000);
+ return {key:year+'-'+String(month).padStart(2,'0')+'-'+String(day).padStart(2,'0'),month:year*12+month-1,ordinal,weekday:new Date(ordinal*86400000).getUTCDay()};
+}
+function retentionKeep(entries,{timeZone,now=new Date().toISOString(),latest=30,dailyDays=7,weeklyWeeks=8,monthlyMonths=12}={}){
+ if(typeof timeZone!=='string'||!timeZone)throw error('A calendar timezone is required before cleaning up backups.');
+ const nowMs=Date.parse(now);if(!Number.isFinite(nowMs))throw error('The current backup date is invalid. No old files were removed.');
+ const today=calendarParts(nowMs,timeZone),keep=new Set(),eligible=[];
+ for(const entry of entries){const at=Date.parse(entry.at);let canonical=false;try{canonical=typeof entry.at==='string'&&new Date(at).toISOString()===entry.at;}catch{}
+  if(entry.valid===false||!canonical||at>nowMs){keep.add(entry.name);continue;}eligible.push({...entry,at});
+ }
+ eligible.sort((a,b)=>b.at-a.at||(a.name===b.name?0:a.name<b.name?1:-1));
+ for(const entry of eligible.slice(0,latest))keep.add(entry.name);
+ const daily=new Set(),weekly=new Set(),monthly=new Set();
+ for(const entry of eligible){const date=calendarParts(entry.at,timeZone),days=today.ordinal-date.ordinal,months=today.month-date.month;
+  if(days>=0&&days<dailyDays&&!daily.has(date.key)){daily.add(date.key);keep.add(entry.name);}
+  if(days>=0&&days<weeklyWeeks*7&&[1,4].includes(date.weekday)&&!weekly.has(date.key)){weekly.add(date.key);keep.add(entry.name);}
+  if(months>=0&&months<monthlyMonths&&!monthly.has(date.month)){monthly.add(date.month);keep.add(entry.name);}
+ }
+ return keep;
+}
+async function safePrune(dir,retention,latest,{timeZone,now}={}){
+ if(retention!=='smart'&&![30,100].includes(retention))return {removed:0};
  const valid=[];
  for(const entry of await listFiles(dir)){
-  try{const file=await entry.handle.getFile();if(file.size>MAX_BYTES*1.5)continue;const data=await decode(await file.text());if(data.format===FORMAT&&data.kind==='automatic')valid.push(entry);}catch{} // Never delete incomplete, foreign, or unverified files.
+  try{const file=await entry.handle.getFile();if(file.size>MAX_BYTES*1.5)continue;const data=await decode(await file.text());if(data.format===FORMAT&&data.kind==='automatic')valid.push({...entry,at:data.createdAt});}catch{} // Never delete incomplete, foreign, or unverified files.
  }
- let removed=0;for(const entry of valid.slice(keep))if(entry.name!==latest){await dir.removeEntry(entry.name);removed++;}
+ const keep=retention==='smart'?retentionKeep(valid,{timeZone,now}):new Set(valid.slice(0,retention).map(entry=>entry.name));
+ let removed=0;for(const entry of valid)if(entry.name!==latest&&!keep.has(entry.name)){await dir.removeEntry(entry.name);removed++;}
  return {removed};
 }
-async function saveVersion(dir,payload,{retention=0}={}){
+async function saveVersion(dir,payload,{retention='smart',timeZone=Intl.DateTimeFormat().resolvedOptions().timeZone}={}){
  await permission(dir);
  const files=await listFiles(dir);if(!retention&&files.length>=MAX_FILES)throw error('Automatic backups paused at 500 files. Choose a new folder or explicitly choose a retention limit.');
  const text=await encode(payload,'automatic'),name=uniqueName();
  try{await dir.getFileHandle(name);throw error('A backup with this name already exists. Please retry.');}catch(e){if(e.name!=='NotFoundError')throw e;}
  const handle=await dir.getFileHandle(name,{create:true});await writeVerified(handle,text);
- let warning='';try{await safePrune(dir,retention,name)}catch(e){warning='New backup verified, but older-backup cleanup failed: '+e.message;}
+ let warning='';try{await safePrune(dir,retention,name,{timeZone})}catch(e){warning='New backup verified, but older-backup cleanup failed: '+e.message;}
  return {name,at:new Date().toISOString(),warning,bytes:new TextEncoder().encode(text).length};
 }
 function explain(e){
@@ -104,5 +128,5 @@ function explain(e){
  if(e?.name==='QuotaExceededError')return 'The disk or browser storage is full. No verified backup was recorded. Choose another folder or download a copy.';
  return e?.message||'The local file operation failed. Keep earlier backups and try again.';
 }
-root.KERN_LOCAL_FILES_CORE={FORMAT,VERSION,MAX_BYTES,MAX_FILES,NAME,copy,encode,decode,contentKey,sources,inspectSource,permission,writeVerified,listFiles,safePrune,saveVersion,explain};
+root.KERN_LOCAL_FILES_CORE={FORMAT,VERSION,MAX_BYTES,MAX_FILES,NAME,copy,encode,decode,contentKey,sources,inspectSource,permission,writeVerified,listFiles,calendarParts,retentionKeep,safePrune,saveVersion,explain};
 })(typeof window!=='undefined'?window:globalThis);

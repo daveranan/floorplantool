@@ -2,7 +2,9 @@
 (function(root){
 'use strict';
 const inside=(p,r,m=0)=>p.x>=r.x-m&&p.x<=r.x+r.w+m&&p.y>=r.y-m&&p.y<=r.y+r.h+m;
-function polygon(p,vs){let hit=false;for(let i=0,j=vs.length-1;i<vs.length;j=i++){const a=vs[i],b=vs[j];if((a[1]>p.y)!==(b[1]>p.y)&&p.x<(b[0]-a[0])*(p.y-a[1])/(b[1]-a[1])+a[0])hit=!hit;}return hit}
+// Adjacent rotated stair/landing polygons share their boundary. Include that
+// boundary within numeric tolerance so walking cannot drop through the seam.
+function polygon(p,vs){let hit=false;for(let i=0,j=vs.length-1;i<vs.length;j=i++){const a=vs[i],b=vs[j],dx=b[0]-a[0],dy=b[1]-a[1],length2=dx*dx+dy*dy;if(length2){const t=((p.x-a[0])*dx+(p.y-a[1])*dy)/length2;if(t>=0&&t<=1&&Math.hypot(p.x-a[0]-t*dx,p.y-a[1]-t*dy)<1e-7)return true;}if((a[1]>p.y)!==(b[1]>p.y)&&p.x<(b[0]-a[0])*(p.y-a[1])/(b[1]-a[1])+a[0])hit=!hit;}return hit}
 function create(data){
  const boxes=data.levels.flatMap(l=>[...l.boxes,...(l.polygons||[]).filter(p=>!['stair','landing'].includes(p.kind))].map(b=>({...b,floor:l.id}))),walls=boxes.filter(b=>['wall','solid','ceiling','slab','landing','window','window-frame'].includes(b.kind)),surfaces=boxes.filter(b=>['slab','landing'].includes(b.kind));
  const ramps=(data.stairs||[]).flatMap(s=>(s.flights||[]).map(f=>({...f,stair:s})));const grounds=data.levels.find(l=>l.id==='L0')||data.levels.reduce((a,b)=>Math.abs(a.z)<Math.abs(b.z)?a:b),gz=Number.isFinite(data.siteGroundZ)?data.siteGroundZ:grounds.z;
@@ -20,7 +22,8 @@ function create(data){
  // The rendered staircase is stepped, but walking follows a smooth ramp. Treat
  // material below the active stair's treads as foot support, rather than a wall
  // against the cylinder's flat base. Keep the exact cutouts and all overhead or
- // side material; a higher overlapping flight must never clear the lower one.
+ // side material (including concrete fill); a higher overlapping flight must
+ // never clear the lower one. Rendered and colliding concrete use the same pieces.
  function stairContacts(p){
   const active=ramps.filter(f=>{const z=rampHeight(p,f);return z!==null&&Math.abs(z-p.z)<.04;}),landings=stairLandings.filter(l=>Math.abs(l.z-p.z)<.04&&(l.polygon?polygon(p,l.polygon):inside(p,l.rect,.001)));
   for(const l of landings)for(const f of ramps)if(f.stair===l.stair&&[f.fromLanding,f.toLanding].includes(l.id)&&!active.includes(f))active.push(f);
@@ -29,7 +32,7 @@ function create(data){
   const key=active.map(f=>ramps.indexOf(f)).sort((a,b)=>a-b).join('|'),surfaces=active.flatMap(f=>f.treads||[]).concat(landings);return{key,surfaces};
  }
  function stairBodyHit(p,b,contacts){
-  if(!contacts||!shapeTools||!['wall','slab','ceiling'].includes(b.kind))return true;
+  if(!contacts||!shapeTools||!['wall','slab','ceiling','solid'].includes(b.kind))return true;
   let cache=contactCache.get(b);if(!cache)contactCache.set(b,cache=new Map());let pieces=cache.get(contacts.key);
   if(!pieces){const top=b.z+b.height,masks=contacts.surfaces.filter(s=>top<=s.z+.03).map(s=>[[s.polygon||[[s.rect.x,s.rect.y],[s.rect.x+s.rect.w,s.rect.y],[s.rect.x+s.rect.w,s.rect.y+s.rect.h],[s.rect.x,s.rect.y+s.rect.h]]]]);
    if(!masks.length)return true;const outline=b.polygon||[[b.x,b.y],[b.x+b.w,b.y],[b.x+b.w,b.y+b.h],[b.x,b.y+b.h]],remaining=shapeTools.difference([[outline,...b.holes||[]]],masks);pieces=remaining.map(rings=>({...b,...shapeTools.bounds(rings[0]),polygon:rings[0],holes:rings.slice(1)}));cache.set(contacts.key,pieces);

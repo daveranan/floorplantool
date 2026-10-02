@@ -141,3 +141,41 @@ This uses mocked browser file handles, not the Windows/Brave native picker. An a
 `node test-local-files-interruptions.cjs` independently asserts the previously found interruption regressions: the disk badge survives navigation, named history dirties the disk backup, pause/resume restores the correct status, a pending auto-backup retries after a canceled save picker, live rotation/point gestures do not get written, Ctrl/Cmd+S works from Home, Close cancels a delayed import preview, import warnings survive subsequent backups, stale project storage is reported, recovery project groups can be loaded, and oversized imported history is rejected without breaking subsequent named saves. Both new suites pass. Focused recovery, null-window persistence, workspace-home, corner-rotation scene, point-undo production and shape-editing suites also pass after integration.
 
 The 35 pre-v57 aggregate suites were run individually: 15 pass, 20 fail. Each of those 20 also fails from an isolated clean v56 `cab151a4105ebb1489a8a6f8241532f5aa2ce288` checkout. These are not a green aggregate run. The first failure is the historical `test-buildings.cjs` harness omitting `seed-v12.js` while iterating current variants. The two v57 suites are registered before existing suites, bringing the runner to 37; no existing suite changed from passing on the v56 baseline to failing in this run.
+
+## October 2, 2026: navigation, layers and whole-building editing (v58)
+
+`node test-building-transform.cjs` passes 17 synthetic cases, including 35 randomized route fixtures and 69 successful shared-renderer parity comparisons. It verifies true unpadded extents, rotated shapes/items, actual route/local stair geometry, bounded service joins, optional annotations, source and cached geometry translation, unchanged local frames/Z/metadata, shared-reference handling, atomic validation and safe partial-floor group rejection.
+
+`node test-keyboard-layers.cjs` tests exact modifier dispatch in 2D/3D, 1/3 navigation with 2 unassigned, text entry isolation, visibility versus active floor, heterogeneous layer selection, hiding/locking, atomic floor/building moves, undo and genuine keyboard canvas focus. `node test-layer-safety.cjs` covers nonmutating drag previews and autosave, one-step history, all interruption paths, stale-building/newer-edit protection, locked context-menu mutations, render-only legacy annotations, route-point deletion behind dialogs, exact save/Tab chords and active-workspace reload retaining layer state.
+
+The persistent layer field is preserved in the initial core capture before workspace restoration; the UI integration loads before workspace-home. No saved plan schema is migrated. New fixture data is synthetic. A known upstream route boolean-clipping exception after a mathematically valid translation is avoided for bounds and rejected by the move UI’s renderer validation before a commit. No unrelated route engine rewrite is included.
+
+The isolated cloud-browser static preview was unavailable; real pixel layout and physical input remain unverified. Static asset/accessibility checks and production-order DOM/storage tests pass. The old aggregate still has the documented baseline harness/expectation failures; v58’s focused release gate is `node scripts/test-v58.cjs` and does not claim an aggregate pass.
+## Concrete staircase passage
+
+Stairs now carve only their bounded tread/landing body and configured headroom out of solid concrete fill. Existing per-step, exact-polygon subtraction is shared by render geometry and walkthrough collision, across any floor whose physical volume intersects. Concrete remains under the staircase, beside it, above its finite clearance, and inside gaps of a bent route’s bounding rectangle. This is a derived preview change; no authored floor/room/stair data or persistence schema is changed.
+
+A rotated flight/landing boundary regression found during traversal testing was corrected with a tiny numeric edge tolerance. Smooth stair walking also treats retained concrete below the active staircase’s treads as foot support, while preserving side, headroom and unrelated-floor collisions.
+
+New checks:
+- `node test-stair-concrete.cjs`: multilevel overlap, concrete above/below, retained body/sides/headroom, 8,932 rotated-volume probes, concave outlines and holes, nonoverlap, a 0.8 m entry, rotated ascent/descent, obstruction isolation, conventional rectangular stairs and unchanged saved model bytes
+- `node test-stair-concrete-scene.cjs`: actual Three.js mesh raycasts with a renderer double for the retained below/side/overhead mass, a bent-path bounding-box gap, wall visibility, cutaway, walkthrough and disposal
+
+No private fixture or user data is included. GPU rendering and physical browser input are not established by these geometry/scene harnesses.
+
+## Doorway threshold correction
+
+The reported doorway was open, but a stair landing stopped 2.5 cm short of the room floor. Added derived physical thresholds inside passable doorway width and wall thickness, trimmed against existing coplanar surfaces. This fills only the missing support rather than overlapping the floor or making an invisible walking bridge. Windows and blocked doors do not gain thresholds, and normal step-height and side/overhead collisions remain active.
+
+`test-door-thresholds.cjs` passes at 0°, 31° and 90° with four movement step sizes in both directions. It reproduces the blocked gap when the threshold is removed, checks sealed/window/narrow/large-gap rejection, prevents a high step bypass, and confirms the generated area is only 0.05 m² in the synthetic 2 m-wide / 2.5 cm-gap fixture. Actual Three.js raycasts in `test-stair-concrete-scene.cjs` verify the threshold is rendered at the correct height and follows slab visibility. The exact private uploaded plan was independently verified in both directions at four motion cadences with unchanged saved bytes; it is not included in public fixtures.
+
+A pre-existing boolean-clipping failure triggered by an exact 90° rotation was reproduced on the baseline and corrected in the bounded-cut math by normalizing derived coordinates to 1e-8 m, below the existing 1e-6 geometry epsilon. Original authored coordinates remain unchanged.
+
+Focused passes: concrete, concrete scene, door thresholds, stair walk contacts, stair cutout volumes, route geometry, route stairs, route v53, stair types, stair detail, polygon rooms, polygon scene, elevation safety, elevation scene, local elevation, height rules, walkthrough, walk scene, walk start, place start, fly scene, authoring3d, authoring3d scene and three scene. `test-fly-mode.cjs` still fails its pre-existing KERN_EXPLORER.active assertion, reproduced on unchanged v57. `test-preview.cjs` passes its geometry sections but retains the existing later UI assertion failure, likewise reproduced on unchanged v57. No full aggregate pass is claimed.
+
+
+## v58 tiered retention and five-minute cadence
+
+The release includes the approved union of newest 30, seven local calendar-day representatives, Monday/Thursday representatives within 56 local calendar days, and current/prior 11 month representatives. The local timezone is captured, persisted and displayed; overlaps are retained once. Existing explicit policies are preserved and Smart can be applied to an already authorized folder. New verified copies precede cleanup. Unrelated/manual/corrupt/invalid/future records are preserved, and closed-page gaps are never backfilled.
+
+`test-local-files.cjs`, `test-local-files-interruptions.cjs` and `test-retention-calendar.cjs` pass. Tests cover actual mock-folder tier pruning, policy transitions and captured timezone, full weekday/calendar boundaries, UTC offsets, DST, leap-year/month edges, overlapping tiers, and five-minute pending-change scheduling that neither resets on subsequent edits nor fires early when hiding a tab. Forty independent calendar cases pass under UTC, America/New_York, Asia/Tokyo and Pacific/Kiritimati host timezones. The current release gate contains 23 focused suites; this does not alter the historical aggregate-failure disclosure.

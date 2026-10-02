@@ -1,0 +1,34 @@
+const fs=require('node:fs'),assert=require('node:assert/strict'),vm=require('node:vm'),esbuild=require('esbuild'),THREE=require('three');
+const {boot}=require('./test-support.cjs'),R=require('./dist/route-stairs'),G=require('./dist/preview-geometry'),D=require('./dist/stair-detail');
+const t=boot(),w=t.w;let current,disposed=0;
+w.HTMLCanvasElement.prototype.getContext=()=>({fillRect(){},strokeRect(){},fillText(){}});
+w.ResizeObserver=class{constructor(fn){this.fn=fn}observe(){this.fn()}disconnect(){}};
+w.__TestRenderer=class{constructor(){this.domElement=w.document.createElement('canvas')}setPixelRatio(){}setClearColor(){}setSize(){}setAnimationLoop(fn){this.loop=fn;if(fn)fn()}render(scene,camera){scene.updateMatrixWorld(true);current={scene,camera,renderer:this}}dispose(){disposed++}forceContextLoss(){}};
+const source=fs.readFileSync('src/preview3d.js','utf8').replace('new THREE.WebGLRenderer(','new window.__TestRenderer(');
+vm.runInContext(esbuild.buildSync({stdin:{contents:source,resolveDir:process.cwd(),sourcefile:'preview3d-concrete-test.js'},bundle:true,write:false,format:'iife',target:'es2020'}).outputFiles[0].text,t.dom.getInternalVMContext());
+const route=R.create([[0,0],[0,10],[10,10]],{id:'carved-route',width:1.2,startZ:0,endZ:4});
+const plan={floors:{L0:{z:0,rooms:[{id:'fill',name:'Concrete',type:'solid',x:-3,y:-3,w:16,h:16,height:9},route],doors:[]}}};
+const data=G.build(plan,D),host=t.get('threeviewport');Object.defineProperties(host,{clientWidth:{value:900},clientHeight:{value:650}});
+const view=w.Building3D.mount(host,data);view.setCutaway(false);view.setWalls(true);current.scene.updateMatrixWorld(true);
+const meshes=[];current.scene.traverse(m=>{if(m.userData.kind==='solid'||m.userData.boxes?.[0]?.kind==='solid')meshes.push(m)});
+assert(meshes.length>1,'decomposed concrete meshes rendered');
+const allHits=(origin,direction)=>new THREE.Raycaster(new THREE.Vector3(...origin),new THREE.Vector3(...direction),0,30).intersectObjects(meshes.filter(m=>m.visible),false);
+// Center of the turn is a clear passage with concrete below, beside and above it.
+const landing=data.stairs[0].landings[1],z=landing.z;
+let hits=allHits([0,z+.8,10],[0,-1,0]);assert(hits.length);assert(Math.abs(hits[0].point.y-(z-.18))<1e-5,'rendered concrete retained just below landing');
+hits=allHits([0,z+.8,10],[-1,0,0]);assert(hits.length);assert(Math.abs(hits[0].point.x+.6)<1e-5,'rendered side of bounded landing cutout');
+hits=allHits([0,z+.8,10],[0,1,0]);assert(hits.length);assert(hits[0].point.y>=z+2.2-1e-5,'rendered concrete ceiling follows finite headroom');
+// Ray through a bounding-box gap encounters intact concrete, not a giant shaft.
+hits=allHits([7,10,3],[0,-1,0]);assert(hits.length);assert(Math.abs(hits[0].point.y-9)<1e-5);
+view.setWalls(false);assert(meshes.every(m=>!m.visible),'hide walls also hides all carved concrete');
+view.setWalls(true);assert(meshes.every(m=>m.visible));
+view.setCutaway(true);assert(meshes.some(m=>!m.visible),'cutaway removes only fragments above the cut height');
+view.setCutaway(false);assert(meshes.every(m=>m.visible));
+view.setWalk({x:0,y:10,z},0,0,true);assert.equal(view.getViewState().cutaway,false);assert(meshes.every(m=>m.visible));view.setWalk(null);
+view.dispose();assert.equal(disposed,1);assert.equal(host.querySelectorAll('canvas').length,0);
+const approach=R.create([[5,4.25],[5,1.25],[-4,1.25]],{id:'approach',startZ:.75,endZ:5.75,width:2.3});R.setHeight(approach,1,1.5);approach.routeStair.nodes[1].landingDepth=2.45;
+const doorway=G.build({floors:{L0:{z:.75,rooms:[{id:'hall',type:'tech',x:0,y:-8,w:10,h:8,z:1.5,height:7},{id:'court',type:'terrace',x:-6,y:0,w:18,h:10,z:.75},approach],doors:[{id:'door',a:'hall',b:'court',edge:'v2',width:2,offset:.5}]}}},D);
+const thresholdView=w.Building3D.mount(host,doorway);thresholdView.setCutaway(false);current.scene.updateMatrixWorld(true);const thresholdMeshes=[];current.scene.traverse(m=>{if(m.userData.shape?.threshold)thresholdMeshes.push(m)});assert(thresholdMeshes.length);
+const thresholdHit=new THREE.Raycaster(new THREE.Vector3(5,2.5,.0125),new THREE.Vector3(0,-1,0),0,2).intersectObjects(thresholdMeshes,false)[0];assert(thresholdHit);assert(Math.abs(thresholdHit.point.y-1.5)<1e-6,'the tiny doorway gap has a real rendered threshold at landing/room height');
+thresholdView.setSlabs(false);assert(thresholdMeshes.every(m=>!m.visible));thresholdView.setSlabs(true);assert(thresholdMeshes.every(m=>m.visible));thresholdView.dispose();assert.equal(disposed,2);t.close();
+console.log('PASS actual Three.js carved-concrete mesh raycasts: preserved below/side/headroom mass, bounding-box gap, physical door threshold, wall/slab visibility, cutaway, walkthrough and cleanup (renderer double; GPU drawing untested)');
