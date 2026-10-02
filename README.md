@@ -66,6 +66,8 @@ Grid snapping is the default. Hold Ctrl during room movement, rectangle resizing
 
 ## 3D authoring and transform feedback
 
-Focused-floor 3D has its own canvas toolbar: Draw room, Local steps, and Steps from edge. For edge steps, select a raised/lowered room, choose the tool, and drag outward from a straight grid-aligned edge. The clicked edge sets facing; the width field controls the span, and the outward drag sets the run. A live tread preview links the source room to the neighboring room or outside ground. It commits once on release and is undoable. Equal-height endpoints are rejected. Oblique/curved edge authoring is not supported.
+2D and focused-floor 3D share the same top toolbar and shortcuts. Draw room (R), Stairs (S), Local steps and Edge steps work in 3D; tools not yet supported there remain visible but disabled. Edge-step width is in the inspector. For edge steps, select a raised/lowered room, choose the tool, and drag outward from a straight grid-aligned edge. The clicked edge sets facing; the width field controls the span, and the outward drag sets the run. A live tread preview links the source room to the neighboring room or outside ground. It commits once on release and is undoable. Equal-height endpoints are rejected. Oblique/curved edge authoring is not supported.
 
 Local steps also supports a free rectangular footprint in 3D. Draw from one surface to a different-height surface. The inspector retains Start/End surface selectors, precise heights and a Facing control. Rotation shows dashed radial/arc guides and a live degree label near the pointer in 2D and 3D.
+
+The separate in-canvas 3D tool row has been removed. Full stairs drawn in 3D opens the same destination-floor dialog as 2D. Edge steps also works in 2D. R/E/S/V retain their shared meanings, and the command palette reflects supported 3D tools. Room drawing remains active after creation.

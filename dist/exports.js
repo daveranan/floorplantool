@@ -50,7 +50,7 @@ function syncModeUI(){
  $('canvas').hidden=three;$('buildingpreview3d').hidden=!three;$('floors').hidden=three;$('threefloorpanel').hidden=!three;
  document.querySelector('.floorsheading').hidden=three;document.querySelector('.floorproperties').hidden=three;
  $('inspector').hidden=three&&!document.body.classList.contains('editing3d');document.querySelector('.asidehead').hidden=three&&!document.body.classList.contains('editing3d');$('threeoptions').hidden=!three;
- document.querySelector('.editbar').hidden=three;document.querySelector('.historytools').hidden=three;
+ document.querySelector('.editbar').hidden=false;document.querySelector('.historytools').hidden=false;window.KERN_AUTHORING_3D?.sync();
  $('mode2d').setAttribute('aria-pressed',String(!three));$('mode3d').setAttribute('aria-pressed',String(three&&!window.KERN_EXPLORER?.active));
  $('buildingmenu').hidden=three;for(const id of ['import','archive'])$(id).disabled=three;
  $('mode2d').title='Edit the floor plan';$('mode3d').title='Explore the building in 3D';
@@ -66,7 +66,7 @@ function syncThreeSettings(state={}){
  $('threecutheight').value=String(state.cutHeight??1.15);$('threecutheightlabel').textContent=Number($('threecutheight').value).toFixed(2)+' m';$('threecutheight').setAttribute('aria-valuetext',Number($('threecutheight').value).toFixed(2)+' metres');$('threecutheightfield').hidden=!$('threecutaway').checked;
 }
 async function mountThree(){
- rememberThree();disposeThree();const token=threeToken;threeName=currentBuilding().name;threeBuildingId=currentBuilding().id;const editor=twoDTools.get(threeBuildingId);if(editor){tool=editor.tool;connectionKind=editor.connectionKind;$('newconnectiontype').value=connectionKind;updateTools()}else twoDTools.set(threeBuildingId,{tool,connectionKind});threePlan=JSON.stringify(model);const saved=threeStates.get(threeBuildingId),activeFloor=floorId;let data,mounting=true;
+ rememberThree();disposeThree();const token=threeToken;threeName=currentBuilding().name;threeBuildingId=currentBuilding().id;threePlan=JSON.stringify(model);const saved=threeStates.get(threeBuildingId),activeFloor=floorId;let data,mounting=true;
  $('preview3dtitle').textContent=`${threeName} · 3D`;$('threestatus').hidden=false;$('threestatus').textContent='Loading 3D…';$('threefloors').innerHTML='';$('threewarnings').open=false;$('save3dpng').disabled=true;
  syncThreeSettings(saved);$('threehover').hidden=true;$('threefocusstatus').hidden=true;$('threefocusnav').hidden=true;$('threefloorup').disabled=true;$('threefloordown').disabled=true;for(const id of controlIds)$(id).disabled=true;
  try{data=currentGeometry();$('threeassumptions').textContent=data.assumptions;$('threewarningcount').textContent=data.warnings.length;$('threewarninglist').innerHTML=data.warnings.length?data.warnings.map(w=>`<p>${esc(w)}</p>`).join(''):'<p>No geometry warnings from this preview.</p>';
@@ -74,8 +74,8 @@ async function mountThree(){
   const library=await loadThree();if(token!==threeToken||!isThreeMode())return;
   threeView=library.mount($('threeviewport'),data,{activeFloor,viewState:saved,onRoomSelect:(fid,rid)=>window.KERN_EXPLORER?.selectRoom(fid,rid),onRoomEdit:(fid,rid,rect)=>window.KERN_EXPLORER?.editRoom(fid,rid,rect),onContext:p=>window.KERN_EXPLORER?.menu(p),onHover:level=>{$('threehover').hidden=!level||!!threeView?.getFocusedFloor?.();$('threehover').textContent=level?level.id+' · '+level.name+' · click to focus':''},onVisibilityChanged:(ids,focused)=>{if(!focused){document.body.classList.remove('editing3d');$('room3dedit')&&($('room3dedit').hidden=true);syncModeUI();}if(!mounting)syncEditorFloor(focused);syncFloorChecks(ids,focused);const index=data.levels.findIndex(l=>l.id===focused),level=data.levels[index];$('threefocusstatus').hidden=true;$('threefocusnav').hidden=!focused;$('threefocuslabel').textContent=focused||'';$('threefocuslabel').title=level?level.name+' · '+fmt(level.z):'';$('threefloorup').disabled=index<0||index>=data.levels.length-1;$('threefloordown').disabled=index<=0;if(focused)$('threehover').hidden=true},onContextLost:()=>{rememberThree();disposeThree();failedThree('The graphics context was lost.')}});
   mounting=false;syncEditorFloor(threeView.getFocusedFloor?.());$('threestatus').hidden=true;$('save3dpng').disabled=false;for(const id of controlIds)$(id).disabled=false;for(const node of $('threefloors').querySelectorAll('input,button'))node.disabled=false;
-  if(!data.levels.some(l=>l.boxes.length)){$('threestatus').hidden=false;$('threestatus').textContent='This building is empty. Switch to 2D and draw a room to give it a 3D shape.'}
-  window.KERN_EXPLORER?.sync();focusWorkspace($('threeviewport').querySelector('canvas'));
+  if(!data.levels.some(l=>l.boxes.length)){$('threestatus').hidden=false;$('threestatus').textContent='This building is empty. Use Draw room above to start on this floor.'}
+  window.KERN_EXPLORER?.sync();window.KERN_AUTHORING_3D?.sync();focusWorkspace($('threeviewport').querySelector('canvas'));
  }catch(error){if(token===threeToken){disposeThree();failedThree(/WebGL|graphics context/i.test(error.message)?'3D needs WebGL 2, which is unavailable in this browser.':error.message)}}
 }
 async function setWorkspaceMode(mode){

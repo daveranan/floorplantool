@@ -78,3 +78,7 @@ Focused tests `test-rotate-tool.cjs`, `test-corner-rotation-scene.cjs`, `test-mu
 ## October 2: 3D authoring and live dimensions
 
 `test-authoring3d.cjs` covers all four cardinal edge directions, automatic descent/ascent metrics, source/destination links, free stair/room footprints, quarter-metre drawing, one-commit undo and inspector refresh. `test-authoring3d-scene.cjs` exercises actual Three raycasts with a mock renderer for edge-tool preview, creation, one-shot reset, undo, Escape, floor-switch cancellation and disposal. Rotation/elevation scene tests cover fixed pivots and quarter-metre height snapping; DOM rotation tests assert the visible degree label and dashed feedback group. No physical pointer, real browser or GPU visual pass is claimed.
+
+## October 2: unified toolbar
+
+`test-shared-toolbar.cjs` covers shared R/E/S/V modes, Local steps/Edge steps, inspector width, unsupported tool gating and restoration, typing guards, and the same full-stair destination dialog without premature model edits. `test-authoring3d-scene.cjs` uses the shared viewer authoring API and verifies there is no separate canvas toolbar. Mobile toolbar-specific 3D layout overrides were removed; responsive browser rendering remains unverified.

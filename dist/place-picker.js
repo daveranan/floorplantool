@@ -95,7 +95,7 @@ function appendHVAC(){
  for(const [id,key]of [['hvacwidth','width'],['hvacheight','clearHeight'],['hvacbottom','offset']])$(id).onchange=e=>{const n=Number(e.target.value),value=id==='hvacbottom'?n-floor().z:n;if(!Number.isFinite(n)||(id==='hvacbottom'?Math.abs(n)>150:n<.1||n>20)){notify('Enter a valid metric service dimension.');syncPlace();return;}serviceState[key]=cleanNumber(value);draw();};
 }
 function syncPlace(){
- const three=window.BuildingExports?.isThreeMode?.();root.hidden=!!three;$('tool-place').setAttribute('aria-pressed',String(['place','symbol','service-draw'].includes(tool)));root.dataset.active=String(['place','symbol','service-draw'].includes(tool));
+ const three=window.BuildingExports?.isThreeMode?.();root.hidden=false;$('tool-place').setAttribute('aria-pressed',String(['place','symbol','service-draw'].includes(tool)));root.dataset.active=String(['place','symbol','service-draw'].includes(tool));
  if(paletteDrag&&(paletteDrag.buildingId!==currentBuilding().id||paletteDrag.floorId!==floorId||three))cancelPlacement();
  if(hover&&!['symbol','service-draw'].includes(tool))hover=null;
  if($('hvacvisible')){$('hvacvisible').checked=currentBuilding().view.serviceVisibility?.[floorId]===true;$('hvacedit').checked=tool.startsWith('service');$('hvacstatus').textContent=$('hvacvisible').checked?'Visible':'Hidden';$('hvaclocation').value=$('servicelocation').value;$('hvacaccess').value=$('serviceaccess').value;$('hvacwidth').value=serviceState.width;$('hvacheight').value=serviceState.clearHeight;$('hvacbottom').value=cleanNumber(floor().z+serviceState.offset);}
