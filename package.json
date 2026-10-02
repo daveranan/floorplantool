@@ -8,7 +8,8 @@
     "test:browser": "node scripts/browser-qa.cjs",
     "build:preview": "esbuild src/preview3d.js --bundle --minify --format=iife --target=es2020 --outfile=dist/preview3d.js",
     "test:ui": "node test-ui.cjs",
-    "test:preview": "node test-preview.cjs"
+    "test:preview": "node test-preview.cjs",
+    "test:elevation": "node test-local-elevation.cjs && node test-elevation-ui.cjs && node test-elevation-scene.cjs && node test-elevation-safety.cjs"
   },
   "dependencies": {
     "polygon-clipping": "^0.15.7",

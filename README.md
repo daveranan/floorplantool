@@ -49,3 +49,11 @@ npm run test:browser
 ```
 
 The browser runner uses an isolated headless Chrome profile, localhost DevTools and software WebGL; it writes screenshots, JSON results and real downloaded exports to ignored `qa/`. Physical touch and hardware GPU behavior are untested. See `TESTING.md` for the current evidence and the known historical Python shell-test failure.
+
+## Split levels and local steps
+
+The selection inspector exposes floor surface elevation, independent outside ground, and room surface/relative offset. Moving a floor preserves explicit room offsets. Room clear height remains independent. In focused-floor 3D, drag the amber vertical handle on a selected room or local stair endpoint; with no room selected, the handle edits the whole floor. Shift snaps elevations to 17 cm increments. Escape cancels the drag.
+
+Draw **Local steps** in 2D, then choose the start/end surfaces in the selection inspector. Endpoints can follow outside ground, this floor, a room, or an unlinked height. The stair endpoint's 3D handle previews the rise and step count and updates its linked surface on release. Floor, room and stair changes are undoable. Lowered courtyards gain an explicit walking surface. Plan checks flag inadequate run/width, missing or detached links, threshold differences and height/headroom conflicts. These are concept checks, not building-code certification.
+
+Run `npm run test:elevation` for focused split-level interaction, geometry, walking, interruption and validation coverage.

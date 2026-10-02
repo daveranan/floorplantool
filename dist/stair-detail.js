@@ -27,7 +27,7 @@ function coordinateFrame(r,axis,end){
 }
 function build(plan,floorId,roomId,options={}){
  const floor=plan?.floors?.[floorId],room=arr(floor?.rooms).find(r=>r?.id===roomId);
- if(!floor||!room)return null;
+ if(!floor||!room)return null;const local=(root.KERN_ELEVATIONS||(typeof require==='function'?require('./elevation.js'):null))?.build(plan,floorId,roomId);if(local)return local;
  const connection=arr(plan.verticalConnections).find(c=>c?.type==='stair'&&c.room===roomId&&arr(c.floors).includes(floorId));
  const split=arr(plan.splitLevelConnections).find(c=>c?.floor===floorId&&c.room===roomId);
  if(!connection&&!split&&!room.stairTransition)return null;
