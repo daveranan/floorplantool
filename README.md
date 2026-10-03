@@ -202,3 +202,12 @@ In Walk mode, enter a connected Freight/lift room and press **E** or use its lif
 ## Walk crouch controls (v70)
 
 Hold **C** to crouch in Walk mode; release it to stand when there is enough headroom. C works alongside WASD. Ctrl no longer controls crouching, and brief taps do not latch the crouch. The editor’s C shortcut and Fly controls are unchanged.
+
+
+## Optional crawlspace layers (v71)
+
+Choose a main floor and use **Add crawlspace** in its floor properties. The settings preview shows the new layer, the minimum upward shifts of higher floors, affected stairs and any conflicts before one undoable Apply. The default is 1.50 m clear; it is adjustable. The layer starts empty, with an inherited boundary from ordinary enclosed rooms below. Tall halls, voids, open terraces, solid fill and shafts create visible excluded gaps. Draw rooms and corridors inside that boundary; only those authored pockets cut the host ceiling mass. Shrinking or deleting a host preserves existing child geometry and reports stranded areas.
+
+The indented crawlspace row has its own editing and visibility state. **Show / Hide** only changes the view. Removal is available only when the layer is empty and unreferenced, and keeps upper floors at their current elevations; it does not compress the building. Crawlspace elevation follows its host ceiling and slab. Use settings or Heights to preview height changes.
+
+Choose **Low door** or **Low passage** from the connection type controls. New low openings default to 0.80 m wide and 1.40 m clear, and their inspector reports the actual shared clearance. Half-height or absent walls may allow standing over the opening and are flagged. **Walk from here**, saved starts, reset and Fly-to-Walk can start crouched when standing clearance is unavailable. Continue holding C to crouch; releasing it stands only when there is room.

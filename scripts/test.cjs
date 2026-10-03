@@ -3,6 +3,13 @@ const { spawnSync } = require('node:child_process');
 
 const root = path.resolve(__dirname, '..');
 const suites = [
+  'test-crawlspaces-model.cjs',
+  'test-crawlspace-ui.cjs',
+  'test-crawlspace-cap-geometry.cjs',
+  'test-crawl-spawn.cjs',
+  'test-low-openings.cjs',
+  'test-low-opening-ui.cjs',
+  'test-low-opening-scene.cjs',
   'test-walk-crouch.cjs',
   'test-stair-surface-offsets.cjs',
   'test-stair-surface-offset-ui.cjs',

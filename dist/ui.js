@@ -133,6 +133,8 @@
         case 'rename-building': renameBuilding(name); notify('Building renamed'); break;
         case 'add-floor': addFloor({id: code, name, z}); notify(`${code} added · draw your first room`); break;
         case 'edit-floor':
+          const crawlReview = window.KERN_CRAWLSPACE_UI?.prepareFloorDetails(state.floorId, {name, z});
+          if (crawlReview) { closeManagement(); window.KERN_CRAWLSPACE_UI.show(crawlReview.proposal, crawlReview.snapshot); return true; }
           if (floor().name !== name || floor().z !== z) commit(() => { floor().name = name; floor().z = z; floor().elevation = `${z > 0 ? '+' : ''}${z.toFixed(2)} m`; });
           notify('Floor details saved · Undo restores the previous details');
           break;

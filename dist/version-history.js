@@ -59,7 +59,7 @@ function restoreVersion(){
  const item=selected,payload=capture();flush(payload.id);if(!storeSnapshot(payload,'Before restore','named'))return;
  closePreview();if(window.BuildingExports.isThreeMode())window.BuildingExports.setWorkspaceMode('2d');
  finishWidthEdit(false);resetTransient(true);checkpoint();model=clone(item.plan);variant=item.sourceVariant||'custom';currentBuilding().sourceVariant=variant;if(!Object.hasOwn(model.floors,floorId))floorId=Object.keys(model.floors)[0];setSelection();viewBounds=null;
- const saved=save();render();renderList();notify(saved?'Version restored · previous layout preserved':'Restored in memory only · export your plan before closing');
+ window.KERN_CRAWLSPACE_UI?.acceptRestoredVersion(item.plan);const saved=save();render();renderList();notify(saved?'Version restored · previous layout preserved':'Restored in memory only · export your plan before closing');
 }
 node('showversionhistory').onclick=show;node('historyadd').onclick=named;node('historyclose').onclick=hide;node('historynamecancel').onclick=()=>node('historynameform').hidden=true;
 node('historynameform').onsubmit=e=>{e.preventDefault();const name=node('historyname').value.trim();if(!name){node('historyname').focus();return;}flush(currentBuilding().id);if(storeSnapshot(capture(),name,'named')){node('historynameform').hidden=true;renderList();notify('Named version saved in this browser.');}};

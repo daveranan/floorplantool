@@ -133,7 +133,10 @@ async function pickerInterruption() {
   cancelPicker(Object.assign(Error('user cancelled'), { name: 'AbortError' })); await manual; api.changed();
   const retry = [...scheduled.entries()].find(([, entry]) => entry.ms >= 2500);
   assert(retry, 'Cancelled picker cannot consume the only automatic backup timer');
-  scheduled.delete(retry[0]); retry[1].fn(); await delay(30);
+  scheduled.delete(retry[0]); retry[1].fn();
+  // The verified write uses asynchronous WebCrypto; completion is the contract,
+  // not a 30 ms wall-clock budget while other suites share the machine.
+  const deadline=Date.now()+2000;while(api.getStatus().writing&&Date.now()<deadline)await delay(10);
   assert.equal(t.dir.files.size, 2, 'Deferred disk backup completes after picker cancellation');
   assert.equal(api.getStatus().status, 'saved'); close(t);
 }

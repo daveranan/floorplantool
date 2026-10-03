@@ -283,3 +283,14 @@ Final frozen-source validation: all68 focused release suites passed. Independent
 ## C-only Walk crouch (v70)
 
 `node test-walk-crouch.cjs` dispatches keyboard events through production script order and checks the actual Three camera with WebGL drawing mocked. It covers C hold/release, short taps, repeated/uppercase input, W+C movement, Ctrl removal, blur, typing, low-ceiling stand refusal, Walk/Fly/2D transitions, unchanged editor C and unchanged plan/history. Browser-reserved shortcut interception is not claimed.
+
+
+## Optional crawlspaces and low openings (v71)
+
+The v71 focused gate contains the 69 v70 suites plus seven crawlspace/low-opening suites. Pure model cases cover derived polygon envelopes and excluded holes, selective opt-in, adjustable clearance, minimum upward shifts, linked stair and explicit room/service offsets, known section/overlook/exterior datums, malformed metadata, removal dependencies, preserved stranded children and input immutability. Production-order UI cases cover pure previews, stale and hidden scope, atomic Apply/Undo/Redo, validation during initial load and named restore, exact rollback, independent buildings and capped history.
+
+Cap tests check rotated geometry, exact bounded pockets, retained side/upper mass, low walking clearance, unchanged empty layers and ordinary stair cutouts. Low-opening tests cover model validation, Full/Half/None boundaries, nested rooms, effective dimensions, preservation of ordinary openings, inspector/history and actual Three raycasts. Crouched-start tests use actual camera/collision math with WebGL rendering replaced, including the first frame, saved placement/reset, Fly-to-Walk, blocked targets and unchanged C hold semantics. Real browser/GPU rendering is not claimed.
+
+The existing asynchronous disk-backup interruption test now waits for the observed write operation to finish before checking the same saved status and exact file count; production backup behavior is unchanged. Private plans and screenshots remain outside this repository and its deployment.
+
+Final v71 validation: all 76 focused suites passed. Independent model/UI and bounded-cap/spawn reviews found no remaining blockers. The exact supplied backup passed production boot, all seven active-building floor checks, all three building geometry builds, reload and unchanged source bytes/authored plans outside the repository. A 100-edit stress run with a crawl pocket in a 240-room synthetic building retained stable DOM/listeners and 80 Undo entries; median edit time was 69 ms initially and 56 ms at the end. These are local CPU/DOM measurements, not browser frame rates.

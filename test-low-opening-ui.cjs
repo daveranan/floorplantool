@@ -1,0 +1,29 @@
+'use strict';
+const assert=require('node:assert/strict'),{boot}=require('./test-production-support.cjs');
+const t=boot(),{run,w,doc,get}=t;w.KERN_WORKSPACE.openBuilding(run('currentBuilding().id'));
+const plan={version:1,units:'metres',floors:{L0:{name:'Ground',z:0,clearHeight:3,rooms:[{id:'a',name:'A',type:'tech',x:0,y:0,w:5,h:10},{id:'b',name:'B',type:'tech',x:5,y:0,w:5,h:10}],doors:[],entrances:[]}}};
+function setup(p=plan){for(const dialog of doc.querySelectorAll('dialog[open]'))dialog.close();doc.activeElement?.blur?.();run(`resetTransient(true);model=${JSON.stringify(p)};floorId='L0';currentBuilding().view.layers={visible:{L0:true},editFloors:['L0']};setTool('select');setSnapSize(0);history=[];future=[];setNewConnectionKind('single');render();`);}
+function choose(value){get('newconnectiontype').value=value;get('newconnectiontype').dispatchEvent(new w.Event('change',{bubbles:true}));}
+function add(kind){choose(kind);run("setTool('connect')");const q=run('connectionCandidate(room("a"),room("b"),{x:5,y:5})');assert(q.valid,q.reason);assert(run(`addCandidate(${JSON.stringify(q)})`));return q;}
+try{
+ assert(w.KERN_LOW_OPENING_UI,'low module is loaded in production order');
+ for(const kind of ['low-door','low-passage']){
+  setup();const before=run('JSON.stringify(model)'),q=add(kind);assert.equal(q.door.height,1.4);assert.equal(q.door.width,.8);assert.equal(q.door.openingPreset,kind);assert.equal(q.door.maximumPassage,undefined);assert.equal(run('history.length'),1);run('validateImport(model)');
+  assert.equal(doc.querySelector('[data-doorkey="type"]').value,kind);const field=doc.querySelector('[data-doorkey="height"]');assert(field);assert.equal(field.value,'1.4');assert(doc.querySelector('[data-opening-clearance]').textContent.includes('Crouch'));if(kind==='low-passage')assert(!doc.querySelector('[data-doorkey="fullWidth"]'));
+  const saved=run('JSON.stringify(model)');run('undo()');assert.equal(run('JSON.stringify(model)'),before);run('redo()');assert.equal(run('JSON.stringify(model)'),saved);
+  run('setSelection({doors:[floor().doors[0].id]});render();');const height=doc.querySelector('[data-doorkey="height"]');height.value='1.1';height.dispatchEvent(new w.Event('change',{bubbles:true}));assert.equal(run('floor().doors[0].height'),1.1);assert.equal(run('history.length'),2);assert(doc.querySelector('[data-opening-clearance]').textContent.includes('Too low'));run('validateImport(model);undo()');assert.equal(run('floor().doors[0].height'),1.4);
+  const stable=run('JSON.stringify(model)');choose('double');assert.equal(run('JSON.stringify(model)'),stable,'new preset preference never converts saved openings');
+  const exportDoor=run('buildGeometry(model).levels.L0.doorOpenings[0]');assert.equal(exportDoor.height,1.4);if(kind==='low-passage')assert.equal(exportDoor.fullHeight,false);
+  for(const next of ['low-door','low-passage','single','double','open','window']){run(`updateConnection(floor().doors[0],'type',${JSON.stringify(next)});validateImport(model)`);const d=run('floor().doors[0]');assert.equal(d.openingPreset,next.startsWith('low-')?next:undefined);assert.equal(d.limitedHeight,next==='low-passage'?true:undefined);if(next==='single'||next==='double')assert.equal(d.height,2.2);}
+ }
+ setup();add('single');assert.equal(run('floor().doors[0].height'),undefined);assert.equal(run('floor().doors[0].openingPreset'),undefined);assert(doc.querySelector('[data-doorkey="height"]'),'ordinary doors expose existing height field');
+ // New presets reuse the authoring controller and preserve its single history entry.
+ setup();choose('low-passage');run("setTool('connect')");const C=w.KERN_CONNECTION_3D,start={floor:'L0',room:'a',p:{x:4,y:5}},hit={floor:'L0',room:'b',p:{x:6,y:5}},gesture=C.begin('connect',start),preview=C.preview('connect',hit,gesture.hit);assert(preview.valid,preview.reason);assert.equal(preview.door.height,1.4);assert.equal(run('history.length'),0);assert(C.finish(gesture,hit,true));assert.equal(run('history.length'),1);assert.equal(run('floor().doors[0].openingPreset'),'low-passage');
+ // Opt-in import extension rejects malformed markers without tightening legacy data.
+ for(const data of [{openingPreset:'bad'},{limitedHeight:true},{openingPreset:'low-passage',kind:'door',height:1.4}]){const invalid=JSON.parse(JSON.stringify(plan));invalid.floors.L0.doors.push({id:'d',a:'a',b:'b',kind:'door',width:.8,offset:.5,...data});assert.throws(()=>run(`validateImport(${JSON.stringify(invalid)})`),/Invalid low/);}
+ // Legacy exterior adapters retain both markers through save and geometry.
+ const legacy=JSON.parse(JSON.stringify(plan));legacy.floors.L0.rooms.pop();legacy.floors.L0.external={room:'a',side:'w',width:1.2,offset:.5};setup(legacy);run("updateConnection(allConnections()[0],'type','low-passage');validateImport(model)");assert.equal(run('floor().external.openingPreset'),'low-passage');assert(run('window.KERN_LOW_OPENINGS.limited(allConnections()[0])'));assert.equal(run('BuildingPreviewGeometry.build(model).levels[0].openings[0].height'),1.4);run("updateConnection(allConnections()[0],'type','low-door');validateImport(model)");assert(run('window.KERN_LOW_OPENINGS.valid(allConnections()[0])'));
+ // Maximum passages retain their independent data and behavior.
+ setup();run("setTool('connect')");const q=w.KERN_MAX_PASSAGES.candidate(run('model'),'L0','a','b',{x:5,y:5});assert(q.valid,q.reason);run(`floor().doors.push(${JSON.stringify(q.door)});updateConnection(floor().doors[0],'type','low-passage');validateImport(model)`);assert.equal(run('floor().doors[0].maximumPassage'),undefined);assert.equal(run('floor().doors[0].openingPreset'),'low-passage');
+ console.log('PASS low opening UI: deliberate presets, unchanged existing data, clear-height field/status, bounded passage, pure preview, single undo, import guards, type cleanup, 3D authoring, export and legacy exterior adapters');
+}finally{t.close();}

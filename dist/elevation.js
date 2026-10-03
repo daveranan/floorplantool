@@ -30,7 +30,7 @@ function cutSurfaces(data,volumes){const S=root.KERN_SHAPES||(typeof require==='
  // Snap only derived cutter math, far below the geometry epsilon; never the plan.
  const snapGeometry=g=>g.map(p=>p.map(ring=>ring.map(p=>p.map(n=>Math.round(n*1e8)/1e8))));
  volumes=volumes.map(v=>({...v,geometry:snapGeometry(v.geometry)}));
- function split(b,level){if(!['wall','slab','ceiling','solid'].includes(b.kind))return[b];const top=b.z+b.height,geometry=snapGeometry([[b.polygon||rect(b),...(b.holes||[])]]),cuts=volumes.filter(v=>(!v.floor||v.floor===level.id)&&(!v.room||[b.room,...b.rooms||[]].includes(v.room))&&(!v.wallOnly||b.kind==='wall')&&v.z0<top-CUT_EPS&&v.z1>b.z+CUT_EPS&&overlap(b,v)).filter(v=>area(S.clip.intersection(geometry,v.geometry))>CUT_EPS);if(!cuts.length)return[b];
+ function split(b,level){if(!['wall','slab','ceiling','solid'].includes(b.kind))return[b];const top=b.z+b.height,geometry=snapGeometry([[b.polygon||rect(b),...(b.holes||[])]]),cuts=volumes.filter(v=>(!v.floor||v.floor===level.id)&&(!v.room||[b.room,...b.rooms||[]].includes(v.room))&&(!v.wallOnly||b.kind==='wall')&&(!v.ceilingOnly||b.kind==='ceiling')&&v.z0<top-CUT_EPS&&v.z1>b.z+CUT_EPS&&overlap(b,v)).filter(v=>area(S.clip.intersection(geometry,v.geometry))>CUT_EPS);if(!cuts.length)return[b];
   const zs=[...new Set([b.z,top,...cuts.flatMap(v=>[Math.max(b.z,v.z0),Math.min(top,v.z1)])])].sort((a,b)=>a-b),out=[],last=new Map();
   for(let i=1;i<zs.length;i++){const z=zs[i-1],end=zs[i];if(end-z<CUT_EPS)continue;const mid=(z+end)/2,active=cuts.filter(v=>v.z0<mid&&v.z1>mid),remaining=active.length?S.difference(geometry,active.map(v=>v.geometry)):geometry;
    for(const rings of remaining){const polygon=rings[0],bounds=S.bounds(polygon),key=JSON.stringify(rings),prior=last.get(key);if(prior&&Math.abs(prior.z+prior.height-z)<CUT_EPS){prior.height=end-prior.z;continue;}const shape={...b,...bounds,z,height:end-z};const open=polygon.filter((p,i)=>!i||p[0]!==polygon[0][0]||p[1]!==polygon[0][1]);const axisAligned=rings.length===1&&open.length===4&&open.every(p=>(Math.abs(p[0]-bounds.x)<CUT_EPS||Math.abs(p[0]-bounds.x-bounds.w)<CUT_EPS)&&(Math.abs(p[1]-bounds.y)<CUT_EPS||Math.abs(p[1]-bounds.y-bounds.h)<CUT_EPS));if(axisAligned&&!b.polygon){delete shape.polygon;delete shape.holes;}else{shape.polygon=polygon;shape.holes=rings.slice(1);}out.push(shape);last.set(key,shape);}
@@ -71,6 +71,15 @@ function decorate(plan,data){const S=root.KERN_SHAPES||(typeof require==='functi
  // Older local-step endpoints stop at a room edge. Extend only that explicit
  // doorway through the wall thickness, at the endpoint's own elevation.
  for(const st of data.stairs.filter(s=>s.localSteps&&!s.routeStair))for(const a of st.access||[]){const g=a.geometry;if(!a.valid||!g||!['h','v'].includes(g.axis))continue;const box=g.axis==='h'?{x:g.start,y:g.fixed-.12,w:g.end-g.start,h:.24}:{x:g.fixed-.12,y:g.start,w:.24,h:g.end-g.start};volumes.push({...box,geometry:[[rect(box)]],z0:a.z-.18,z1:a.z+cutHeadroom(st.spec?.minHeadroom),floor:a.floor,room:a.room,wallOnly:true});}
+ // A crawl pocket removes only its bounded occupied volume from its host's
+ // derived service cap. Keep material below its slab and above its roof, even
+ // when the existing gap is much taller than the requested crawl clearance.
+ const slab=Number.isFinite(plan.floorModule?.slab)&&plan.floorModule.slab>0?Math.min(plan.floorModule.slab,2):.3;
+ for(const [fid,f]of Object.entries(plan.floors))if(f.crawlspace?.hostFloor&&plan.floors[f.crawlspace.hostFloor])for(const r of f.rooms){
+  if(r.outdoor||['void','courtyard','terrace','solid'].includes(r.type)||r.routeStair||r.localSteps)continue;
+  const z=r.z??f.z,height=r.height??f.clearHeight??3;
+  volumes.push({...S.bounds(S.points(r)),geometry:S.multi(r),z0:z-slab,z1:z+height+slab,floor:f.crawlspace.hostFloor,ceilingOnly:true,source:fid+':'+r.id});
+ }
  cutSurfaces(data,volumes);const all=data.levels.flatMap(l=>[...l.boxes,...l.polygons||[]]);if(all.length)data.bounds={minX:Math.min(...all.map(b=>b.x)),maxX:Math.max(...all.map(b=>b.x+b.w)),minY:Math.min(...all.map(b=>b.y)),maxY:Math.max(...all.map(b=>b.y+b.h)),minZ:Math.min(...all.map(b=>b.z)),maxZ:Math.max(...all.map(b=>b.z+b.height))};return data;
 }
 const api={ground,value,sync,floorMove,roomMove,setEnd,build,decorate,cutHeadroom,cutVolumes,cutSurfaces};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.KERN_ELEVATIONS=api;

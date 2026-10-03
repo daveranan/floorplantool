@@ -1,6 +1,6 @@
 (function(){'use strict';const E=window.KERN_ELEVATIONS;let drawing=null;const btn=document.createElement('button');btn.id='tool-local-steps';btn.textContent='Local steps';btn.title='Draw short stairs between surfaces on this floor';$('createstairs').after(btn);btn.onclick=()=>{setTool(tool==='local-steps'?'select':'local-steps');};
 function changed(fn){try{commit(()=>{fn();E.sync(model);});}catch(e){notify(e.message);}}
-function floorZ(fid,z){changed(()=>E.floorMove(model,fid,z));}
+function floorZ(fid,z){if(window.KERN_CRAWLSPACE_UI?.routeHeight(fid,'z',z))return;changed(()=>E.floorMove(model,fid,z));}
 function roomZ(fid,rid,z){const f=model.floors[fid],r=f?.rooms.find(r=>r.id===rid);if(!r||!canEdit(r)){notify('Change the source room elevation instead');return;}if(!r.localSteps&&isStair(r)){notify('Move the connected floor to adjust this stair stack');return;}changed(()=>{E.roomMove(model,fid,rid,z);syncStairEdit(r);});}
 function refs(c){return[['site','Outside ground'],['floor','This floor'],['manual','Unlinked height'],...floor().rooms.filter(r=>r.id!==c.room&&!r.localSteps&&!isStair(r)&&r.type!=='void'&&canEdit(r)).map(r=>['room:'+r.id,r.name])];}
 function refKey(ref){return !ref?'manual':ref.kind==='room'?'room:'+ref.room:ref.kind;}
