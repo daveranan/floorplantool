@@ -5,7 +5,7 @@ w.KERN_WORKSPACE.openBuilding(run('currentBuilding().id'));
 const plain=x=>JSON.parse(JSON.stringify(x));
 function setup(extra=''){
  for(const d of doc.querySelectorAll('dialog[open]'))d.close();
- run(`resetTransient(true);model={version:1,units:'metres',floors:{L0:{name:'Ground',z:0,rooms:[{id:'a',name:'A',x:0,y:0,w:8,h:8,type:'tech'},{id:'b',name:'Other',x:30,y:0,w:8,h:8,type:'tech'}],doors:[],entrances:[]},L1:{name:'Upper',z:4,rooms:[{id:'a',name:'Upper A',x:12,y:0,w:8,h:8,type:'living'}],doors:[],entrances:[]}}};floorId='L0';currentBuilding().view.layers={};setTool('select');setSelection();history=[];future=[];${extra};render();save();`);
+ run(`resetTransient(true);model={version:1,units:'metres',floors:{L0:{name:'Ground',z:0,rooms:[{id:'a',name:'A',x:0,y:0,w:8,h:8,type:'tech'},{id:'b',name:'Other',x:30,y:0,w:8,h:8,type:'tech'}],doors:[],entrances:[]},L1:{name:'Upper',z:4,rooms:[{id:'a',name:'Upper A',x:12,y:0,w:8,h:8,type:'living'}],doors:[],entrances:[]}}};floorId='L0';currentBuilding().view.layers={visible:{L0:true,L1:true}};setTool('select');setSelection();history=[];future=[];${extra};render();save();`);
 }
 function both(){L.setFloorSelection(['L0','L1']);L.setReferences([{floor:'L0',kind:'rooms',id:'a'},{floor:'L1',kind:'rooms',id:'a'}]);}
 function key(k,more={},target=doc.body){const e=new w.KeyboardEvent('keydown',{key:k,bubbles:true,cancelable:true,...more});target.dispatchEvent(e);return e;}
@@ -37,6 +37,6 @@ try{
  // Undo/redo while previewing cancel the uncommitted gesture, preserving older history.
  for(const action of ['undo()','redo()']){setup();both();run(`commit(()=>room('b').name='Earlier saved edit')`);before=snapshot();ptr(get('plan').querySelector('[data-crossfloor-move]'),'pointerdown');ptr(get('plan'),'pointermove',3,2);run(action);ptr(get('plan'),'pointerup',3,2);assert.equal(snapshot(),before);}
  // Scope follows creation/removal through the normal floor-management entry points.
- setup();run(`addFloor({id:'L9',name:'New',z:9})`);assert.equal(L.editable('L9'),false,'Creating a floor must preserve the existing editing checkbox set');run('removeFloor(true)');assert.equal(run('currentBuilding().view.layers.editFloors.includes("L9")'),false,'Deleted floor cannot remain in editing scope');
+ setup();run(`addFloor({id:'L9',name:'New',z:9})`);assert.equal(L.editable('L9'),true,'Creating a floor makes its new active floor editable');run('removeFloor(true)');assert.equal(run('currentBuilding().view.layers.editFloors.includes("L9")'),false,'Deleted floor cannot remain in editing scope');
  console.log('PASS crossfloor selection reconciliation and reload, clipboard ownership, safe cut, linked guards, destination scope, partial-editor protections, camera invalidation, cancellation history and floor lifecycle');
 }finally{t.close();}

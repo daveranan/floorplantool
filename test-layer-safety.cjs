@@ -7,7 +7,7 @@ const support=new Module(path.resolve('test-support.cjs'),module);support.filena
 const t=support.exports.boot(),{run,w,doc,get}=t;w.KERN_WORKSPACE.openBuilding(run('currentBuilding().id'));
 function setup(){
  for(const dialog of doc.querySelectorAll('dialog[open]'))dialog.close();
- run(`resetTransient(true);model={version:1,units:'metres',floors:{L0:{name:'Ground',z:0,rooms:[{id:'a',name:'A',x:0,y:0,w:10,h:10,type:'tech'},{id:'b',name:'B',x:10,y:0,w:10,h:10,type:'living'}],doors:[{id:'ab',a:'a',b:'b',width:1.2,offset:.5,kind:'door'}],entrances:[]},L1:{name:'Upper',z:4,rooms:[{id:'upper',name:'Upper',x:30,y:30,w:5,h:5,type:'living'}],doors:[],entrances:[]}}};floorId='L0';currentBuilding().view.layers={};setSelection();setTool('select');history=[];future=[];render();save();`);
+ run(`resetTransient(true);model={version:1,units:'metres',floors:{L0:{name:'Ground',z:0,rooms:[{id:'a',name:'A',x:0,y:0,w:10,h:10,type:'tech'},{id:'b',name:'B',x:10,y:0,w:10,h:10,type:'living'}],doors:[{id:'ab',a:'a',b:'b',width:1.2,offset:.5,kind:'door'}],entrances:[]},L1:{name:'Upper',z:4,rooms:[{id:'upper',name:'Upper',x:30,y:30,w:5,h:5,type:'living'}],doors:[],entrances:[]}}};floorId='L0';currentBuilding().view.layers={visible:{L0:true,L1:true}};setSelection();setTool('select');history=[];future=[];render();save();`);
 }
 function pointer(target,type,x=0,y=0){const e=new w.MouseEvent(type,{bubbles:true,cancelable:true,button:0,clientX:x,clientY:y});Object.defineProperty(e,'pointerId',{value:7});target.dispatchEvent(e);return e;}
 function key(target,key,more={}){const e=new w.KeyboardEvent('keydown',{key,bubbles:true,cancelable:true,...more});target.dispatchEvent(e);return e;}
