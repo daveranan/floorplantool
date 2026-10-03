@@ -21,7 +21,7 @@ $('compactvariant').onclick=()=>{closeToolbarMenus();const source=window.KERN_PU
 for(const id of ['stairtype','spiralhand'])$(id).onchange=renderStairCreation;
 const escapeKeys=e=>{if(e.key==='Escape'&&($( 'symbolmenu').open||$('servicemenu').open)){e.preventDefault();e.stopImmediatePropagation();closeToolbarMenus(true);}};document.addEventListener('keydown',escapeKeys,true);
 function clipboard(key){
- finishWidthEdit(false);finishDrag(true);closeObjectMenus();try{if(key==='v'&&window.KERN_LAYERS&&!window.KERN_LAYERS.editable(floorId))throw Error('Enable editing on '+floorId+' before pasting.');
+ finishWidthEdit(false);finishDrag(true);closeObjectMenus();try{if(key==='v'&&window.KERN_LAYERS&&!window.KERN_LAYERS.canEditFloor(floorId))throw Error('Enable editing and visibility on '+floorId+' before pasting.');
   if(key==='c'||key==='x'){
    const next=api.snapshot(model,floorId,getSelection());if(key==='x'){const removed=api.remove(model,next);validateImport(removed);commit(()=>{model=removed;setSelection();});}
    next.sourceBuilding=currentBuilding().id;buffer=next;pasteCount=0;notify((key==='x'?'Cut':'Copied')+' selection'+(next.omitted?' · links to unselected rooms are not copied':'')+(next.connections.length?' · complete linked stair stack retained':''));return true;
@@ -32,7 +32,7 @@ function clipboard(key){
   validateImport(proposal.plan);commit(()=>{model=proposal.plan;setSelection(proposal.selection);});notify('Pasted on '+floorId+(proposal.notes.length?' · '+proposal.notes.join('; '):' · Undo restores this edit'));return true;
  }catch(e){notify(e.message);return false;}
 }
-function moveSelection(target){finishDrag(true);try{if(window.KERN_LAYERS&&(!window.KERN_LAYERS.editable(floorId)||!window.KERN_LAYERS.editable(target)))throw Error('Enable editing on both the source and destination floors before moving objects.');const proposal=api.move(model,floorId,getSelection(),target);validateImport(proposal.plan);commit(()=>{model=proposal.plan;floorId=target;setSelection(proposal.selection);});notify('Selection moved to '+target+' · Undo restores the complete transfer');return true;}catch(e){notify(e.message);return false;}}
+function moveSelection(target){finishDrag(true);try{if(window.KERN_LAYERS&&(!window.KERN_LAYERS.canEditFloor(floorId)||!window.KERN_LAYERS.canEditFloor(target)))throw Error('Enable editing and visibility on both the source and destination floors before moving objects.');const proposal=api.move(model,floorId,getSelection(),target);validateImport(proposal.plan);commit(()=>{model=proposal.plan;floorId=target;setSelection(proposal.selection);});notify('Selection moved to '+target+' · Undo restores the complete transfer');return true;}catch(e){notify(e.message);return false;}}
 function sync(){
  syncTools();if(window.BuildingExports?.isThreeMode?.())return;
  const s=getSelection(),count=selectionCount(s);if(!count)return;

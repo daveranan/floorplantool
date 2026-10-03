@@ -1,7 +1,7 @@
 /* Production-order local-files regressions. Filesystem handles are deterministic mocks. */
 const fs = require('node:fs'), vm = require('node:vm'), Module = require('node:module');
 const path = require('node:path'), assert = require('node:assert/strict'), { webcrypto } = require('node:crypto');
-const repo = __dirname, staging = path.join(repo, 'dist');
+const repo = process.cwd(), staging = process.env.BACKUP_SHORTCUT_ASSETS || path.join(repo, 'dist');
 process.chdir(repo);
 let source = fs.readFileSync('test-support.cjs', 'utf8');
 const scripts = [...fs.readFileSync('dist/index.html', 'utf8').matchAll(/<script src="([^"]+)\.js"/g)]
@@ -19,7 +19,7 @@ async function boot() {
   t.w.TextEncoder = TextEncoder;
   t.w.showDirectoryPicker = async () => t.dir;
   for (const name of ['local-files-core.js', 'local-files.js']) {
-    vm.runInContext(fs.readFileSync(path.join(staging, name), 'utf8'), t.dom.getInternalVMContext(), { filename: name });
+    vm.runInContext(fs.readFileSync(path.join(name==='local-files.js'?staging:path.join(repo,'dist'), name), 'utf8'), t.dom.getInternalVMContext(), { filename: name });
   }
   await Promise.resolve(); await Promise.resolve();
   return t;
@@ -113,7 +113,7 @@ async function homeShortcut() {
   t.w.showSaveFilePicker = async () => { picks++; throw Object.assign(Error('cancel'), { name: 'AbortError' }); };
   const event = new t.w.KeyboardEvent('keydown', { key: 's', code: 'KeyS', ctrlKey: true, bubbles: true, cancelable: true });
   t.doc.body.dispatchEvent(event);
-  assert.equal(picks, 1, 'Home Ctrl+S reaches local file picker'); assert(event.defaultPrevented);
+  assert.equal(picks, 0, 'Home Ctrl+S never opens Save As'); assert(event.defaultPrevented);assert(t.get('local-files-dialog').open, 'No configured folder shows backup setup');
   await delay(10); close(t);
 }
 async function pickerInterruption() {

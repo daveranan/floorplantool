@@ -68,7 +68,7 @@ function changed(){
  }catch(e){if(directory)failure(e);}
 }
 async function flush(force=false){
- if(!directory||paused)return false;if(writing||operation){schedule(2500);return false;}
+ if(!directory||paused&&!force)return false;if(writing||operation){schedule(2500);return false;}
  if(isEditing()){schedule(2500);return false;}
  clearTimeout(timer);timer=null;
  let payload,key;try{payload=snapshot();key=C.contentKey(payload);if(!force&&key===savedKey){status='saved';detail='Folder: '+directory.name+' · '+lastFile;update();return true;}}catch(e){failure(e);return false;}
@@ -78,6 +78,21 @@ async function flush(force=false){
   if(pendingKey!==key&&!paused)schedule(AUTOSAVE_INTERVAL);
   return true;
  }catch(e){failure(e);return false;}finally{writing=false;update();}
+}
+// Explicit save always targets the configured versioned backup folder.
+async function backupNow(){
+ if(writing){update();return false;}
+ if(operation){notify('Wait for the current file operation to finish.');return false;}
+ if(isEditing()){notify('Finish or cancel the current edit, then press Ctrl/Cmd+S again.');return false;}
+ if(!directory){
+  operationResult=restoringHandle?'Still checking the saved backup folder. Try Back up now again in a moment.':capabilities().folder?'Choose a backup folder once to use Ctrl/Cmd+S.':'Automatic folder backups are unavailable here. Ctrl/Cmd+S cannot save to a folder.';
+  show();byId('local-files-result-details').open=true;
+  if(!restoringHandle&&!byId('local-files-folder').hidden)byId('local-files-folder').focus();
+  return false;
+ }
+ const ok=await flush(true);
+ if(!ok&&status==='error'){show();byId('local-files-reconnect').focus();}
+ return ok;
 }
 function storeHandle(value){return new Promise((resolve,reject)=>{
  if(!window.indexedDB){reject(Error('Folder permission cannot be remembered in this browser.'));return;}
@@ -169,18 +184,18 @@ function importSelected(){
 }
 byId('local-files-close').onclick=close;dialog.addEventListener('cancel',e=>{e.preventDefault();close();});
 byId('local-files-save').onclick=()=>saveCopy(true);byId('local-files-download').onclick=()=>saveCopy(false);byId('local-files-load').onclick=()=>byId('local-files-input').click();byId('local-files-input').onchange=e=>loadFile(e.target.files[0]);
-byId('local-files-apply').onclick=applyRetention;byId('local-files-retention').onchange=()=>{retentionTouched=true;update();};byId('local-files-folder').onclick=chooseFolder;byId('local-files-reconnect').onclick=reconnect;byId('local-files-now').onclick=()=>flush(true);
+byId('local-files-apply').onclick=applyRetention;byId('local-files-retention').onchange=()=>{retentionTouched=true;update();};byId('local-files-folder').onclick=chooseFolder;byId('local-files-reconnect').onclick=reconnect;byId('local-files-now').onclick=backupNow;
 byId('local-files-pause').onclick=async()=>{paused=!paused;clearTimeout(timer);status=paused?'paused':'pending';detail=paused?'Automatic disk backups are paused. Existing files are unchanged.':'Automatic disk backups resumed.';await remember();update();if(!paused)await flush();};
 byId('local-files-forget').onclick=async()=>{if(writing)return;directory=null;paused=false;clearTimeout(timer);savedKey=null;status='off';detail='Folder disconnected. Existing files on disk are unchanged.';await remember();update();};
 byId('local-files-source').onchange=selectSource;byId('local-files-floor').onchange=drawPreview;byId('local-files-import').onclick=importSelected;byId('local-files-cancel').onclick=cancelRestore;
 const originalMarkUnsaved=markUnsaved;markUnsaved=function(...args){const result=originalMarkUnsaved(...args);if(directory&&!paused&&!writing&&status!=='error'){status='pending';detail='Editing · disk backup follows after you finish this edit.';update();}return result;};
 const originalSave=save;save=function(...args){const result=originalSave(...args);changed();return result;};
-function saveShortcut(e){if((e.ctrlKey||e.metaKey)&&!e.altKey&&!e.shiftKey&&e.code==='KeyS'&&!e.repeat){e.preventDefault();e.stopImmediatePropagation();if((!document.querySelector('dialog[open]')||dialog.open&&!restore)&&!operation&&!writing)saveCopy(true);return true;}return false;}
+function saveShortcut(e){if(e.ctrlKey!==e.metaKey&&!e.altKey&&!e.shiftKey&&(e.code==='KeyS'||String(e.key).toLowerCase()==='s')){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat&&(!document.querySelector('dialog[open]')||dialog.open&&!restore))backupNow();return true;}return false;}
 window.addEventListener('keydown',saveShortcut,true);if(window.KERN_WORKSPACE){const previousKeys=window.KERN_WORKSPACE.handleKeydown;window.KERN_WORKSPACE.handleKeydown=function(e){if(!saveShortcut(e))return previousKeys(e);};}
 window.addEventListener('beforeunload',e=>{let unsaved=false;try{unsaved=(writing||directory&&currentKey()!==savedKey&&currentKey()!==manualVerifiedKey||byId('saved').dataset.state==='error'&&currentKey()!==manualVerifiedKey);}catch{unsaved=true;}if(unsaved){e.preventDefault();e.returnValue='';}});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')changed();});
 let interval=setInterval(changed,15000);window.addEventListener('pagehide',()=>{clearInterval(interval);clearTimeout(timer);});window.addEventListener('pageshow',e=>{if(e.persisted){clearInterval(interval);interval=setInterval(changed,15000);observedKey=null;changed();}});
-window.KERN_LOCAL_FILES={show,snapshot,saveCopy,chooseFolder,applyRetention,reconnect,flush,changed,loadFile,importSelected,getStatus:()=>({status,detail,lastAt,lastFile,writing,paused,hasFolder:!!directory,retention,calendarTimeZone,intervalMs:AUTOSAVE_INTERVAL,dirty:!!directory&&pendingKey!==savedKey}),core:C};
+window.KERN_LOCAL_FILES={show,snapshot,saveCopy,backupNow,chooseFolder,applyRetention,reconnect,flush,changed,loadFile,importSelected,getStatus:()=>({status,detail,lastAt,lastFile,writing,paused,hasFolder:!!directory,retention,calendarTimeZone,intervalMs:AUTOSAVE_INTERVAL,dirty:!!directory&&pendingKey!==savedKey}),core:C};
 update();
 (async()=>{try{const config=await storeHandle();if(config?.handle){directory=config.handle;retention=config.retention==='smart'||[0,30,100].includes(config.retention)?config.retention:'smart';calendarTimeZone=typeof config.calendarTimeZone==='string'?config.calendarTimeZone:browserTimeZone();if(!retentionTouched)byId('local-files-retention').value=String(retention);paused=!!config.paused;status=paused?'paused':'pending';await C.permission(directory);}}catch(e){if(directory)failure(e);}finally{restoringHandle=false;update();if(directory&&!paused&&status!=='error')changed();}})();
 })();
