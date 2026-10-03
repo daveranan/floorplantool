@@ -12,9 +12,9 @@ function setup(){
 function pointer(target,type,x=0,y=0){const e=new w.MouseEvent(type,{bubbles:true,cancelable:true,button:0,clientX:x,clientY:y});Object.defineProperty(e,'pointerId',{value:7});target.dispatchEvent(e);return e;}
 function key(target,key,more={}){const e=new w.KeyboardEvent('keydown',{key,bubbles:true,cancelable:true,...more});target.dispatchEvent(e);return e;}
 function startDrag(){
- w.KERN_LAYERS.setFloorSelection(['L0']);const node=doc.querySelector('[data-floor-move]');assert(node,'Floor group has a drag outline');const x=Number(node.getAttribute('x'));
+ w.KERN_LAYERS.setFloorSelection(['L0','L1']);w.KERN_LAYERS.setReferences([{floor:'L0',kind:'rooms',id:'a'},{floor:'L1',kind:'rooms',id:'upper'}]);const node=doc.querySelector('[data-crossfloor-move]');assert(node,'Object selection has a drag outline');
  pointer(node,'pointerdown');pointer(get('plan'),'pointermove',2,0);
- assert(Math.abs(Number(doc.querySelector('[data-floor-move]').getAttribute('x'))-x-2)<1e-6,'A nonmutating floor-move preview is actually drawn');
+ assert.equal(doc.querySelector('#crossfloor-selection').getAttribute('transform'),'translate(2 0)','A nonmutating selection preview is drawn');
  assert.equal(run('room("a").x'),0,'Preview must not mutate the source plan');assert.equal(run('history.length'),0,'Preview must not create history');
 }
 function assertUnmoved(label){assert.equal(run('room("a").x'),0,label);assert.equal(run('history.length'),0,label+' history');}
@@ -42,9 +42,9 @@ try{
  // Shift+Tab keeps browser focus behavior rather than inheriting canvas view-switch.
  setup();const shiftTab=key(get('plan'),'Tab',{shiftKey:true});assert.equal(shiftTab.defaultPrevented,false);assert.equal(w.BuildingExports.isThreeMode(),false);assert(w.KERN_KEYS.allowed({key:'s',code:'KeyS',ctrlKey:true}),'Exact Ctrl+S remains assigned');assert(!w.KERN_KEYS.allowed({key:'S',code:'KeyS',ctrlKey:true,shiftKey:true}),'Ctrl+Shift+S is not Ctrl+S');
  // Geometry-provider failures are rejected before a move can enter history/storage.
- setup();run('floor().rooms.push(KERN_ROUTE_STAIRS.create([[2,2],[5,2],[5,5]],{id:"st",startZ:0,endZ:3}));render();save()');const originalBuild=w.KERN_STAIR_DETAIL.build,unmoved=run('JSON.stringify(model)'),priorHistory=run('history.length');w.KERN_STAIR_DETAIL.build=()=>{throw Error('Synthetic clipping failure');};try{assert(!w.KERN_LAYERS.moveFloors(['L0','L1'],2,1));assert.equal(run('JSON.stringify(model)'),unmoved);assert.equal(run('history.length'),priorHistory);}finally{w.KERN_STAIR_DETAIL.build=originalBuild;}
- setup();const originalBounds=w.KERN_BUILDING_TRANSFORM.bounds;w.KERN_BUILDING_TRANSFORM.bounds=()=>{throw Error('Synthetic invalid geometry');};try{run('render()');assert.equal(get('building-size').textContent,'Geometry needs review');}finally{w.KERN_BUILDING_TRANSFORM.bounds=originalBounds;run('render()');}
- setup();run('currentBuilding().view.layers={visible:[],objects:{L0:"bad"},selectedFloors:"bad"};render()');assert.equal(run('JSON.stringify(currentBuilding().view.layers)'),'{"visible":{},"objects":{},"selectedFloors":[]}');
+ setup();run('floor().rooms.push(KERN_ROUTE_STAIRS.create([[2,2],[5,2],[5,5]],{id:"st",startZ:0,endZ:3}));render();save()');const originalBuild=w.KERN_STAIR_DETAIL.build,unmoved=run('JSON.stringify(model)'),priorHistory=run('history.length');w.KERN_LAYERS.setFloorSelection(['L0','L1']);w.KERN_LAYERS.setReferences([{floor:'L0',kind:'rooms',id:'st'},{floor:'L1',kind:'rooms',id:'upper'}]);w.KERN_STAIR_DETAIL.build=()=>{throw Error('Synthetic clipping failure');};try{assert(!w.KERN_LAYERS.moveSelection(2,1));assert.equal(run('JSON.stringify(model)'),unmoved);assert.equal(run('history.length'),priorHistory);}finally{w.KERN_STAIR_DETAIL.build=originalBuild;}
+ setup();assert(!get('building-footprint'));
+ setup();run('currentBuilding().view.layers={visible:[],objects:{L0:"bad"},selectedFloors:"bad"};render()');assert.equal(run('JSON.stringify(currentBuilding().view.layers)'),'{"visible":{},"objects":{},"editFloors":["L0"],"selection":[]}');
  // A real reload of the active workspace must preserve all per-building layer state.
  setup();w.KERN_LAYERS.toggleObject('rooms','a','locked');w.KERN_LAYERS.toggleObject('rooms','b','hidden');w.KERN_LAYERS.setFloorSelection(['L1']);run('saveView()');const layerState=run('JSON.stringify(currentBuilding().view.layers)');
  const storage=Object.fromEntries(Array.from({length:w.localStorage.length},(_,i)=>{const k=w.localStorage.key(i);return[k,w.localStorage.getItem(k)];}));const reloaded=support.exports.boot(storage);

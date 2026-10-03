@@ -49,3 +49,30 @@
 @media(min-width:721px){.floorproperties{padding:9px 12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.floorproperties>h1,.floorproperties #flooraccess,.floorproperties #floorstats{display:none}.floorproperties>#levelcode{font-size:10px;width:100%}.floorproperties>button{min-height:26px;padding:3px 7px;font-size:10px}}
 .layer-icon{width:14px;height:14px;display:block;margin:auto;pointer-events:none}.visible-floor-overlay rect{fill:#8797b1;fill-opacity:.06;stroke:#8b9ec2;stroke-width:.065;stroke-dasharray:.2 .15;pointer-events:all}
 body[data-view-mode="3d"] #floor-layer-actions{display:none}
+/* One stable floor list in both views. Edit scope is separate from visibility. */
+.floor-layer-row.edit-enabled{box-shadow:inset 2px 0 color-mix(in srgb,var(--accent) 50%,transparent)}
+.floor-layer-row.edit-disabled:not(.active){opacity:.65}
+.floor-layer-row small{font-variant-numeric:tabular-nums}
+.floor-reference-only{opacity:.24}
+.floor-reference-only path,.floor-reference-only rect{pointer-events:none}
+.floor-edit-enabled{opacity:.42}
+.layer-floor-label{font-size:10px;color:var(--muted);padding:10px 4px 5px;font-weight:600}
+.crossfloor-selection{cursor:move}
+.crossfloor-inspector h3{font-size:15px;margin:0 0 8px}
+.crossfloor-inspector .small{font-size:12px;line-height:1.5;color:var(--muted)}
+.crossfloor-inspector .object-action-row{margin:12px 0}
+#workspace-editor-title,.buildingcontrols .variantlabel{display:none!important}
+body[data-view-mode="3d"] #floor-layer-actions{display:flex}
+body[data-view-mode="3d"] .threefloorpanel{display:none!important}
+body[data-view-mode="3d"] #floors{display:flex!important;flex:none;min-height:0}
+@media(max-width:720px){
+ .floor-sidebar{grid-template-columns:minmax(0,1fr)!important;max-height:84px}
+ #floors{grid-column:1!important;height:78px}
+ .floorsheading{display:flex;position:absolute;right:4px;top:2px;z-index:4;padding:0}
+ .floorsheading>h2,.floorsheading>#addfloor{display:none}
+ #floors .floor-layer-row{grid-template-columns:18px 15px minmax(50px,1fr);min-width:104px}
+ #floors .floor-layer-row>button.floor-eye{display:block;width:18px}
+ #floors .floor-layer-row input{width:14px;height:14px}
+ #floors .floor-layer-row>button[data-floor]{min-width:50px}
+ body[data-view-mode="3d"] #floor-layer-actions{display:none}
+}

@@ -17,27 +17,29 @@
   const editor = document.querySelector('body > main');
   const appbar = document.querySelector('header.appbar');
   const toolStates = new Map();
-  let busy = false, search = '', status = '', locked = false, baseline = null;
+  let busy = false, search = '', status = '', locked = false, baseline = null, archiveSource = null;
   let projectDialogMode = 'new', projectDialogTarget = null, dialogReturnFocus = null;
 
   function defaults() {
-    return {schemaVersion:1, projects:[], buildingProjects:{}, openTabs:[currentBuilding().id], activeTab:'home', selectedProject:'all', lastOpened:{}, modes:{}};
+    return {schemaVersion:1, projects:[], buildingProjects:{}, openTabs:[currentBuilding().id], activeTab:'home', selectedProject:'all', lastOpened:{}, modes:{}, buildingOrder:[]};
   }
-  function normalize(input) {
+  function normalize(input,scope=buildings()) {
     if (!input || input.schemaVersion !== 1 || !Array.isArray(input.projects) || !Array.isArray(input.openTabs)) throw Error('The saved workspace could not be read.');
-    const result = defaults(), seen = new Set();
+    const result = defaults(), seen = new Set(), scopeIds=new Set(scope.map(b=>b.id));
     result.projects = input.projects.slice(0,100).filter(item => item && typeof item.id === 'string' && /^project-[a-z0-9-]+$/i.test(item.id) && typeof item.name === 'string' && item.name.trim() && !seen.has(item.id) && seen.add(item.id)).map(item => ({id:item.id, name:item.name.trim().slice(0,100)}));
-    result.openTabs = [...new Set(input.openTabs)].filter(id => typeof id === 'string' && building(id));
-    result.activeTab = input.activeTab === 'home' || !building(input.activeTab) ? 'home' : input.activeTab;
+    result.openTabs = [...new Set(input.openTabs)].filter(id => typeof id === 'string' && scopeIds.has(id));
+    result.activeTab = input.activeTab === 'home' || !scopeIds.has(input.activeTab) ? 'home' : input.activeTab;
     if (result.activeTab !== 'home' && !result.openTabs.includes(result.activeTab)) result.openTabs.push(result.activeTab);
     result.selectedProject = ['all','recent','unsorted'].includes(input.selectedProject) || result.projects.some(p => p.id === input.selectedProject) ? input.selectedProject : 'all';
-    for (const b of buildings()) {
+    for (const b of scope) {
       const project = input.buildingProjects && own(input.buildingProjects,b.id) && input.buildingProjects[b.id];
       if (result.projects.some(p => p.id === project)) result.buildingProjects[b.id] = project;
       const opened = input.lastOpened && own(input.lastOpened,b.id) && input.lastOpened[b.id];
       if (Number.isFinite(opened) && opened >= 0) result.lastOpened[b.id] = opened;
       if (input.modes && own(input.modes,b.id) && ['2d','3d'].includes(input.modes[b.id])) result.modes[b.id] = input.modes[b.id];
     }
+    if(input.buildingOrder!==undefined&&(!Array.isArray(input.buildingOrder)||input.buildingOrder.length>100||input.buildingOrder.some(id=>typeof id!=='string')))throw Error('The saved building order could not be read.');
+    if(input.buildingOrder?.length){result.buildingOrder=[...new Set(input.buildingOrder)].filter(id=>scopeIds.has(id));for(const b of scope)if(!result.buildingOrder.includes(b.id))result.buildingOrder.push(b.id);}
     return result;
   }
   function load() {
@@ -156,7 +158,7 @@
   function renderGrid() {
     let rows = buildings().filter(b=>state.selectedProject==='all'||state.selectedProject==='recent'&&state.lastOpened[b.id]||state.selectedProject==='unsorted'&&!projectFor(b.id)||projectFor(b.id)===state.selectedProject);
     if (search.trim()) { const q=search.toLocaleLowerCase().trim(); rows=rows.filter(b=>`${b.name} ${title(projectFor(b.id))}`.toLocaleLowerCase().includes(q)); }
-    rows = [...rows].sort((a,b)=>state.selectedProject==='recent'?(state.lastOpened[b.id]||0)-(state.lastOpened[a.id]||0):(Date.parse(b.updatedAt)||0)-(Date.parse(a.updatedAt)||0));
+    const order=new Map(state.buildingOrder.map((id,i)=>[id,i]));rows = [...rows].sort((a,b)=>state.selectedProject==='recent'?(state.lastOpened[b.id]||0)-(state.lastOpened[a.id]||0):state.buildingOrder.length?(order.get(a.id)??100)-(order.get(b.id)??100):(Date.parse(b.updatedAt)||0)-(Date.parse(a.updatedAt)||0));
     $w('workspace-heading').textContent = ({all:'All buildings',recent:'Recents',unsorted:'Unsorted'})[state.selectedProject] || title(state.selectedProject);
     $w('workspace-count').textContent = `${rows.length} building${rows.length===1?'':'s'} · stored in this browser`;
     $w('workspace-grid').innerHTML = rows.map(b=>`<article class="workspace-card"><button class="workspace-card-open" data-open-building="${escape(b.id)}" aria-label="Open ${escape(b.name)}">${thumbnail(b)}<span class="workspace-card-info">${icon('building')}<span><strong title="${escape(b.name)}">${escape(b.name)}</strong><small>${b.recoveryStatus?escape(b.recoveryStatus):Object.keys(b.plan.floors).length+' floors · '+escape(relative(b.updatedAt))}</small></span></span></button><footer><button class="workspace-project-chip" data-move-building="${escape(b.id)}" title="Move to project">${icon('project')}<span>${escape(title(projectFor(b.id)))}</span></button><button data-open-building="${escape(b.id)}" class="workspace-card-arrow" aria-label="Open ${escape(b.name)}">↗</button></footer></article>`).join('');
@@ -164,6 +166,7 @@
     $w('workspace-empty-title').textContent = search ? 'No matching buildings' : state.selectedProject==='recent' ? 'Your recent buildings will appear here' : 'No buildings here yet';
     $w('workspace-empty-copy').textContent = search ? 'Try another name or choose All buildings.' : state.selectedProject==='recent' ? 'Open a building from All buildings to get started.' : 'Create a building or move one into this project.';
     $w('workspace-empty-new').hidden = !!search || state.selectedProject==='recent';
+    window.KERN_HOME_CARDS?.decorate?.();
   }
   function sync() {
     if (busy) return;
@@ -279,7 +282,8 @@
       result=fn(...args);
       const added=buildings().filter(b=>!previous.has(b.id));
       if (added.length) {
-        for(const b of added)if(project)state.buildingProjects[b.id]=project;
+        clearCardHistory();
+        for(const b of added){const destination=archiveSource&&own(archiveSource,'workspaceProjectId')?validProject(archiveSource.workspaceProjectId)?archiveSource.workspaceProjectId:null:project;if(destination)state.buildingProjects[b.id]=destination;}
         const id=currentBuilding().id;
         state.activeTab=id;state.modes[id]='2d';state.lastOpened[id]=Date.now();
         if(!state.openTabs.includes(id))state.openTabs.push(id);
@@ -293,6 +297,7 @@
   }
   // Preserve existing application paths: menus, archive, imports, commands and copies.
   switchBuilding=function(id){return openBuilding(id);};
+  const originalArchiveRestore=restoreArchive;restoreArchive=function(id,...args){const previous=archiveSource;archiveSource=buildingState.data.archive.find(a=>a.id===id)||null;try{return originalArchiveRestore(id,...args);}finally{archiveSource=previous;}};
   const originalAdd=addBuilding; addBuilding=function(...args){return runMutation(originalAdd,args);};
   const originalImport=importBuildings; importBuildings=function(...args){return runMutation(originalImport,args);};
   const originalRender=render; render=function(...args){const result=originalRender(...args);sync();return result;};
@@ -315,7 +320,7 @@
   $w('workspace-search').oninput=event=>{search=event.target.value;renderGrid();};
   $w('workspace-add-project').onclick=()=>openProjectDialog('new');
   $w('workspace-new-building').onclick=newBuilding;$w('workspace-empty-new').onclick=newBuilding;
-  $w('workspace-backup').onclick=()=>exportAll();$w('workspace-import').onclick=()=>$w('file').click();
+  $w('workspace-backup').onclick=()=>window.KERN_LOCAL_FILES?window.KERN_LOCAL_FILES.saveCopy(false):exportAll();$w('workspace-import').onclick=()=>{if(window.KERN_LOCAL_FILES){window.KERN_LOCAL_FILES.show();$w('local-files-input').click();}else $w('file').click();};
   menuProject.onclick=()=>openProjectDialog('move',currentBuilding().id);menuReveal.onclick=()=>showHome(projectFor(currentBuilding().id)||'unsorted');
   $w('workspace-project-cancel').onclick=closeProjectDialog;
   projectDialog.oncancel=event=>{event.preventDefault();closeProjectDialog();};
@@ -326,8 +331,83 @@
   };
   window.addEventListener('pagehide',()=>{rememberCurrent();persist();});
   window.addEventListener('storage',event=>{if(event.key===KEY&&event.newValue!==baseline){locked=true;status='Workspace settings changed in another tab. Organization changes here are in memory only until you reload.';syncStatus();}});
+  // Home card operations have their own bounded undo history. Removed records
+  // move into the existing Archive in the SAME validated collection write.
+  const cardUndo=[],cardRedo=[],CARD_HISTORY_LIMIT=20;
+  function cardFingerprint(record){const data=JSON.parse(JSON.stringify(record));delete data.view;delete data.updatedAt;return JSON.stringify(data);}
+  function cardOrder(){const fallback=[...buildings()].sort((a,b)=>(Date.parse(b.updatedAt)||0)-(Date.parse(a.updatedAt)||0)).map(b=>b.id);return state.buildingOrder.length?[...state.buildingOrder,...fallback.filter(id=>!state.buildingOrder.includes(id))]:fallback;}
+  function visibleCardOrder(){const ids=new Set([...$w('workspace-grid').querySelectorAll('.workspace-card-open')].map(n=>n.dataset.openBuilding));return cardOrder().filter(id=>ids.has(id));}
+  function assertCardsWritable(){
+    if(!isHome())throw Error('Open Home to change building cards.');
+    if(locked||buildingState.locked||$w('saved').dataset.state==='error')throw Error('Saving needs attention. Back up your work and resolve it before changing building cards.');
+    if($w('saved').dataset.state==='editing')throw Error('Finish the current edit first.');
+    if(localStorage.getItem(KEY)!==baseline){locked=true;status='Workspace settings changed in another tab. Back up your work and reload.';syncStatus();throw Error(status);}
+    if(localStorage.getItem(window.KERN_BUILDINGS.KEY)!==buildingState.baseline){buildingState.locked=true;const message='The building collection changed in another tab. Back up your work and reload.';$w('saved').dataset.state='error';$w('saved').title=message;window.KERN_UI?.syncStorage();throw Error(message);}
+  }
+  function cardMetadata(id){return {project:state.buildingProjects[id]||null,mode:state.modes[id],lastOpened:state.lastOpened[id],tabIndex:state.openTabs.indexOf(id)};}
+  function dropCardMetadata(meta,id){delete meta.buildingProjects[id];delete meta.modes[id];delete meta.lastOpened[id];meta.openTabs=meta.openTabs.filter(x=>x!==id);meta.buildingOrder=meta.buildingOrder.filter(x=>x!==id);meta.activeTab='home';}
+  function putCardMetadata(meta,id,saved){if(saved.project&&validProject(saved.project))meta.buildingProjects[id]=saved.project;if(saved.mode)meta.modes[id]=saved.mode;if(Number.isFinite(saved.lastOpened))meta.lastOpened[id]=saved.lastOpened;if(saved.tabIndex>=0&&!meta.openTabs.includes(id))meta.openTabs.splice(Math.min(saved.tabIndex,meta.openTabs.length),0,id);}
+  function rememberCardAction(action){cardUndo.push(action);if(cardUndo.length>CARD_HISTORY_LIMIT)cardUndo.shift();cardRedo.length=0;window.KERN_HOME_CARDS?.refresh?.();}
+  function archiveCard(record){if((buildingState.data.archive||[]).length>=200)throw Error('Archive is full. Nothing was removed; keep a local backup and review the archive.');return {id:'removed-'+window.KERN_BUILDINGS.id(),name:(record.name+' · removed from Home').slice(0,180),sourceVariant:[...window.KERN_BUILDINGS.variants,'main','custom'].includes(record.sourceVariant)?record.sourceVariant:'custom',savedOnly:true,saved:JSON.stringify(record.plan),buildingSnapshot:JSON.parse(JSON.stringify(record)),workspaceProjectId:projectFor(record.id),removedAt:new Date().toISOString()};}
+  function writeCardCollection(next,metadata,restoredHistory=null){
+    assertCardsWritable();window.KERN_BUILDINGS.validate(next,validateImport);
+    const previousActive=buildingState.data.activeBuildingId,priorMetadata=state,priorMetadataBaseline=baseline,futureMetadata=normalize(metadata,next.buildings),staged={...buildingState,data:next},encoded=JSON.stringify(next);
+    state=futureMetadata;
+    if(!persist()){
+      let actual;try{actual=localStorage.getItem(KEY);}catch{}
+      if(actual===JSON.stringify(futureMetadata)){baseline=actual;}
+      else{state=priorMetadata;if(actual!==priorMetadataBaseline){locked=true;status='Could not verify workspace settings. Keep this page open and download a local backup.';}sync();throw Error('Building change not saved: '+(status||'workspace organization could not be saved.'));}
+    }
+    try{window.KERN_BUILDINGS.persist(localStorage,staged);}catch(error){
+      let actual;try{actual=localStorage.getItem(window.KERN_BUILDINGS.KEY);}catch{}
+      if(actual===encoded){staged.baseline=encoded;} // A second exact read can confirm a completed write.
+      else{
+        state=priorMetadata;let rolledBack=false;
+        if(actual===buildingState.baseline)rolledBack=persist(); // Definite non-commit; never roll back over a changed/unknown collection.
+        if(staged.locked||actual!==buildingState.baseline){buildingState.locked=true;locked=true;}
+        $w('saved').dataset.state='error';$w('saved').title=error.message+(rolledBack?'':' The result could not be fully verified; keep this page open and download a local backup.');window.KERN_UI?.syncStorage();sync();throw Error($w('saved').title);
+      }
+    }
+    buildingState.data=next;buildingState.baseline=staged.baseline;if(restoredHistory)buildingHistories.set(restoredHistory.id,restoredHistory.value);status='';
+    $w('saved').dataset.state='saved';$w('saved').textContent='Saved locally · this browser';$w('saved').title='Saved in this browser on this device.';
+    if(previousActive!==next.activeBuildingId){loadBuilding(currentBuilding());render();}else renderBuildings();
+    window.KERN_UI?.syncStorage();sync();window.KERN_LOCAL_FILES?.changed?.();return true;
+  }
+
+  function writeCardOrder(order){
+    assertCardsWritable();const prior=state;state=normalize({...state,buildingOrder:order});if(!persist()){state=prior;sync();throw Error(status||'Building order could not be saved.');}sync();window.KERN_LOCAL_FILES?.changed?.();
+  }
+  function copyCard(id){const source=building(id);if(!source||source.recoveryIssue)throw Error('This building is unavailable or needs recovery.');validateImport(source.plan);return {format:'kern-home-building',record:JSON.parse(JSON.stringify(source)),project:projectFor(id)};}
+  function addCardCopy(payload,{duplicate=false}={}){
+    assertCardsWritable();if(payload?.format!=='kern-home-building'||!payload.record)throw Error('Copy a building first.');if(buildings().length>=100)throw Error('This collection has reached 100 buildings.');validateImport(payload.record.plan);
+    const source=payload.record,b=JSON.parse(JSON.stringify(source));delete b.recoveryIssue;delete b.recoveryStatus;b.id=window.KERN_BUILDINGS.id();let suffix=' copy',count=1;while(buildings().some(x=>x.name===(source.name.slice(0,100-suffix.length)+suffix)))suffix=' copy '+(++count);b.name=source.name.slice(0,100-suffix.length)+suffix;b.createdAt=b.updatedAt=new Date().toISOString();
+    const data=JSON.parse(JSON.stringify(buildingState.data)),meta=JSON.parse(JSON.stringify(state)),order=cardOrder(),sourceIndex=order.indexOf(source.id);order.splice(sourceIndex>=0?sourceIndex+1:order.length,0,b.id);data.buildings.push(b);meta.buildingOrder=order;const project=duplicate?payload.project:state.selectedProject==='unsorted'?null:validProject(state.selectedProject)?state.selectedProject:payload.project;if(project&&validProject(project))meta.buildingProjects[b.id]=project;meta.lastOpened[b.id]=Date.now();meta.activeTab='home';
+    writeCardCollection(data,meta);rememberCardAction({kind:'add',label:duplicate?'Duplicate building':'Paste building',record:JSON.parse(JSON.stringify(b)),fingerprint:cardFingerprint(b),metadata:cardMetadata(b.id),order:cardOrder(),undoArchive:null});return b.id;
+  }
+  function duplicateCard(id){return addCardCopy(copyCard(id),{duplicate:true});}
+  function removeCard(id){
+    assertCardsWritable();const record=building(id);if(!record)throw Error('This building no longer exists.');if(buildings().length<=1)throw Error('Keep at least one building. Create another before removing this one.');const archived=archiveCard(record),data=JSON.parse(JSON.stringify(buildingState.data)),meta=JSON.parse(JSON.stringify(state)),position=data.buildings.findIndex(b=>b.id===id),order=cardOrder(),metadata=cardMetadata(id),active=data.activeBuildingId;
+    data.archive??=[];data.archive.push(archived);data.buildings=data.buildings.filter(b=>b.id!==id);if(data.activeBuildingId===id)data.activeBuildingId=data.buildings[Math.min(position,data.buildings.length-1)].id;dropCardMetadata(meta,id);meta.buildingOrder=order.filter(x=>x!==id);writeCardCollection(data,meta);const editorHistory=buildingHistories.get(id);buildingHistories.delete(id);rememberCardAction({kind:'remove',label:'Remove building',record:JSON.parse(JSON.stringify(record)),fingerprint:cardFingerprint(record),archive:archived,metadata,position,order,active,editorHistory});return id;
+  }
+  function reorderCard(id,targetId,after=false){
+    assertCardsWritable();if(state.selectedProject==='recent')throw Error('Recents stays in recently opened order. Use All buildings or a project to reorder.');const visible=visibleCardOrder();if(id===targetId||!visible.includes(id)||!visible.includes(targetId))return false;const nextVisible=visible.filter(x=>x!==id);nextVisible.splice(nextVisible.indexOf(targetId)+(after?1:0),0,id);if(nextVisible.every((x,i)=>x===visible[i]))return false;const before=cardOrder(),included=new Set(visible);let i=0;const afterOrder=before.map(x=>included.has(x)?nextVisible[i++]:x);writeCardOrder(afterOrder);rememberCardAction({kind:'order',label:'Reorder buildings',before,after:afterOrder});return true;
+  }
+  function cardHistory(back=true){
+    assertCardsWritable();const from=back?cardUndo:cardRedo,to=back?cardRedo:cardUndo,action=from.at(-1);if(!action)return false;
+    if(action.kind==='order'){const desired=back?action.before:action.after,order=cardOrder(),kept=desired.filter(id=>building(id));writeCardOrder([...kept,...order.filter(id=>!kept.includes(id))]);}
+    else{
+      const restore=action.kind==='remove'?back:!back,id=action.record.id,data=JSON.parse(JSON.stringify(buildingState.data)),meta=JSON.parse(JSON.stringify(state));
+      if(restore){if(building(id))throw Error('This building was already restored. No existing building was replaced.');if(buildings().length>=100)throw Error('This collection has reached 100 buildings.');data.buildings.splice(Math.min(action.position??data.buildings.length,data.buildings.length),0,JSON.parse(JSON.stringify(action.record)));const archiveId=action.kind==='remove'?action.archive.id:action.undoArchive?.id;data.archive=data.archive.filter(a=>a.id!==archiveId);putCardMetadata(meta,id,action.metadata);const desired=action.order.filter(x=>x===id||building(x));meta.buildingOrder=[...desired,...cardOrder().filter(x=>!desired.includes(x))];if(action.kind==='remove'&&action.active===id)data.activeBuildingId=id;}
+      else{const current=building(id);if(!current||cardFingerprint(current)!==action.fingerprint)throw Error('This building changed after the Home action. Nothing was removed; use Remove to review it.');if(buildings().length<=1)throw Error('Keep at least one building.');const archive=action.kind==='remove'?action.archive:archiveCard(current);if(data.archive.length>=200)throw Error('Archive is full. Nothing was removed; keep a local backup and review the archive.');data.archive.push(JSON.parse(JSON.stringify(archive)));data.buildings=data.buildings.filter(b=>b.id!==id);if(data.activeBuildingId===id)data.activeBuildingId=data.buildings[0].id;dropCardMetadata(meta,id);meta.buildingOrder=cardOrder().filter(x=>x!==id);if(action.kind==='add')action.undoArchive=archive;}
+      writeCardCollection(data,meta,restore&&action.editorHistory?{id,value:action.editorHistory}:null);if(!restore)buildingHistories.delete(id);
+    }
+    from.pop();to.push(action);window.KERN_HOME_CARDS?.refresh?.();return true;
+  }
+  function importCardOrder(sourceOrder,mapping){if(!Array.isArray(sourceOrder)||!sourceOrder.length)return false;if(sourceOrder.length>100||sourceOrder.some(id=>typeof id!=='string'))throw Error('Invalid saved card order.');const ids=[...new Set(sourceOrder.map(id=>mapping.get(id)).filter(id=>building(id)))];if(!ids.length)return false;const rest=cardOrder().filter(id=>!ids.includes(id));state=normalize({...state,buildingOrder:[...rest,...ids]});const saved=persist();sync();window.KERN_LOCAL_FILES?.changed?.();return saved;}
+  function clearCardHistory(){cardUndo.length=0;cardRedo.length=0;window.KERN_HOME_CARDS?.refresh?.();}
+
   function refreshAfterRecovery(){if(status==='Workspace organization is protected while saved buildings need recovery.')status='';if(state.activeTab!=='home'){state.activeTab=currentBuilding().id;if(!state.openTabs.includes(state.activeTab))state.openTabs.push(state.activeTab)}sync();}
-  window.KERN_WORKSPACE={isHome,showHome,openBuilding,closeTab,selectProject,createProject,moveBuilding,projectFor,sync,refreshAfterRecovery,handleKeydown,thumbnail,getState:()=>JSON.parse(JSON.stringify(state)),storageKeys:{current:KEY,previous:PREVIOUS}};
+  window.KERN_WORKSPACE={isHome,showHome,openBuilding,closeTab,selectProject,createProject,moveBuilding,projectFor,sync,refreshAfterRecovery,handleKeydown,thumbnail,copyCard,duplicateCard,addCardCopy,removeCard,reorderCard,undoCards:()=>cardHistory(true),redoCards:()=>cardHistory(false),cardOrder,visibleCardOrder,importCardOrder,cardHistoryState:()=>({undo:cardUndo.at(-1)?.label||'',redo:cardRedo.at(-1)?.label||'',undoDepth:cardUndo.length,redoDepth:cardRedo.length,canMutate:!locked&&!buildingState.locked&&$w('saved').dataset.state!=='error'}),getState:()=>JSON.parse(JSON.stringify(state)),storageKeys:{current:KEY,previous:PREVIOUS}};
   // First use deliberately starts at Home; subsequent visits restore the saved surface.
   const initial=state.activeTab;
   state.activeTab='home';setSurface();sync();

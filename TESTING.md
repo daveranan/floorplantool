@@ -195,3 +195,10 @@ Room wall profiles are optional. Untouched rooms and terraces retain their previ
 `test-backup-ui.cjs` verifies the compact disk status beside existing save controls, no idle status strip or redundant brand block, actionable warnings only, stable focus, simplified backup panel, one fallback download, compatibility guidance and unchanged cadence/retention behavior. Home card management and cross-floor selection corrections are intentionally separate later work.
 
 These tests use DOM and real Three.js geometry with a renderer double. Cloud-browser visual QA was attempted against the isolated local preview and blocked with ERR_BLOCKED_BY_CLIENT. GPU rendering, physical pointer/touch behavior and full browser layout are not claimed. No private uploaded plan or screenshot was added to source or public assets.
+
+
+## v60 cross-floor corrections, camera performance and Home cards
+
+Run `npm run test:release` for the current combined 33-suite gate. It includes all v59 wall/cap/concrete and backup/recovery checks plus the four new suites. `test-selection-transform.cjs` has 30 immutable ownership/translation/copy/delete cases. `test-crossfloor-ui.cjs` exercises actual production-order pointer/keyboard handlers for floor-qualified Shift/marquee selection, disabled/visible floors, subset moves, preview isolation, interruption, clipboard and undo. `test-crossfloor-lifecycle.cjs` covers direct legacy selection reconciliation, reload, four clipboard entry paths, protected dependencies, rejected partial rotate/point editing, camera DOM identity and invalidation, and floor creation/removal. `test-home-cards.cjs` exercises archive-backed removal, copy/paste, session history, filtered reorder, persistence/import mapping, capacity and failure guards.
+
+The prior aggregate's historical fixture/expectation failures remain separate; a green focused release gate does not claim the old aggregate is green. Native browser/GPU visual QA is still unverified in this environment. No private uploaded reference images or plan fixtures are included in the release.

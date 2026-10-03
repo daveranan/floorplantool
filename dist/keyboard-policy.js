@@ -21,6 +21,7 @@ window.addEventListener('keydown',e=>{if(window.KERN_WALL_EDGE_UI?.handleKey(e))
  // Reject a loose letter match before an older independent tool handler sees it.
  // Browser/OS defaults remain available for unassigned modified combinations.
  if((reserved.has(key)||['Slash','KeyS'].includes(e.code)&&!!(e.ctrlKey||e.metaKey)||/^Digit\d$/.test(e.code||''))&&!allowed(e)){e.stopImmediatePropagation();return;}
+ if(window.KERN_LAYERS?.handleKey?.(e))return;
  if(chord(e)==='Shift+d'){
   e.preventDefault();e.stopImmediatePropagation();if(e.repeat)return;
   window.KERN_LAYERS?.clearSelection?.();

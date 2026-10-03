@@ -10,7 +10,7 @@
     "test:ui": "node test-ui.cjs",
     "test:preview": "node test-preview.cjs",
     "test:elevation": "node test-local-elevation.cjs && node test-elevation-ui.cjs && node test-elevation-scene.cjs && node test-elevation-safety.cjs",
-    "test:release": "node scripts/test-v58.cjs"
+    "test:release": "node scripts/test-v60.cjs"
   },
   "dependencies": {
     "polygon-clipping": "^0.15.7",

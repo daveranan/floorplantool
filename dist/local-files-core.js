@@ -28,7 +28,7 @@ function contentKey(payload){
  if(data?.buildings)for(const b of data.buildings){delete b.view;delete b.updatedAt;}
  if(data)delete data.activeBuildingId;
  const records=Object.fromEntries(Object.entries(payload.browserStorage?.raw||{}).filter(([key])=>!['kern-buildings-v1','kern-buildings-v1.previous','kern-workspace-v1','kern-workspace-v1.previous'].includes(key)));
- return JSON.stringify({collection:data,workspace:workspace?{projects:workspace.projects,buildingProjects:workspace.buildingProjects}:null,records,recovery:payload.recovery?{raw:payload.recovery.raw,reason:payload.recovery.reason}:null});
+ return JSON.stringify({collection:data,workspace:workspace?{projects:workspace.projects,buildingProjects:workspace.buildingProjects,buildingOrder:workspace.buildingOrder}:null,records,recovery:payload.recovery?{raw:payload.recovery.raw,reason:payload.recovery.reason}:null});
 }
 function sources(data){
  const out=[],add=(label,collection,workspace=null,storage=null)=>{if(collection)out.push({label,collection,workspace,storage});};
