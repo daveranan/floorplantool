@@ -198,3 +198,7 @@ Point selection keeps the same corners through insertion Undo/Redo, and adjoinin
 ### Freight lift travel
 
 In Walk mode, enter a connected Freight/lift room and press **E** or use its lift button. Choose a connected floor to arrive immediately at that room’s actual surface height, keeping your facing direction. Unconnected or obstructed stops are unavailable. Escape closes the floor list and returns to walking; Fly retains E for upward movement. Lift travel changes your view and position, not the building geometry.
+
+## Walk crouch controls (v70)
+
+Hold **C** to crouch in Walk mode; release it to stand when there is enough headroom. C works alongside WASD. Ctrl no longer controls crouching, and brief taps do not latch the crouch. The editor’s C shortcut and Fly controls are unchanged.

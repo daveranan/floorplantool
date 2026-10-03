@@ -279,3 +279,7 @@ Primitive workflow tests use actual Three meshes and TransformControls with WebG
 Real browser/GPU QA remains blocked in this execution environment: cloud Chromium refused the local preview URL with `ERR_BLOCKED_BY_CLIENT`, direct headless launch could not create its sandbox socket, and an escalated readiness check failed environment setup. No workaround bypassed those restrictions. Geometry/raycast, full production events, data-preservation checks and prolonged CPU/heap tests remain available. Historical aggregate harness drift is separate from the focused release gate.
 
 Final frozen-source validation: all68 focused release suites passed. Independent integration review cleared the final event-routing, diagnostic and persistence changes, and the production preview bundle matched a fresh build byte-for-byte. The final private-input run verified all3 buildings and18 floors, three complete preview builds, save/reload and unchanged authored plans/original backup bytes. A final500-edit run on the same frozen implementation retained stable DOM/listeners and80 Undo entries.
+
+## C-only Walk crouch (v70)
+
+`node test-walk-crouch.cjs` dispatches keyboard events through production script order and checks the actual Three camera with WebGL drawing mocked. It covers C hold/release, short taps, repeated/uppercase input, W+C movement, Ctrl removal, blur, typing, low-ceiling stand refusal, Walk/Fly/2D transitions, unchanged editor C and unchanged plan/history. Browser-reserved shortcut interception is not claimed.
