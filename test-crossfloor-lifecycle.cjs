@@ -37,6 +37,6 @@ try{
  // Undo/redo while previewing cancel the uncommitted gesture, preserving older history.
  for(const action of ['undo()','redo()']){setup();both();run(`commit(()=>room('b').name='Earlier saved edit')`);before=snapshot();ptr(get('plan').querySelector('[data-crossfloor-move]'),'pointerdown');ptr(get('plan'),'pointermove',3,2);run(action);ptr(get('plan'),'pointerup',3,2);assert.equal(snapshot(),before);}
  // Scope follows creation/removal through the normal floor-management entry points.
- setup();run(`addFloor({id:'L9',name:'New',z:9})`);assert.equal(L.editable('L9'),true,'New drawing floor should be editable');run('removeFloor(true)');assert.equal(run('currentBuilding().view.layers.editFloors.includes("L9")'),false,'Deleted floor cannot remain in editing scope');
+ setup();run(`addFloor({id:'L9',name:'New',z:9})`);assert.equal(L.editable('L9'),false,'Creating a floor must preserve the existing editing checkbox set');run('removeFloor(true)');assert.equal(run('currentBuilding().view.layers.editFloors.includes("L9")'),false,'Deleted floor cannot remain in editing scope');
  console.log('PASS crossfloor selection reconciliation and reload, clipboard ownership, safe cut, linked guards, destination scope, partial-editor protections, camera invalidation, cancellation history and floor lifecycle');
 }finally{t.close();}
