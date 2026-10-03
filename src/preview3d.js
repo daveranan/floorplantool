@@ -16,7 +16,14 @@ function segmentBox(origin, end, box) {
 
 // Labels use an existing horizontal slab or arrival landing, never the air over a stairwell.
 function roomLabelSurface(room, level) {
-  if(room.polygon&&window.KERN_SHAPES){const ps=(level.polygons||[]).filter(p=>p.kind==='slab'&&p.room===room.id);const contains=p=>ps.some(s=>window.KERN_SHAPES.contains(p,s.polygon)&&!(s.holes||[]).some(h=>window.KERN_SHAPES.contains(p,h)));const anchor=window.KERN_SHAPES.centroid(room);if(contains(anchor))return{x:anchor.x-Math.min(room.w,4)/2,y:anchor.y-Math.min(room.h,2)/2,w:Math.min(room.w,4),h:Math.min(room.h,2),z:room.z};return null;}const surfaces = level.boxes.filter(box => (box.kind === 'slab' && (!box.room || box.room === room.id) || box.kind === 'landing') && Math.abs(box.z + box.height - room.z) < .01).map(box => {
+  if(room.polygon&&window.KERN_SHAPES){
+    const S=window.KERN_SHAPES,ps=(level.polygons||[]).filter(p=>p.kind==='slab'&&p.room===room.id&&Math.abs(p.z+p.height-room.z)<.01),contains=p=>ps.some(s=>S.contains(p,s.polygon)&&!(s.holes||[]).some(h=>S.contains(p,h))),anchor=S.centroid(room),width=Math.min(room.w,4),height=Math.min(room.h,2);
+    if(contains(anchor))return{x:anchor.x-width/2,y:anchor.y-height/2,w:width,h:height,z:room.z};
+    // A nested room may occupy the old centre. Find an actual remaining floor
+    // patch, with enough clearance for the full label rather than dropping it.
+    let best=null;for(const slab of ps){const rings=[slab.polygon,...slab.holes||[]],b=S.bounds(slab.polygon);for(let iy=0;iy<12;iy++)for(let ix=0;ix<12;ix++){const p={x:b.x+b.w*(ix+.5)/12,y:b.y+b.h*(iy+.5)/12};if(!contains(p))continue;const clearance=Math.min(...rings.flatMap(r=>r.map((a,i)=>{const b=r[(i+1)%r.length];return Math.hypot(a[0]-b[0],a[1]-b[1])>1e-8?S.project(p,{a,b}).distance:Infinity;}))),scale=Math.min(1,clearance/Math.hypot(width/2,height/2)),score=scale*width*height-Math.hypot(p.x-anchor.x,p.y-anchor.y)*1e-4;if(scale*width>.35&&scale*height>.35&&(!best||score>best.score))best={...p,w:width*scale,h:height*scale,score};}}
+    return best?{x:best.x-best.w/2,y:best.y-best.h/2,w:best.w,h:best.h,z:room.z}:null;
+  }const surfaces = level.boxes.filter(box => (box.kind === 'slab' && (!box.room || box.room === room.id) || box.kind === 'landing') && Math.abs(box.z + box.height - room.z) < .01).map(box => {
     const x = Math.max(room.x, box.x), y = Math.max(room.y, box.y);
     return {x, y, w: Math.min(room.x + room.w, box.x + box.w) - x, h: Math.min(room.y + room.h, box.y + box.h) - y, z: box.z + box.height};
   }).filter(box => box.w > .35 && box.h > .35);

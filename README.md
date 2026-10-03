@@ -158,3 +158,10 @@ On L2, select the linked concrete cap in **Layers** or 3D, then choose **Make ca
 ### Home building cards (v60)
 
 Home cards support Copy/Paste, Duplicate, recoverable Remove, and drag ordering. Removed cards keep a complete Archive snapshot and can be restored through Home Archive; existing duplicate buildings are not deduplicated. Home Undo/Redo tracks up to 20 card actions separately from editor geometry history. Filtered ordering is persistent, and accessible Move earlier/later menu actions provide the same control. Backup/import includes that order and rich archive snapshots. Stale data, quota errors, canceled drags and recovery locks stop writes safely.
+
+
+### Rooms inside rooms (v65)
+
+Draw a room inside a larger room normally, then use **Door (D)** on the inner wall to connect it to the surrounding space. The same workflow works for polygon and rotated rooms, including a room tucked against an outer wall. Inner rooms stay independently selectable, editable and deletable; deleting the surrounding room does not delete them. Proper containment is allowed, while partial overlaps still appear in Checks.
+
+Nested floors and ceilings use each room's own elevation and height. A lower inner room cuts the obstructing surrounding floor, and a taller inner room cuts the ceiling it crosses. Door positions and widths must fit the actual clear wall; edits that would detach the opening are rejected. Existing plan coordinates and room order are preserved.
