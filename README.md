@@ -144,3 +144,9 @@ The 2D floor sidebar separates visibility (eye), the active editing floor (row),
 **Building footprint** reports unpadded world XY dimensions across all floors, including hidden geometry, rotated/rounded room contours, actual stair flights and landings, service/item footprints and modeled site approaches. Labels and decorative strokes do not inflate these dimensions. **Move building** translates all authored geometry in one undo step while preserving heights, links and relative layouts. Floor groups use the same atomic operation. A partial group is rejected if it would detach a linked stair/source footprint or shared building-wide geometry; the message identifies the required floors. Dragging the floor-group outline previews without changing saved data; completion commits once, and interruption cancels safely.
 
 Original coordinates remain subject to import validation; excessive or non-finite moves are rejected. A renderer-failing stair proposal is rejected before saving. These are model-world dimensions, not viewport dimensions or structural/construction certification.
+
+### Boundary walls and concrete caps
+
+Select a room, then use **Boundary walls** to set all edges or apply **Terrace with low walls**. Half walls start at 1.1 m; their height is editable. Double-click the room to edit points, hover an edge and right-click for **Full / Half / None**. The inspector edge list provides the same controls by keyboard or touch. Each room owns its side of a shared boundary, so a neighbor's full wall remains if only one side is set to None. Incompatible existing openings are preserved and flagged for review.
+
+On L2, select the linked concrete cap in **Layers** or 3D, then choose **Make cap independent**. This preserves its position, shape and elevation, without changing Operations or its linked void. You can then change its room type or delete it normally. Undo restores the link; loading a building never alters the cap automatically.

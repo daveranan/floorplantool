@@ -76,7 +76,7 @@ function bounds(plan,options={}){const items=geometryItems(plan,options),b=boxOf
 function legacySource(plan,fid,r){
   if(r.linkedSource)return r.linkedSource;
   if(r.courtyardVoid||r.type==='void'&&r.id==='sky'){const floor=plan.courtyard?.floor||'L0',source=arr(plan.floors[floor]?.rooms).find(q=>q.type==='courtyard');if(source)return{floor,room:source.id};}
-  if((r.type==='void'&&r.id==='void'&&fid==='L1'||r.id==='opsroof')&&arr(plan.floors.L0?.rooms).some(q=>q.id==='control'))return{floor:'L0',room:'control'};
+  if((r.type==='void'&&r.id==='void'&&fid==='L1'||r.id==='opsroof'&&r.independentCap!==true)&&arr(plan.floors.L0?.rooms).some(q=>q.id==='control'))return{floor:'L0',room:'control'};
   return null;
 }
 function analyzeFloorTranslation(plan,floorIds){

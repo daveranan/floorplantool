@@ -2,6 +2,7 @@
 (function(root){
 'use strict';
 const copy=x=>JSON.parse(JSON.stringify(x)),arr=x=>Array.isArray(x)?x:[],round=n=>Math.round(n*1e6)/1e6;
+const caps=root.KERN_CONCRETE_CAPS||(typeof require==='function'?require('./concrete-caps.js'):null);
 const catalog=[
  ['scanner','Medical scanner',2.4,1.8],['exam','Exam couch',2.1,.8],
  ['decoder','Computing / decoder desk',1.8,.8],['panel','Power panel',1.2,.3],
@@ -24,6 +25,7 @@ function annotations(plan,fid){const f=plan.floors[fid];if(!f)return[];return [
  ];}
 function normalizeAnnotations(plan){for(const fid of Object.keys(plan.floors)){const f=plan.floors[fid],values=annotations(plan,fid);if(values.length||f.annotations)f.annotations=values;for(const r of f.rooms)if(r.zones)delete r.zones;}return plan;}
 function validateFloor(f){
+ for(const r of f.rooms)caps?.validateRoom(r);
  const ids=new Set([...f.rooms.map(r=>r.id),...f.doors.map(d=>d.id)]);
  const number=(v,min,max)=>Number.isFinite(v)&&v>=min&&v<=max&&Math.abs(v*1e6-Math.round(v*1e6))<1e-4;
  for(const key of ['symbols','services','annotations']){
@@ -57,7 +59,7 @@ function snapshot(plan,fid,selection){
  const f=plan.floors[fid];if(!f)throw Error('Missing source floor');
  const groups=arr(plan.verticalConnections).filter(c=>c.type==='stair'&&arr(c.floors).includes(fid)&&arr(selection.rooms).includes(c.room));
  const roomIds=new Set(arr(selection.rooms)),selectedRooms=f.rooms.filter(r=>roomIds.has(r.id));
- if(selectedRooms.some(r=>r.linkedSource||r.locked&&!groups.some(c=>c.room===r.id)||Object.values(plan.floors).some(l=>l.rooms.some(q=>q.linkedSource?.floor===fid&&q.linkedSource.room===r.id))||r.type==='courtyard'||r.type==='solid'||r.type==='void'))throw Error('Source-linked or protected footprints require Duplicate building.');
+ if(selectedRooms.some(r=>r.linkedSource||r.locked&&!groups.some(c=>c.room===r.id)||Object.values(plan.floors).some(l=>l.rooms.some(q=>q.linkedSource?.floor===fid&&q.linkedSource.room===r.id))||r.type==='courtyard'||['solid','void'].includes(r.type)&&!caps?.independent(r)))throw Error('Source-linked or protected footprints require Duplicate building.');
  const levels={},put=id=>levels[id]||(levels[id]={rooms:[],doors:[],symbols:[],services:[],annotations:[],entrances:[],externals:[]});
  put(fid).rooms=copy(selectedRooms);for(const r of put(fid).rooms)if(r.routeStair){const E=root.KERN_ELEVATIONS||(typeof require==='function'?require('./elevation.js'):null),q=r.routeStair;q.startZ=E.value(plan,q.start,q.startZ);q.endZ=E.value(plan,q.end,q.endZ);}
  for(const c of groups)for(const id of c.floors){const r=plan.floors[id]?.rooms.find(r=>r.id===c.room);if(!r)throw Error('Stair stack has a missing floor footprint');if(!put(id).rooms.some(q=>q.id===r.id))put(id).rooms.push(copy(r));}

@@ -13,7 +13,7 @@ function allowed(e){
  return mod&&alt&&!shift&&key==='s';
 }
 function paused(e){return typing(e.target)||window.KERN_WORKSPACE?.isHome?.()||window.KERN_EXPLORER?.active||e.target.closest?.('#workspace-tabs,#workspace-project-dialog,dialog,[role=menu],[role=listbox],.toolbar-popover')||document.querySelector('dialog[open]');}
-window.addEventListener('keydown',e=>{
+window.addEventListener('keydown',e=>{if(window.KERN_WALL_EDGE_UI?.handleKey(e))return;
  if((e.code==='Slash'&&(e.ctrlKey||e.metaKey)||e.code==='KeyS'&&e.altKey&&(e.ctrlKey||e.metaKey))&&!allowed(e)){e.stopImmediatePropagation();return;}
  if(paused(e)||e.isComposing||e.key==='Process'||e.key==='Dead')return;
  const key=String(e.key||'').toLowerCase();

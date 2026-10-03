@@ -21,7 +21,7 @@ function apply(key,type){
  try{
   if(key==='rooms')for(const id of changedIds){const option=roomTypeOption(room(id),type);if(!option.valid)throw Error(room(id).name+': '+option.reason);}
   model=proposal;
-  if(key==='rooms')for(const id of changedIds){const r=room(id),refs=groupRefs(stairGroup(r));for(const target of refs.length?refs.map(ref=>ref.room):[r])target.type=type;}
+  if(key==='rooms')for(const id of changedIds){const r=room(id),refs=groupRefs(stairGroup(r));for(const target of refs.length?refs.map(ref=>ref.room):[r]){if(window.KERN_CONCRETE_CAPS)window.KERN_CONCRETE_CAPS.setType(target,type);else target.type=type;}}
   else if(key==='doors'){
    for(const id of changedIds){const d=connection(id),next=connectionWithType(d,type);next.width=d.width;next.offset=d.offset;
     if(type!=='window'&&[d.a,d.b].some(id=>['void','solid'].includes(room(id)?.type)))throw Error('A door or passage needs circulation rooms on both sides.');

@@ -3,6 +3,12 @@ const { spawnSync } = require('node:child_process');
 
 const root = path.resolve(__dirname, '..');
 const suites = [
+  'test-backup-ui.cjs',
+  'test-wall-profiles.cjs',
+  'test-wall-profiles-scene.cjs',
+  'test-wall-edge-ui.cjs',
+  'test-concrete-cap-editing.cjs',
+  'test-concrete-cap-scene.cjs',
   'test-stair-concrete.cjs',
   'test-stair-concrete-scene.cjs',
   'test-door-thresholds.cjs',
