@@ -59,6 +59,15 @@ function addDoorThresholds(data,S){
 function decorate(plan,data){const S=root.KERN_SHAPES||(typeof require==='function'?require('./room-shapes.js'):null);data.siteGroundZ=ground(plan);for(const l of data.levels){for(const r of plan.floors[l.id].rooms){const q=l.rooms.find(q=>q.id===r.id);if(q){q.groundSurface=!!r.groundSurface;q.localSteps=!!r.localSteps;}if(r.type==='courtyard'&&r.groundSurface){const ps=S.points(r);l.polygons??=[];l.polygons.push({...S.bounds(ps),polygon:ps,z:(r.z??l.z)-.3,height:.3,kind:'slab',room:r.id,color:'#8dad82'});}}}
  addDoorThresholds(data,S);
  const volumes=data.stairs.flatMap(cutVolumes);
+ // Conventional access must clear its perimeter throat at the resolved landing
+ // height, including a lower storey's service ceiling left beside the shaft.
+ // The exact door width and bounded headroom remain; support below z survives.
+ for(const st of data.stairs.filter(s=>!s.localSteps&&!s.routeStair))for(const a of st.access||[]){
+  const g=a.geometry,opening=data.levels.find(l=>l.id===(a.floor||st.floorId))?.openings.find(o=>o.id===a.doorId);if(!a.valid||!g||!Number.isFinite(a.z)||!opening||opening.blocked||opening.kind==='window'||Math.abs(opening.z-a.z)>CUT_EPS)continue;
+  const p=g.p0||(g.axis==='h'?[g.start,g.fixed]:[g.fixed,g.start]),q=g.p1||(g.axis==='h'?[g.end,g.fixed]:[g.fixed,g.end]),dx=q[0]-p[0],dy=q[1]-p[1],length=Math.hypot(dx,dy);if(!(length>CUT_EPS))continue;
+  const depth=Math.max(.12,Math.min(2,st.spec?.perimeter||0)),nx=-dy/length*depth,ny=dx/length*depth,polygon=[[p[0]-nx,p[1]-ny],[q[0]-nx,q[1]-ny],[q[0]+nx,q[1]+ny],[p[0]+nx,p[1]+ny]];
+  volumes.push({...S.bounds(polygon),geometry:[[polygon]],z0:a.z,z1:a.z+Math.min(opening.height,cutHeadroom(st.spec?.minHeadroom)),source:a.doorId,stair:st.connectionId});
+ }
  // Older local-step endpoints stop at a room edge. Extend only that explicit
  // doorway through the wall thickness, at the endpoint's own elevation.
  for(const st of data.stairs.filter(s=>s.localSteps&&!s.routeStair))for(const a of st.access||[]){const g=a.geometry;if(!a.valid||!g||!['h','v'].includes(g.axis))continue;const box=g.axis==='h'?{x:g.start,y:g.fixed-.12,w:g.end-g.start,h:.24}:{x:g.fixed-.12,y:g.start,w:.24,h:g.end-g.start};volumes.push({...box,geometry:[[rect(box)]],z0:a.z-.18,z1:a.z+cutHeadroom(st.spec?.minHeadroom),floor:a.floor,room:a.room,wallOnly:true});}

@@ -17,6 +17,26 @@ const round=n=>Math.round(n*1000000)/1000000;
 function intersection(a,b){const x=Math.max(a.x,b.x),y=Math.max(a.y,b.y),w=Math.min(a.x+a.w,b.x+b.w)-x,h=Math.min(a.y+a.h,b.y+b.h)-y;return w>EPS&&h>EPS?{x,y,w,h}:null}
 function boundary(a,b){let lo,hi;if(!a||!b)return null;if(Math.abs(a.x+a.w-b.x)<EPS||Math.abs(b.x+b.w-a.x)<EPS){lo=Math.max(a.y,b.y);hi=Math.min(a.y+a.h,b.y+b.h);if(hi>lo)return{axis:'v',fixed:Math.abs(a.x+a.w-b.x)<EPS?b.x:a.x,lo,hi}}if(Math.abs(a.y+a.h-b.y)<EPS||Math.abs(b.y+b.h-a.y)<EPS){lo=Math.max(a.x,b.x);hi=Math.min(a.x+a.w,b.x+b.w);if(hi>lo)return{axis:'h',fixed:Math.abs(a.y+a.h-b.y)<EPS?b.y:a.y,lo,hi}}return null}
 function doorGeometry(d,f){if(d.edge||f.rooms.some(r=>(r.id===d.a||r.id===d.b)&&r.shape)){const S=root.KERN_SHAPES||(typeof require==='function'?require('./room-shapes.js'):null),g=S?.opening(d,f);if(!g)return null;if(Math.abs(g.u[1])<EPS)return{...g,axis:'h',fixed:g.p0[1]};if(Math.abs(g.u[0])<EPS)return{...g,axis:'v',fixed:g.p0[0]};return null;}if(d.b==='outside')return connections?.geometry(d,f);const a=f.rooms.find(r=>r.id===d.a),b=f.rooms.find(r=>r.id===d.b),g=boundary(a,b);if(!g)return null;if(d.kind==='open'&&d.fullWidth!==false)return{...g,start:g.lo,end:g.hi};if(g.hi-g.lo<d.width+.2-EPS)return null;const t=Math.max(0,Math.min(1,d.offset??.5)),start=g.lo+.1+Math.max(0,g.hi-g.lo-d.width-.2)*t;return{...g,start,end:start+d.width}}
+// A conventional stack follows its real access surfaces. This is derived only:
+// moving a room does not rewrite the shaft, another room, or saved floor datums.
+function accessSurface(plan,floorId,roomId){
+ const floor=plan?.floors?.[floorId],room=arr(floor?.rooms).find(r=>r?.id===roomId),fallback=finite(room?.z,floor?.z),targets=[];
+ if(!room||!floor)return{z:fallback,targets,conflict:false};
+ for(const d of connections?connections.all(floor):arr(floor.doors)){
+  if(!d||d.kind==='window'||d.sealed||d.cemented||d.a!==roomId&&d.b!==roomId)continue;
+  const other=arr(floor.rooms).find(r=>r.id===(d.a===roomId?d.b:d.a));
+  if(!other||['void','solid'].includes(other.type)||!doorGeometry(d,floor))continue;
+  const z=finite(other.z,floor.z);if(Number.isFinite(z))targets.push({door:d.id,room:other.id,z});
+ }
+ const heights=targets.map(t=>t.z).sort((a,b)=>a-b),conflict=heights.length>1&&heights.at(-1)-heights[0]>EPS;
+ return{z:!conflict&&heights.length?heights[0]:fallback,targets,conflict};
+}
+// Threshold checks use the same verified landing contact as the rendered stair.
+function hasLandingAccess(plan,floorId,door,detailFor){
+ if(!door||door.kind==='window'||door.sealed||door.cemented)return false;
+ const floor=plan?.floors?.[floorId];if(!floor)return false;
+ return [door.a,door.b].some(id=>{const r=arr(floor.rooms).find(r=>r.id===id);if(!r||!arr(plan.verticalConnections).some(c=>c?.type==='stair'&&c.room===id&&arr(c.floors).includes(floorId))||accessSurface(plan,floorId,id).conflict)return false;const detail=detailFor?detailFor(r,floorId):build(plan,floorId,id);return !!detail?.access?.some(a=>a.doorId===door.id&&a.valid);});
+}
 function coordinateFrame(r,axis,end){
  const long=axis==='x'?r.w:r.h,short=axis==='x'?r.h:r.w;
  const reverse=(axis==='x'&&end==='east')||(axis==='y'&&end==='south');
@@ -45,7 +65,7 @@ function build(plan,floorId,roomId,options={}){
  let end=room.landingEnd||c.landingEnd||(roomId==='transferstair'?'north':axis==='x'?'west':'south');
  if(!(axis==='x'?['west','east']:['north','south']).includes(end)){warn('invalid-end','Landing end does not match the stair axis');end=axis==='x'?'west':'south'}
  const frame=coordinateFrame(room,axis,end);
- const stops=connection?arr(c.floors).map(id=>{const f=plan.floors[id],r=arr(f?.rooms).find(a=>a?.id===roomId);return f&&r?{floor:id,z:finite(r.z,f.z),room:r}:null}).filter(Boolean).sort((a,b)=>a.z-b.z):[{floor:floorId,z:finite(c.lowerZ,finite(room.lowerZ,room.z)),room},{floor:floorId,z:finite(c.upperZ,finite(room.upperZ,floor.z)),room}];
+ const stops=connection?arr(c.floors).map(id=>{const f=plan.floors[id],r=arr(f?.rooms).find(a=>a?.id===roomId);if(!f||!r)return null;const surface=accessSurface(plan,id,roomId);if(surface.conflict)warn('access-height-conflict',id+': connected access surfaces have different heights; use local steps or separate stairs before treating this landing as connected');return{floor:id,z:surface.z,room:r}}).filter(Boolean).sort((a,b)=>a.z-b.z):[{floor:floorId,z:finite(c.lowerZ,finite(room.lowerZ,room.z)),room},{floor:floorId,z:finite(c.upperZ,finite(room.upperZ,floor.z)),room}];
  if(stops.length<2||stops.some(s=>!Number.isFinite(s.z))){warn('missing-levels','Connected stair needs two explicit, finite floor elevations');return{roomId,floorId,warnings,status:'error',flights:[],landings:[],openings:[],access:[],segments:[],metrics:{},displayFlights:[],displayLandings:[]}}
  for(const stop of stops){if(['x','y','w','h'].some(k=>Math.abs(stop.room[k]-room[k])>.01))warn('alignment',`${stop.floor}: stair footprint does not align with ${floorId}`)}
  const stairType=room.stairType||c.stairType||'switchback';
@@ -122,7 +142,7 @@ function build(plan,floorId,roomId,options={}){
  }
  if(minimum!==null&&minimum<spec.minHeadroom-EPS)warn('headroom',`Only ${minimum.toFixed(2)} m headroom below ${worst.obstructionId}; needs ${spec.minHeadroom.toFixed(2)} m`,'error',{headroom:minimum,required:spec.minHeadroom,location:worst.point});
  const access=[];
- for(const d of (connections?connections.all(floor):arr(floor.doors))){if(!d||d.a!==roomId&&d.b!==roomId)continue;const other=d.b==='outside'?{id:'outside',name:'Outside',z:room.z??floor.z}:floor.rooms.find(r=>r.id===(d.a===roomId?d.b:d.a)),g=doorGeometry(d,floor);if(!other||!g){warn('door-detached',`Door ${d.id} is detached or too wide`);access.push({doorId:d.id,valid:false,reason:'detached'});continue}
+ for(const d of (connections?connections.all(floor):arr(floor.doors))){if(!d||d.kind==='window'||d.sealed||d.cemented||d.a!==roomId&&d.b!==roomId)continue;const other=d.b==='outside'?{id:'outside',name:'Outside',z:room.z??floor.z}:floor.rooms.find(r=>r.id===(d.a===roomId?d.b:d.a)),g=doorGeometry(d,floor);if(!other||!g){warn('door-detached',`Door ${d.id} is detached or too wide`);access.push({doorId:d.id,valid:false,reason:'detached'});continue}
   const z=finite(other.z,floor.z),ends=g.axis==='h'?[[g.start,g.fixed],[g.end,g.fixed]]:[[g.fixed,g.start],[g.fixed,g.end]];
   const uv=ends.map(a=>frame.uv(...a));
   // Project through the perimeter wall into the walking clear zone; opening must still sit within the near landing band.
@@ -136,7 +156,7 @@ function build(plan,floorId,roomId,options={}){
   if(a.doorHeight<spec.minHeadroom-EPS)warn('door-headroom',`${d.id}: door height ${a.doorHeight.toFixed(2)} m is below the ${spec.minHeadroom.toFixed(2)} m route headroom target`);
  }
  if(!access.length)warn('no-door','Stair has no floor access connection');
- const currentZ=connection?finite(room.z,floor.z):null;
+ const currentZ=connection?stops.find(s=>s.floor===floorId)?.z:null;
  const up=connection?segments.find(s=>s.from===floorId):segments[0],down=connection?segments.find(s=>s.to===floorId):segments[0];
  const displayFlights=[];
  function display(fid,direction,role,label){const f=flights.find(a=>a.id===fid);if(f)displayFlights.push({...f,direction,role,label,arrowPath:direction==='up'?f.upPath:f.downPath})}
@@ -202,5 +222,5 @@ function markup(detail){
  if(detail.status==='error'&&!detail.routeStair&&!detail.localSteps)s+=`<rect x="${n(r.x+.08)}" y="${n(r.y+.08)}" width="${n(Math.max(.1,r.w-.16))}" height="${n(Math.max(.1,r.h-.16))}" fill="none" stroke="#b73e31" stroke-width=".14" stroke-dasharray=".2 .12"/>`;
  return s+badges+'</g>';
 }
-const api={build,markup,previewLevels,slice,defaults:{...DEFAULTS},doorGeometry};root.KERN_STAIR_DETAIL=api;if(typeof module!=='undefined'&&module.exports)module.exports=api;
+const api={build,markup,previewLevels,slice,defaults:{...DEFAULTS},doorGeometry,accessSurface,hasLandingAccess};root.KERN_STAIR_DETAIL=api;if(typeof module!=='undefined'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

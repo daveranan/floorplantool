@@ -46,7 +46,7 @@ function rememberThree(){if(threeView&&threeBuildingId&&threeView.getViewState)t
 function disposeThree(){threeToken++;threeView?.dispose();threeView=null;$('threeviewport').innerHTML='';$('save3dpng').disabled=true;$('threefocusnav').hidden=true}
 function isThreeMode(){return viewMode==='3d'}
 function syncModeUI(){
- const three=isThreeMode();document.body.dataset.viewMode=viewMode;
+ const three=isThreeMode();if(document.body.dataset.viewMode!==viewMode)document.body.dataset.viewMode=viewMode;
  $('canvas').hidden=three;$('buildingpreview3d').hidden=!three;$('floors').hidden=three;$('threefloorpanel').hidden=!three;
  document.querySelector('.floorsheading').hidden=three;document.querySelector('.floorproperties').hidden=three;
  $('inspector').hidden=three&&!document.body.classList.contains('editing3d');document.querySelector('.asidehead').hidden=three&&!document.body.classList.contains('editing3d');$('threeoptions').hidden=!three;

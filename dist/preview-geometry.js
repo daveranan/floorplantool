@@ -12,12 +12,19 @@ function boundary(a,b){if(!a||!b)return null;let lo,hi;if(Math.abs(a.x+a.w-b.x)<
 function doorGeometry(d,f){const a=f.rooms.find(r=>r.id===d.a),b=f.rooms.find(r=>r.id===d.b),S=root.KERN_SHAPES||(typeof require==='function'?require('./room-shapes.js'):null);if(d.edge||S?.nestedPair(a,b,f))return S.opening(d,f);if(d.b==='outside')return connections.geometry(d,f);const g=boundary(a,b);if(!g)return null;if(d.kind==='open'&&d.fullWidth!==false)return{...g,start:g.lo,end:g.hi};if(!Number.isFinite(d.width)||g.hi-g.lo<d.width+.2-EPS)return null;const start=g.lo+.1+Math.max(0,g.hi-g.lo-d.width-.2)*Math.max(0,Math.min(1,finite(d.offset,.5)));return{...g,start,end:start+d.width}}
 function mergeIntervals(values){const out=[];for(const v of values.sort((a,b)=>a[0]-b[0])){const last=out.at(-1);if(last&&v[0]<=last[1]+EPS)last[1]=Math.max(last[1],v[1]);else out.push([...v])}return out}
 function cutInterval(values,cut){return values.flatMap(([lo,hi])=>cut[1]<=lo+EPS||cut[0]>=hi-EPS?[[lo,hi]]:[[lo,Math.min(hi,cut[0])],[Math.max(lo,cut[1]),hi]].filter(v=>v[1]-v[0]>EPS))}
+function hasStairConnection(plan,d){return (plan.verticalConnections||[]).some(c=>c?.type==='stair'&&c.room===d.roomId&&(c.id||c.room)===d.connectionId);}
 function build(plan,stairHelper){
  if(!plan?.floors||!Object.keys(plan.floors).length)throw Error('No floors to preview.');
  const warnings=[],levels=Object.entries(plan.floors).map(([id,f])=>({id,name:f.name||id,z:finite(f.z),height:finite(f.clearHeight,3),boxes:[],rooms:[],openings:[],holes:[],roomCount:(f.rooms||[]).length})).sort((a,b)=>a.z-b.z||a.id.localeCompare(b.id)),byId=Object.fromEntries(levels.map(l=>[l.id,l])),details=[],seenStairs=new Set();
  const slab=Number.isFinite(plan.floorModule?.slab)&&plan.floorModule.slab>0?Math.min(plan.floorModule.slab,2):.3;
  let totalBoxes=0;const add=(level,box)=>{if(totalBoxes>=60000)throw Error('This building is too complex for the 3D preview. Export its plan instead.');if([box.x,box.y,box.w,box.h,box.z,box.height].every(Number.isFinite)&&box.w>EPS&&box.h>EPS&&box.height>EPS){level.boxes.push(box);totalBoxes++}};
  for(const level of levels){const f=plan.floors[level.id];for(const r of f.rooms||[]){let d=null;try{d=stairHelper?.build(plan,level.id,r.id)}catch(error){warnings.push(`${level.id}: stair geometry could not be calculated for ${r.name}.`)}if(!d)continue;const key=d.connectionId||`${level.id}:${r.id}`;d.access=(d.access||[]).map(a=>({...a,floor:a.floor??level.id}));if(seenStairs.has(key)){const previous=details.find(p=>(p.connectionId||`${p.floorId}:${p.roomId}`)===key);if(previous)previous.access.push(...d.access);continue;}seenStairs.add(key);details.push(d);for(const w of d.warnings||[])warnings.push(`${r.name}: ${w.text}`);}}
+
+ // Project resolved conventional landing datums into a read-only render plan.
+ // Walls, room picking, thresholds and both rectangular/polygon render paths
+ // must share the same surface height as the calculated treads and cutouts.
+ const stairSurfaces=new Map();for(const d of details)if(!d.localSteps&&!d.routeStair&&hasStairConnection(plan,d))for(const stop of d.stops||[]){const key=stop.floor+'\0'+d.roomId;stairSurfaces.set(key,stop.z);}
+ if(stairSurfaces.size)plan={...plan,floors:Object.fromEntries(Object.entries(plan.floors).map(([fid,f])=>[fid,{...f,rooms:f.rooms.map(r=>{const z=stairSurfaces.get(fid+'\0'+r.id);return Number.isFinite(z)&&Math.abs(z-finite(r.z,f.z))>EPS?{...r,z}:r;})}]))};
 
  for(const level of levels){const f=plan.floors[level.id],rooms=f.rooms||[],edges=new Map(),holes=level.holes;
   level.primitives=(f.primitives||[]).map(o=>JSON.parse(JSON.stringify(o)));level.annotations=objects?.annotations(plan,level.id)||[];level.polygons=[];

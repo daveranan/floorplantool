@@ -63,5 +63,5 @@ const baseSetTool=setTool;setTool=function(...args){leave();return baseSetTool(.
 const baseRender=render;render=function(...args){if(enabled&&!same(toolScope))leave();const r=baseRender(...args);button.hidden=window.KERN_WORKSPACE?.isHome()||false;button.setAttribute('aria-pressed',String(enabled));if(enabled)panel();return r;};
 window.addEventListener('blur',cancel);window.addEventListener('pointercancel',e=>handlePointer(e),true);window.addEventListener('lostpointercapture',e=>handlePointer(e),true);
 button.onclick=open;
-window.KERN_THIN_WALL_UI={open,cancel:leave,active:()=>enabled,isEditing:()=>!!gesture,handleKey,handlePointer,sync:panel,inspectSelected:()=>!enabled&&panel()};
+window.KERN_THIN_WALL_UI={guardSelection,open,cancel:leave,active:()=>enabled,isEditing:()=>!!gesture,handleKey,handlePointer,sync:panel,inspectSelected:()=>!enabled&&panel()};
 })();

@@ -3,6 +3,12 @@ const { spawnSync } = require('node:child_process');
 
 const root = path.resolve(__dirname, '..');
 const suites = [
+  'test-stair-surface-offsets.cjs',
+  'test-stair-surface-offset-ui.cjs',
+  'test-stair-surface-offset-scene.cjs',
+  'test-multifloor-point-editing.cjs',
+ 'test-outline-consistency.cjs','test-layer-dom-stability.cjs','test-render-performance.cjs',
+ 'test-primitive-gizmo-workflow.cjs','test-lift-walk.cjs','test-lift-walk-scene.cjs',
   'test-clipping-robustness.cjs','test-corner-label-centering.cjs','test-max-passages.cjs','test-max-passage-ui.cjs','test-max-passage-geometry.cjs','test-max-passage-scene.cjs','test-bridges.cjs','test-bridge-ui.cjs','test-bridge-scene.cjs','test-thin-walls.cjs','test-thin-wall-ui.cjs','test-thin-wall-scene.cjs','test-primitive-2d-editing.cjs',
   'test-nested-room-doors.cjs','test-nested-room-geometry.cjs','test-nested-room-ui.cjs','test-nested-room-scene.cjs',
   'test-floor-edit-scope.cjs',

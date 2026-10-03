@@ -61,7 +61,7 @@ function close(){loadGeneration++;if(dialog.open)dialog.close();const visible=ta
 function failure(e){status='error';detail=C.explain(e);update();}
 function schedule(delay){clearTimeout(timer);timer=setTimeout(()=>{timer=null;flush();},Math.max(0,delay));}
 function changed(){
- if(restoringHandle)return;
+ if(restoringHandle||!directory)return;
  try{const key=currentKey();if(key===observedKey){if(directory&&!paused&&!writing&&status==='pending'&&key===savedKey){status='saved';detail='Folder: '+directory.name+' · '+lastFile;update();}return;}observedKey=key;pendingKey=key;
   if(!directory)return;if(key===savedKey){if(!writing){status='saved';detail='Folder: '+directory.name+' · '+lastFile;update();}return;}
   if(paused)return;status='pending';detail='Changes are waiting for the next 5-minute disk backup. Use Back up now before closing if needed.';update();if(!timer)schedule(AUTOSAVE_INTERVAL);
