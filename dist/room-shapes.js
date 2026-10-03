@@ -1,6 +1,12 @@
 /* Metric polygon rooms. Stored vertices are normalized in the existing editable bounds. */
 (function(root){'use strict';
-const clip=root.polygonClipping||(typeof require==='function'?require('polygon-clipping'):null),E=1e-6,round=n=>Math.round(n*1e6)/1e6;
+const rawClip=root.polygonClipping||(typeof require==='function'?require('polygon-clipping'):null),E=1e-6,round=n=>Math.round(n*1e6)/1e6;
+// Nearly coincident rounded edges can differ by floating-point ulps and break
+// the sweep-line ordering. Keep the exact calculation first, then retry once on
+// independent derived coordinates at 0.1 nanometre precision. Never round the
+// authored vertices, silently omit geometry, or suppress a second failure.
+const clippingCopy=value=>Array.isArray(value)?value.map(clippingCopy):typeof value==='number'&&Number.isFinite(value)?Math.round(value*1e10)/1e10:value;
+const clip=Object.fromEntries(['intersection','difference','union','xor'].map(operation=>[operation,(...args)=>{try{return rawClip[operation](...args);}catch(error){return rawClip[operation](...args.map(clippingCopy));}}]));
 const dot=(a,b)=>a[0]*b[0]+a[1]*b[1],sub=(a,b)=>[a[0]-b[0],a[1]-b[1]],cross=(a,b)=>a[0]*b[1]-a[1]*b[0],mix=(a,b,t)=>[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t],len=a=>Math.hypot(...a);
 function vertices(r){return r.shape?.vertices||[{id:'v0',x:0,y:0},{id:'v1',x:1,y:0},{id:'v2',x:1,y:1},{id:'v3',x:0,y:1}];}
 function raw(r){return vertices(r).map(v=>[r.x+v.x*r.w,r.y+v.y*r.h]);}
