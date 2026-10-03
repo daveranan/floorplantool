@@ -10,7 +10,7 @@
     "test:ui": "node test-ui.cjs",
     "test:preview": "node test-preview.cjs",
     "test:elevation": "node test-local-elevation.cjs && node test-elevation-ui.cjs && node test-elevation-scene.cjs && node test-elevation-safety.cjs",
-    "test:release": "node scripts/test-v65.cjs"
+    "test:release": "node scripts/test-v66.cjs"
   },
   "dependencies": {
     "polygon-clipping": "^0.15.7",
@@ -19,5 +19,8 @@
   "devDependencies": {
     "esbuild": "0.25.10",
     "jsdom": "26.1.0"
+  },
+  "imports": {
+    "#primitive-scene": "./src/primitive-scene.js"
   }
 }

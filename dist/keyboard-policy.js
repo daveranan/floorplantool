@@ -8,12 +8,12 @@ function chord(e){return [e.ctrlKey?'Ctrl':'',e.metaKey?'Meta':'',e.altKey?'Alt'
 function allowed(e){
  const key=e.code==='Slash'&&(e.ctrlKey||e.metaKey)?'/':e.code==='KeyS'&&e.altKey&&(e.ctrlKey||e.metaKey)?'s':String(e.key||'').toLowerCase(),ctrl=!!e.ctrlKey,meta=!!e.metaKey,alt=!!e.altKey,shift=!!e.shiftKey,mod=ctrl!==meta;
  if(ctrl&&meta)return false;
- if(!ctrl&&!meta&&!alt)return !shift||['s','e','d','tab','f10'].includes(key)||(!window.BuildingExports?.isThreeMode?.()&&['arrowup','arrowdown','arrowleft','arrowright'].includes(key));
+ if(!ctrl&&!meta&&!alt)return !shift||['s','e','d','a','tab','f10'].includes(key)||(!window.BuildingExports?.isThreeMode?.()&&['arrowup','arrowdown','arrowleft','arrowright'].includes(key));
  if(mod&&!alt)return shift?key==='z':['z','y','c','x','v','k','/','s'].includes(key);
  return mod&&alt&&!shift&&key==='s';
 }
 function paused(e){return typing(e.target)||window.KERN_WORKSPACE?.isHome?.()||window.KERN_EXPLORER?.active||e.target.closest?.('#workspace-tabs,#workspace-project-dialog,dialog,[role=menu],[role=listbox],.toolbar-popover')||document.querySelector('dialog[open]');}
-window.addEventListener('keydown',e=>{if(window.KERN_WALL_EDGE_UI?.handleKey(e))return;
+window.addEventListener('keydown',e=>{if(window.KERN_PRIMITIVE_UI?.menuKey?.(e))return;if(window.KERN_WALL_EDGE_UI?.handleKey(e))return;
  if((e.code==='Slash'&&(e.ctrlKey||e.metaKey)||e.code==='KeyS'&&e.altKey&&(e.ctrlKey||e.metaKey))&&!allowed(e)){e.stopImmediatePropagation();return;}
  if(paused(e)||e.isComposing||e.key==='Process'||e.key==='Dead')return;
  const key=String(e.key||'').toLowerCase();
@@ -21,6 +21,7 @@ window.addEventListener('keydown',e=>{if(window.KERN_WALL_EDGE_UI?.handleKey(e))
  // Reject a loose letter match before an older independent tool handler sees it.
  // Browser/OS defaults remain available for unassigned modified combinations.
  if((reserved.has(key)||['Slash','KeyS'].includes(e.code)&&!!(e.ctrlKey||e.metaKey)||/^Digit\d$/.test(e.code||''))&&!allowed(e)){e.stopImmediatePropagation();return;}
+ if(window.KERN_PRIMITIVE_UI?.handleKey?.(e))return;
  if(window.KERN_LAYERS?.handleKey?.(e))return;
  if(chord(e)==='Shift+d'){
   e.preventDefault();e.stopImmediatePropagation();if(e.repeat)return;

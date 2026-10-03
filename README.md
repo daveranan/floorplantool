@@ -165,3 +165,13 @@ Home cards support Copy/Paste, Duplicate, recoverable Remove, and drag ordering.
 Draw a room inside a larger room normally, then use **Door (D)** on the inner wall to connect it to the surrounding space. The same workflow works for polygon and rotated rooms, including a room tucked against an outer wall. Inner rooms stay independently selectable, editable and deletable; deleting the surrounding room does not delete them. Proper containment is allowed, while partial overlaps still appear in Checks.
 
 Nested floors and ceilings use each room's own elevation and height. A lower inner room cuts the obstructing surrounding floor, and a taller inner room cuts the ceiling it crosses. Door positions and widths must fit the actual clear wall; edits that would detach the opening are rejected. Existing plan coordinates and room order are preserved.
+
+### Floor-owned blockout shapes
+
+Use **Add shape** or **Shift+A** while the pointer is over the plan or 3D view, then choose **Cube**, **Cylinder**, **Sphere**, or **Hemisphere**. A shape is added once on the active editable floor and selected. In 3D it rests against the physical surface under the pointer, with the active floor plane as a fallback. Shape elevation is relative to its floor, so raising that floor carries its shapes with it. Floor visibility and layer locks apply in both views.
+
+Choose **Move**, **Size**, or **Rotate** in the shape inspector to change the 3D gizmo; **E** also selects the rotation gizmo. Drag an axis/handle, or enter exact position, dimensions, turn and tilt values. Hemisphere orientation can be changed with the tilt fields or rotation gizmo. **Escape** cancels a drag; releasing it records one Undo step. **Copy**, **Duplicate**, paste and Delete use the existing selection history. These are independent blockout solids and markers; they do not create rooms, cut walls, or simulate lights.
+
+Shapes appear in their floor's layer list and 2D footprint. All geometry, orientation and colours travel with the building's saved plan and local backup/import copies. A primitive-only floor can be fitted and exported without a room. Browser and disk failures remain visible through the existing backup status.
+
+A room’s saved alignment lock is separate from its connections. Select it and choose **Unlock space** in the inspector. If it still belongs to a shaft, **Detach this floor and unlock** releases only that floor. One Undo restores its prior lock and links.

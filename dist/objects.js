@@ -11,6 +11,7 @@ const catalog=[
  ['core','Core / shaft allowance',2,2]
 ].map(([kind,name,w,h])=>({kind,name,w,h}));
 function bounds(o){
+ if(o.primitive)return (root.KERN_PRIMITIVES||(typeof require==='function'?require('./primitives.js'):null)).bounds(o);
  if(o.text!==undefined){const size=o.fontSize||.45;return{x:o.x-Math.max(1,o.text.length)*size*.29,y:o.y-size,w:Math.max(1,o.text.length)*size*.58,h:size*1.3}}
  if(o.points){const xs=o.points.map(p=>p.x),ys=o.points.map(p=>p.y),half=o.width/2;return{x:Math.min(...xs)-half,y:Math.min(...ys)-half,w:Math.max(...xs)-Math.min(...xs)+o.width,h:Math.max(...ys)-Math.min(...ys)+o.width}}
  if(o.rotationSpace||o.kind==='hatch'||o.kind==='vent'){const a=(o.rotation||0)*Math.PI/180,w=Math.abs(o.w*Math.cos(a))+Math.abs(o.h*Math.sin(a)),h=Math.abs(o.w*Math.sin(a))+Math.abs(o.h*Math.cos(a));return{x:o.x+o.w/2-w/2,y:o.y+o.h/2-h/2,w,h};}return{x:o.x,y:o.y,w:o.w,h:o.h};
@@ -28,10 +29,11 @@ function validateFloor(f){
  for(const r of f.rooms)caps?.validateRoom(r);
  const ids=new Set([...f.rooms.map(r=>r.id),...f.doors.map(d=>d.id)]);
  const number=(v,min,max)=>Number.isFinite(v)&&v>=min&&v<=max&&Math.abs(v*1e6-Math.round(v*1e6))<1e-4;
- for(const key of ['symbols','services','annotations']){
+ for(const key of ['symbols','services','annotations','primitives']){
   if(f[key]!==undefined&&(!Array.isArray(f[key])||f[key].length>300))throw Error('Invalid '+key+' collection');
   for(const o of arr(f[key])){
    if(!o||typeof o.id!=='string'||!o.id||o.id.length>150||ids.has(o.id)||key!=='annotations'&&(typeof o.name!=='string'||o.name.length>150))throw Error('Invalid or duplicate '+key+' ID');ids.add(o.id);
+   if(key==='primitives'){(root.KERN_PRIMITIVES||(typeof require==='function'?require('./primitives.js'):null)).validate(o);continue;}
    if(o.rotation!==undefined&&!number(o.rotation,0,360))throw Error('Invalid object rotation');
    if(key==='annotations'){if(typeof o.text!=='string'||o.text.length>300||!number(o.x,-150,150)||!number(o.y,-150,150)||!number(o.fontSize,.1,3))throw Error('Invalid annotation');continue;}
    if(key==='symbols'&&!catalog.some(s=>s.kind===o.kind))throw Error('Unknown outline symbol');
@@ -60,7 +62,7 @@ function snapshot(plan,fid,selection){
  const groups=arr(plan.verticalConnections).filter(c=>c.type==='stair'&&arr(c.floors).includes(fid)&&arr(selection.rooms).includes(c.room));
  const roomIds=new Set(arr(selection.rooms)),selectedRooms=f.rooms.filter(r=>roomIds.has(r.id));
  if(selectedRooms.some(r=>r.linkedSource||r.locked&&!groups.some(c=>c.room===r.id)||Object.values(plan.floors).some(l=>l.rooms.some(q=>q.linkedSource?.floor===fid&&q.linkedSource.room===r.id))||r.type==='courtyard'||['solid','void'].includes(r.type)&&!caps?.independent(r)))throw Error('Source-linked or protected footprints require Duplicate building.');
- const levels={},put=id=>levels[id]||(levels[id]={rooms:[],doors:[],symbols:[],services:[],annotations:[],entrances:[],externals:[]});
+ const levels={},put=id=>levels[id]||(levels[id]={rooms:[],doors:[],symbols:[],services:[],annotations:[],primitives:[],entrances:[],externals:[]});
  put(fid).rooms=copy(selectedRooms);for(const r of put(fid).rooms)if(r.routeStair){const E=root.KERN_ELEVATIONS||(typeof require==='function'?require('./elevation.js'):null),q=r.routeStair;q.startZ=E.value(plan,q.start,q.startZ);q.endZ=E.value(plan,q.end,q.endZ);}
  for(const c of groups)for(const id of c.floors){const r=plan.floors[id]?.rooms.find(r=>r.id===c.room);if(!r)throw Error('Stair stack has a missing floor footprint');if(!put(id).rooms.some(q=>q.id===r.id))put(id).rooms.push(copy(r));}
  let omitted=0;
@@ -71,9 +73,9 @@ function snapshot(plan,fid,selection){
   data.externals=arr(source.externals||[source.external].filter(Boolean)).filter(e=>rs.has(e.room)).map(copy);
   if(id===fid&&!rs.size){const geometry=root.KERN_CONNECTIONS||(typeof require==='function'?require('./geometry.js'):null);for(const d of geometry?.legacy(source)||[])if(arr(selection.doors).includes(d.id))data.doors.push({...copy(d),legacyExterior:true});}
  }
- for(const key of ['symbols','services','annotations'])put(fid)[key]=arr(f[key]).filter(o=>arr(selection[key]).includes(o.id)).map(copy);
+ for(const key of ['symbols','services','annotations','primitives'])put(fid)[key]=arr(f[key]).filter(o=>arr(selection[key]).includes(o.id)).map(copy);
  const ids=new Set(put(fid).services.map(o=>o.id));for(const o of put(fid).services)if(o.routeId&&!ids.has(o.routeId))delete o.routeId;
- if(!Object.values(levels).some(l=>l.rooms.length+l.doors.length+l.symbols.length+l.services.length+l.annotations.length))throw Error('Select objects to copy.');
+ if(!Object.values(levels).some(l=>l.rooms.length+l.doors.length+l.symbols.length+l.services.length+l.annotations.length+(l.primitives?.length||0)))throw Error('Select objects to copy.');
  const splits=arr(plan.splitLevelConnections).filter(c=>c.floor===fid&&roomIds.has(c.room)).map(copy);
  return {version:1,sourceFloor:fid,sourceZ:f.z||0,selection:copy(selection),levels,connections:copy(groups),splits,omitted};
 }
@@ -85,7 +87,7 @@ function remove(plan,bundle){
   f.rooms=f.rooms.filter(r=>!rs.has(r.id));f.doors=f.doors.filter(d=>!ds.has(d.id)&&!rs.has(d.a)&&!rs.has(d.b));f.entrances=f.entrances.filter(r=>!rs.has(r));
   if(f.externals)f.externals=f.externals.filter(e=>!rs.has(e.room));if(f.external&&rs.has(f.external.room))delete f.external;
   if(data.doors.some(d=>d.legacyExterior)){const removeIds=new Set(data.doors.filter(d=>d.legacyExterior).map(d=>d.id));if(f.externals)f.externals=f.externals.filter((e,i)=>!removeIds.has('legacy-exterior-'+i+'-'+e.room));else if(f.external&&removeIds.has('legacy-exterior-0-'+f.external.room))delete f.external;}
-  for(const key of ['symbols','services','annotations'])if(f[key])f[key]=f[key].filter(o=>!data[key].some(q=>q.id===o.id));
+  for(const key of ['symbols','services','annotations','primitives'])if(f[key])f[key]=f[key].filter(o=>!arr(data[key]).some(q=>q.id===o.id));
   for(const o of arr(f.services))if(o.routeId&&!f.services.some(r=>r.id===o.routeId))delete o.routeId;
  }
  if(next.verticalConnections)next.verticalConnections=next.verticalConnections.filter(c=>!removedStacks.has(c.id));
@@ -95,10 +97,10 @@ function remove(plan,bundle){
 function paste(plan,bundle,target,offset={x:1,y:1}){
  if(!plan.floors[target])throw Error('Choose an existing destination floor');
  if(bundle.connections.some(c=>!c.floors.includes(target)))throw Error('This stair stack has no destination on '+target+'. Use Edit connected floors.');
- const next=normalizeAnnotations(copy(plan)),used=new Set(Object.values(next.floors).flatMap(f=>[...f.rooms,...f.doors,...arr(f.symbols),...arr(f.services),...arr(f.annotations)].map(o=>o.id)).concat(arr(next.verticalConnections).map(c=>c.id),arr(next.splitLevelConnections).map(c=>c.id))),map=new Map();let serial=1;
+ const next=normalizeAnnotations(copy(plan)),used=new Set(Object.values(next.floors).flatMap(f=>[...f.rooms,...f.doors,...arr(f.symbols),...arr(f.services),...arr(f.annotations),...arr(f.primitives)].map(o=>o.id)).concat(arr(next.verticalConnections).map(c=>c.id),arr(next.splitLevelConnections).map(c=>c.id))),map=new Map();let serial=1;
  const fresh=id=>{if(map.has(id))return map.get(id);let value;do{value='copy-'+id+'-'+serial++}while(used.has(value));used.add(value);map.set(id,value);return value};
  for(const c of bundle.connections)fresh(c.id);
- for(const l of Object.values(bundle.levels))for(const key of ['rooms','doors','symbols','services','annotations'])for(const o of l[key])fresh(o.id);
+ for(const l of Object.values(bundle.levels))for(const key of ['rooms','doors','symbols','services','annotations','primitives'])for(const o of arr(l[key]))fresh(o.id);
  const shifted=o=>{const q=copy(o);q.id=fresh(o.id);if(q.points)q.points=q.points.map(p=>({x:round(p.x+offset.x),y:round(p.y+offset.y)}));else if(Number.isFinite(q.x)){q.x=round(q.x+offset.x);q.y=round(q.y+offset.y)}return q};
  const selection={rooms:[],doors:[]},notes=[];
  for(const [origin,data]of Object.entries(bundle.levels)){
@@ -112,7 +114,7 @@ function paste(plan,bundle,target,offset={x:1,y:1}){
    if(!data.rooms.length){if(origin!==target)throw Error('Copy the attached rooms to paste a connection on another floor.');q.offset=Math.max(0,Math.min(1,q.offset+.1));}
    q.a=map.get(d.a)||d.a;q.b=d.b==='outside'?'outside':map.get(d.b)||d.b;if(!df.rooms.some(r=>r.id===q.a)||q.b!=='outside'&&!df.rooms.some(r=>r.id===q.b))throw Error('Connection endpoints are missing');df.doors.push(q);if(doorDest===target)selection.doors.push(q.id);
   }
-  for(const key of ['symbols','services','annotations'])for(const o of data[key]){const q=shifted(o);if(key==='services'){q.z=round(q.z+(level.z||0)-bundle.sourceZ);if(q.routeId)q.routeId=map.get(q.routeId);q.provisional=true;q.runtimeTested=false;}if(q.sourceRoom)delete q.sourceRoom;level[key]??=[];level[key].push(q);(selection[key]??=[]).push(q.id);}
+  for(const key of ['symbols','services','annotations','primitives'])for(const o of arr(data[key])){const q=shifted(o);if(key==='services'){q.z=round(q.z+(level.z||0)-bundle.sourceZ);if(q.routeId)q.routeId=map.get(q.routeId);q.provisional=true;q.runtimeTested=false;}if(q.sourceRoom)delete q.sourceRoom;level[key]??=[];level[key].push(q);(selection[key]??=[]).push(q.id);}
   for(const id of data.entrances){const roomDest=bundle.connections.some(c=>c.room===id)?origin:dest,df=next.floors[roomDest],rid=fresh(id);if(df.rooms.some(r=>r.id===rid)&&!df.entrances.includes(rid))df.entrances.push(rid);}
   for(const e of data.externals){const q=copy(e);q.room=fresh(e.room);level.externals??=[];level.externals.push(q);}
  }

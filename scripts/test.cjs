@@ -5,7 +5,7 @@ const root = path.resolve(__dirname, '..');
 const suites = [
   'test-nested-room-doors.cjs','test-nested-room-geometry.cjs','test-nested-room-ui.cjs','test-nested-room-scene.cjs',
   'test-floor-edit-scope.cjs',
-  'test-home-cards.cjs','test-selection-transform.cjs','test-crossfloor-ui.cjs','test-crossfloor-lifecycle.cjs',
+  'test-primitives.cjs','test-primitives-scene.cjs','test-primitives-io.cjs','test-space-lock-editing.cjs','test-home-cards.cjs','test-selection-transform.cjs','test-crossfloor-ui.cjs','test-crossfloor-lifecycle.cjs',
   'test-backup-ui.cjs',
   'test-wall-profiles.cjs',
   'test-wall-profiles-scene.cjs',

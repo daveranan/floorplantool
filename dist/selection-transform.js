@@ -7,7 +7,7 @@
  */
 (function(root){
 'use strict';
-const kinds=['rooms','doors','symbols','services','annotations'],arr=v=>Array.isArray(v)?v:[],finite=Number.isFinite;
+const kinds=['rooms','doors','symbols','services','annotations','primitives'],arr=v=>Array.isArray(v)?v:[],finite=Number.isFinite;
 class SelectionError extends Error{constructor(message,code='invalid-selection',extra={}){super(message);this.name='SelectionTransformError';this.code=code;Object.assign(this,extra);}}
 const key=r=>JSON.stringify([r.floor,r.kind,r.id]),ref=(floor,kind,id)=>({floor,kind,id}),roomRef=(floor,id)=>ref(floor,'rooms',id);
 function clone(value,seen=new Map()){if(!value||typeof value!=='object')return value;if(seen.has(value))return seen.get(value);const out=Array.isArray(value)?[]:{};seen.set(value,out);for(const k of Object.keys(value))Object.defineProperty(out,k,{value:clone(value[k],seen),writable:true,enumerable:true,configurable:true});return out;}
@@ -190,7 +190,7 @@ function remove(plan,refs,options={}){
   // Filter against original indices, before removing rooms or synthetic entries.
   if(f.annotations)f.annotations=f.annotations.filter((o,i)=>!has(fid,'annotations',o.id||'annotation-'+fid+'-'+i));
   for(const r of arr(f.rooms))if(r.zones)r.zones=r.zones.filter((z,i)=>!has(fid,'annotations','zone-'+fid+'-'+r.id+'-'+i));
-  for(const kind of ['rooms','doors','symbols','services'])if(f[kind])f[kind]=f[kind].filter(o=>!has(fid,kind,o.id));
+  for(const kind of ['rooms','doors','symbols','services','primitives'])if(f[kind])f[kind]=f[kind].filter(o=>!has(fid,kind,o.id));
   if(f.externals)f.externals=f.externals.filter((o,i)=>!has(fid,'doors','legacy-exterior-'+i+'-'+o.room));
   else if(f.external&&has(fid,'doors','legacy-exterior-0-'+f.external.room))delete f.external;
   if(f.entrances)f.entrances=f.entrances.filter(id=>!goneRoom(fid,id));
@@ -227,7 +227,8 @@ function bounds(plan,refs,options={}){
   }else if(r.kind==='doors'){
    const g=options.doorGeometry?.(o,f,plan,r.floor);if(g){if(g.segments)for(const s of g.segments){add(s.p0);add(s.p1);}else if(g.p0&&g.p1){add(g.p0);add(g.p1);}else if(['h','v'].includes(g.axis)){add(g.axis==='h'?[g.start,g.fixed]:[g.fixed,g.start]);add(g.axis==='h'?[g.end,g.fixed]:[g.fixed,g.end]);}}
    else{const a=arr(f.rooms).find(q=>q.id===o.a),b=arr(f.rooms).find(q=>q.id===o.b);if(!a)continue;if(o.b==='outside'&&['n','e','s','w'].includes(o.side)){const vertical=['e','w'].includes(o.side),length=vertical?a.h:a.w,width=o.width||1,start=(vertical?a.y:a.x)+.1+Math.max(0,length-width-.2)*(o.offset??.5),fixed=vertical?a.x+(o.side==='e'?a.w:0):a.y+(o.side==='s'?a.h:0);add(vertical?[fixed,start]:[start,fixed]);add(vertical?[fixed,start+width]:[start+width,fixed]);}else if(b){const x=Math.max(a.x,b.x),y=Math.max(a.y,b.y),right=Math.min(a.x+a.w,b.x+b.w),bottom=Math.min(a.y+a.h,b.y+b.h);if(right>=x-1e-6&&bottom>=y-1e-6)box({x,y,w:Math.max(0,right-x),h:Math.max(0,bottom-y)});}}
-  }else if(o.points){const ps=o.points.map(p=>Array.isArray(p)?p:[p.x,p.y]);if(B?.strokePoints)for(const p of B.strokePoints(ps,o.width))add(p);else{const half=Math.max(0,o.width||0)/2;for(const p of ps){add([p[0]-half,p[1]-half]);add([p[0]+half,p[1]+half]);}}}
+  }else if(r.kind==='primitives'){for(const p of (root.KERN_PRIMITIVES||(typeof require==='function'?require('./primitives.js'):null)).points(o))add(p);}
+  else if(o.points){const ps=o.points.map(p=>Array.isArray(p)?p:[p.x,p.y]);if(B?.strokePoints)for(const p of B.strokePoints(ps,o.width))add(p);else{const half=Math.max(0,o.width||0)/2;for(const p of ps){add([p[0]-half,p[1]-half]);add([p[0]+half,p[1]+half]);}}}
   else if(r.kind==='annotations'){const size=o.fontSize??(e.zone?.45:.35),text=String(o.text??o.name??''),b=options.annotationBounds?.(o)||{x:o.x-Math.max(1,text.length)*size*.29,y:o.y-size,w:Math.max(1,text.length)*size*.58,h:size*1.3},angle=(o.rotation||0)*Math.PI/180,c=Math.cos(angle),s=Math.sin(angle),cx=o.x,cy=o.y-size*.35;for(const p of [[b.x,b.y],[b.x+b.w,b.y],[b.x+b.w,b.y+b.h],[b.x,b.y+b.h]])add([cx+(p[0]-cx)*c-(p[1]-cy)*s,cy+(p[0]-cx)*s+(p[1]-cy)*c]);}
   else if(r.kind==='symbols'&&!o.rotationSpace)box(o);else rotateBox(o);
  }

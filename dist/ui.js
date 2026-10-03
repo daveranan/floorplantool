@@ -26,7 +26,7 @@
     $('floor-menulabel').textContent = `Current floor · ${floorId}`;
     $('floorstats').textContent = `${plural(f.rooms.filter(r => !['void', 'solid'].includes(r.type) && !r.throughOnly).length, 'space')} · ${plural(allConnections(f).length, 'connection')}`;
     $('canvasfloor').textContent = `${floorId} / ${f.name}`;
-    $('emptyfloor').hidden = !!f.rooms.length || tool !== 'select' || preview;
+    $('emptyfloor').hidden = !!f.rooms.length || !!f.primitives?.length || tool !== 'select' || preview;
     $('removefloor').title = floorId === 'L0' ? 'The ground-floor code L0 is permanent. Its name and elevation are editable.' : `Remove ${floorId} · ${f.name}`;
     $('building').title = `${currentBuilding().name} · ${plural(count, 'floor')} · saved in this browser`;
     $('inspectortoggle').classList.toggle('has-selection', !!(selected || selectedDoor));

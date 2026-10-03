@@ -35,6 +35,7 @@ function annotationPoints(o,options,defaultSize=.35){
 }
 function roomPoints(r,options){if(r.shape){const S=options.shapes||root.KERN_SHAPES;if(!S?.points)throw new TranslationError('Room-shape geometry is required to measure this building.','missing-shape-geometry');return S.points(r);}return rectPoints(r);}
 function objectPoints(o,key,options){
+  if(key==='primitives')return (root.KERN_PRIMITIVES||(typeof require==='function'?require('./primitives.js'):null)).points(o);
   if(key==='annotations')return annotationPoints(o,options);
   if(o.points)return strokePoints(o.points,o.width);
   if(key==='symbols'&&!o.rotationSpace)return rectPoints(o); // Legacy dimensions already describe world bounds.
@@ -63,7 +64,7 @@ function geometryItems(plan,options={}){
     if(r.routeStair){for(const part of routePolygons(r))add('stair',part.id,part.polygon,fid);}
     else if(stair){const D=options.stairs||root.KERN_STAIR_DETAIL;if(!D?.build)throw new TranslationError('Stair geometry is required to measure this building.','missing-stair-geometry');const detail=D.build(plan,fid,r.id);if(!detail&&(r.routeStair||r.localSteps))throw new TranslationError('The stair '+r.id+' has no measurable geometry.','missing-stair-geometry');for(const part of [...arr(detail?.flights),...arr(detail?.landings)])add('stair',part.id,part.polygon||part.rect&&rectPoints(part.rect),fid);}
     if(includeExtras&&options.includeAnnotations)for(const [index,z]of arr(r.zones).entries())add('annotation','zone-'+r.id+'-'+index,annotationPoints(z,options,.45),fid);
-  }if(includeExtras)for(const key of ['symbols','services',...(options.includeAnnotations?['annotations']:[])])for(const [i,o]of arr(f[key]).entries())add(key,o.id||key+'-'+i,objectPoints(o,key,options),fid);}
+  }if(includeExtras)for(const key of ['symbols','services','primitives',...(options.includeAnnotations?['annotations']:[])])for(const [i,o]of arr(f[key]).entries())add(key,o.id||key+'-'+i,objectPoints(o,key,options),fid);}
   if(includeSite){
     if(plan.courtyard)add('courtyard','courtyard',roomPoints(plan.courtyard,options));
     const env=plan.envelope;if(env?.polygon)add('envelope','envelope',env.polygon);else if(env&&finite(env.x)&&finite(env.y)&&finite(env.w)&&finite(env.h))add('envelope','envelope',roomPoints(env,options));
@@ -123,7 +124,7 @@ function translateFloors(plan,floorIds,dx,dy,options={}){
     for(const [key,d]of [['flightCenterX',dx],['flightCenterY',dy]])if(finite(g[key]))g[key]=add(g[key],d,path+'.'+key);
   };
   const room=(r,path)=>{if(!r||visitedRooms.has(r))return;visitedRooms.add(r);shiftXY(r,path);for(const [i,z]of arr(r.zones).entries())shiftXY(z,path+'.zones['+i+']');if(r.stairOriginal)room(r.stairOriginal,path+'.stairOriginal');};
-  for(const fid of chosen){const f=next.floors[fid];for(const [i,r]of arr(f.rooms).entries())room(r,'floors.'+fid+'.rooms['+i+']');for(const key of ['symbols','services','annotations'])for(const [i,o]of arr(f[key]).entries()){const path='floors.'+fid+'.'+key+'['+i+']';if(o.points)points(o.points,path+'.points');else shiftXY(o,path);}}
+  for(const fid of chosen){const f=next.floors[fid];for(const [i,r]of arr(f.rooms).entries())room(r,'floors.'+fid+'.rooms['+i+']');for(const key of ['symbols','services','annotations','primitives'])for(const [i,o]of arr(f[key]).entries()){const path='floors.'+fid+'.'+key+'['+i+']';if(o.points)points(o.points,path+'.points');else shiftXY(o,path);}}
   for(const [i,c]of arr(next.verticalConnections).entries()){const ids=arr(c.floors);if(whole||ids.length&&ids.every(id=>chosen.has(id)))geometry(c,'verticalConnections['+i+']');else if(c.footprints)for(const [fid,b]of Object.entries(c.footprints))if(chosen.has(fid))geometry(b,'verticalConnections['+i+'].footprints.'+fid);}
   for(const [i,c]of arr(next.splitLevelConnections).entries())if(whole||chosen.has(c.floor||c.level))geometry(c,'splitLevelConnections['+i+']');
   for(const [i,a]of arr(next.approaches).entries())if(whole||chosen.has(a.level||a.floor)){geometry(a,'approaches['+i+']');for(const [j,ps]of arr(a.branches).entries())points(ps,'approaches['+i+'].branches['+j+']');}
