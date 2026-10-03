@@ -6,7 +6,8 @@ const inside=(p,r,m=0)=>p.x>=r.x-m&&p.x<=r.x+r.w+m&&p.y>=r.y-m&&p.y<=r.y+r.h+m;
 // boundary within numeric tolerance so walking cannot drop through the seam.
 function polygon(p,vs){let hit=false;for(let i=0,j=vs.length-1;i<vs.length;j=i++){const a=vs[i],b=vs[j],dx=b[0]-a[0],dy=b[1]-a[1],length2=dx*dx+dy*dy;if(length2){const t=((p.x-a[0])*dx+(p.y-a[1])*dy)/length2;if(t>=0&&t<=1&&Math.hypot(p.x-a[0]-t*dx,p.y-a[1]-t*dy)<1e-7)return true;}if((a[1]>p.y)!==(b[1]>p.y)&&p.x<(b[0]-a[0])*(p.y-a[1])/(b[1]-a[1])+a[0])hit=!hit;}return hit}
 function create(data){
- const boxes=data.levels.flatMap(l=>[...l.boxes,...(l.polygons||[]).filter(p=>!['stair','landing'].includes(p.kind))].map(b=>({...b,floor:l.id}))),walls=boxes.filter(b=>['wall','solid','ceiling','slab','landing','window','window-frame'].includes(b.kind)),surfaces=boxes.filter(b=>['slab','landing'].includes(b.kind));
+ const thinWalls=root.KERN_THIN_WALLS||(typeof require==='function'?require('./thin-walls.js'):null);
+ const boxes=data.levels.flatMap(l=>[...l.boxes,...(l.polygons||[]).filter(p=>!['stair','landing'].includes(p.kind)),...(l.primitives||[]).filter(o=>o.wall===true).map(o=>thinWalls.collision(o,l.z))].map(b=>({...b,floor:l.id}))),walls=boxes.filter(b=>['wall','solid','ceiling','slab','landing','window','window-frame'].includes(b.kind)),surfaces=boxes.filter(b=>['slab','landing'].includes(b.kind));
  const ramps=(data.stairs||[]).flatMap(s=>(s.flights||[]).map(f=>({...f,stair:s})));const grounds=data.levels.find(l=>l.id==='L0')||data.levels.reduce((a,b)=>Math.abs(a.z)<Math.abs(b.z)?a:b),gz=Number.isFinite(data.siteGroundZ)?data.siteGroundZ:grounds.z;
  const shapeTools=root.KERN_SHAPES||(typeof require==='function'?require('./room-shapes.js'):null),contactCache=new WeakMap();
  const stairLandings=(data.stairs||[]).flatMap(stair=>(stair.landings||[]).map(landing=>({...landing,stair})));

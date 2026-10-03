@@ -3,6 +3,7 @@ const { spawnSync } = require('node:child_process');
 
 const root = path.resolve(__dirname, '..');
 const suites = [
+  'test-corner-label-centering.cjs','test-max-passages.cjs','test-max-passage-ui.cjs','test-max-passage-geometry.cjs','test-max-passage-scene.cjs','test-bridges.cjs','test-bridge-ui.cjs','test-bridge-scene.cjs','test-thin-walls.cjs','test-thin-wall-ui.cjs','test-thin-wall-scene.cjs','test-primitive-2d-editing.cjs',
   'test-nested-room-doors.cjs','test-nested-room-geometry.cjs','test-nested-room-ui.cjs','test-nested-room-scene.cjs',
   'test-floor-edit-scope.cjs',
   'test-primitives.cjs','test-primitives-scene.cjs','test-primitives-io.cjs','test-space-lock-editing.cjs','test-home-cards.cjs','test-selection-transform.cjs','test-crossfloor-ui.cjs','test-crossfloor-lifecycle.cjs',

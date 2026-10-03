@@ -30,7 +30,7 @@ function snapshot(){
  return {backupPolicy:{retention,calendarTimeZone,intervalMs:AUTOSAVE_INTERVAL},collection:data,workspace:window.KERN_WORKSPACE?.getState?.()||null,browserStorage:raw,recovery};
 }
 function currentKey(){return C.contentKey(snapshot());}
-function isEditing(){return !!(drag||widthEdit||window.KERN_ROUTE_UI?.dragging||window.KERN_ROTATE?.isEditing?.()||window.KERN_SHAPE_UI?.isEditing?.()||window.KERN_PRIMITIVE_UI?.isEditing?.());}
+function isEditing(){return !!(drag||widthEdit||window.KERN_ROUTE_UI?.dragging||window.KERN_ROTATE?.isEditing?.()||window.KERN_SHAPE_UI?.isEditing?.()||window.KERN_PRIMITIVE_UI?.isEditing?.()||window.KERN_THIN_WALL_UI?.isEditing?.());}
 function stamp(value){return value?new Date(value).toLocaleString():'';}
 function update(){
  if(!window.document)return;

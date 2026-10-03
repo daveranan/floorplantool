@@ -175,3 +175,14 @@ Choose **Move**, **Size**, or **Rotate** in the shape inspector to change the 3D
 Shapes appear in their floor's layer list and 2D footprint. All geometry, orientation and colours travel with the building's saved plan and local backup/import copies. A primitive-only floor can be fitted and exported without a room. Browser and disk failures remain visible through the existing backup status.
 
 A room’s saved alignment lock is separate from its connections. Select it and choose **Unlock space** in the inspector. If it still belongs to a shaft, **Detach this floor and unlock** releases only that floor. One Undo restores its prior lock and links.
+
+
+### Maximum passages, bridges and thin walls (v67)
+
+Use **Alt+C**, or hold Alt while connecting with C, to preview the largest clear open passage on the chosen shared wall. It respects existing openings, wall profiles, room heights and other wall owners; one edit commits the cut with no door leaf. Ordinary C retains its normal connection tool.
+
+Use **Shift+C / Bridge** to click two room floors across one gap. Width is adjustable from 1–8 m. Both ends must be on the same floor and elevation; use Local steps for a height difference. A bridge is a real, selectable floor slab with clear endpoint openings where needed, including over a void. It can be copied, edited, deleted and undone normally. Hidden/locked endpoints and obstructed routes cannot be committed.
+
+Use **Shift+W / Thin wall** to draw a separate upright wall. Thickness defaults to 0.25 m and steps through 0.5, 0.75 and 1 m; dimensions and movement use quarter-metre increments. Its plan handles and 3D gizmo edit the same floor-owned object, and walkthrough collision follows its actual rotated footprint. It does not alter room topology.
+
+Rounded and chamfered corners keep room labels at the underlying footprint's center while it remains inside. Concave rooms use a safe interior fallback; existing manually placed annotations remain untouched. Primitive 2D handles now commit resizing, primitive-only duplicate/paste stays at the original position, and holding Shift after starting a primitive drag constrains it to one plan axis.

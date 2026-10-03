@@ -10,6 +10,11 @@ function validate(o){
  if(typeof o.id!=='string'||!o.id||o.id.length>150||typeof o.name!=='string'||o.name.length>150)throw Error('Invalid blockout identity');
  if(!['x','y','z'].every(k=>number(o[k],-150,150))||!['w','h','height'].every(k=>number(o[k],.02,150)))throw Error('Keep shape dimensions from 0.02 to 150 m, and positions within ±150 m');
  if(!['rotation','tiltX','tiltY'].every(k=>number(o[k],-360,360)))throw Error('Shape rotation must be between −360° and 360°');
+ if(o.wall!==undefined&&typeof o.wall!=='boolean')throw Error('Invalid thin-wall flag');
+ if(o.wall===true){
+  if(o.primitive!=='cube'||o.tiltX!==0||o.tiltY!==0)throw Error('Thin walls must be upright cubes');
+  if(!['w','height'].every(k=>o[k]>=.25&&Math.abs(o[k]*4-Math.round(o[k]*4))<1e-6)||![.25,.5,.75,1].includes(o.h))throw Error('Thin-wall length and height use 0.25 m increments; thickness must be 0.25, 0.5, 0.75 or 1 m');
+ }
  if(o.color!==undefined&&(typeof o.color!=='string'||!/^#[\da-f]{6}$/i.test(o.color)))throw Error('Invalid shape colour');
  return o;
 }

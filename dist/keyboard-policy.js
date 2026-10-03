@@ -8,14 +8,16 @@ function chord(e){return [e.ctrlKey?'Ctrl':'',e.metaKey?'Meta':'',e.altKey?'Alt'
 function allowed(e){
  const key=e.code==='Slash'&&(e.ctrlKey||e.metaKey)?'/':e.code==='KeyS'&&e.altKey&&(e.ctrlKey||e.metaKey)?'s':String(e.key||'').toLowerCase(),ctrl=!!e.ctrlKey,meta=!!e.metaKey,alt=!!e.altKey,shift=!!e.shiftKey,mod=ctrl!==meta;
  if(ctrl&&meta)return false;
- if(!ctrl&&!meta&&!alt)return !shift||['s','e','d','a','tab','f10'].includes(key)||(!window.BuildingExports?.isThreeMode?.()&&['arrowup','arrowdown','arrowleft','arrowright'].includes(key));
+ if(!ctrl&&!meta&&!alt)return !shift||['s','e','d','a','c','w','tab','f10'].includes(key)||(!window.BuildingExports?.isThreeMode?.()&&['arrowup','arrowdown','arrowleft','arrowright'].includes(key));
  if(mod&&!alt)return shift?key==='z':['z','y','c','x','v','k','/','s'].includes(key);
- return mod&&alt&&!shift&&key==='s';
+ return !ctrl&&!meta&&alt&&!shift&&key==='c'||mod&&alt&&!shift&&key==='s';
 }
 function paused(e){return typing(e.target)||window.KERN_WORKSPACE?.isHome?.()||window.KERN_EXPLORER?.active||e.target.closest?.('#workspace-tabs,#workspace-project-dialog,dialog,[role=menu],[role=listbox],.toolbar-popover')||document.querySelector('dialog[open]');}
+for(const name of ['pointerdown','pointermove','pointerup'])window.addEventListener(name,e=>window.KERN_THIN_WALL_UI?.handlePointer(e),true);
 window.addEventListener('keydown',e=>{if(window.KERN_PRIMITIVE_UI?.menuKey?.(e))return;if(window.KERN_WALL_EDGE_UI?.handleKey(e))return;
  if((e.code==='Slash'&&(e.ctrlKey||e.metaKey)||e.code==='KeyS'&&e.altKey&&(e.ctrlKey||e.metaKey))&&!allowed(e)){e.stopImmediatePropagation();return;}
  if(paused(e)||e.isComposing||e.key==='Process'||e.key==='Dead')return;
+ if(window.KERN_MAX_PASSAGE_UI?.handleKey(e)||window.KERN_BRIDGE_UI?.handleKey(e)||window.KERN_THIN_WALL_UI?.handleKey(e))return;
  const key=String(e.key||'').toLowerCase();
  if(key==='tab'&&e.shiftKey&&!e.ctrlKey&&!e.metaKey&&!e.altKey){tabNavigation=true;e.stopImmediatePropagation();return;}
  // Reject a loose letter match before an older independent tool handler sees it.

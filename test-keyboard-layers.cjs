@@ -10,7 +10,7 @@ const setup=()=>run(`model={version:1,units:'metres',floors:{L1:{name:'Upper',z:
 setup();
 for(const three of [false,true]){
  const base=w.BuildingExports.isThreeMode;w.BuildingExports.isThreeMode=()=>three;
- for(const letter of ['c','d','r','w','p','b','v','f']){run("setTool('select');setSelection({rooms:['a']})");const before=state();key(doc.body,letter.toUpperCase(),{shiftKey:true});if(letter==='d'){assert.equal(run('selectionCount()'),0);assert.equal(run('tool'),'select');}else assert.equal(state(),before,'Shift+'+letter+' must be independent of plain key');}
+ for(const letter of ['c','d','r','w','p','b','v','f']){run("setTool('select');setSelection({rooms:['a']})");const before=state();key(doc.body,letter.toUpperCase(),{shiftKey:true});if(letter==='d'){assert.equal(run('selectionCount()'),0);assert.equal(run('tool'),'select');}else if(letter==='c'){assert.equal(run('tool'),'bridge');assert.equal(run('selectionCount()'),0);}else if(letter==='w'&&w.KERN_THIN_WALL_UI){assert(w.KERN_THIN_WALL_UI.active());}else assert.equal(state(),before,'Shift+'+letter+' must be independent of plain key');}
  run("setTool('select')");key(doc.body,'c');assert.equal(run('tool'),'connect');
  key(doc.body,'S',{shiftKey:true});assert.equal(run('tool'),'local-steps');key(doc.body,'E',{shiftKey:true});assert.equal(run('tool'),'edge-steps');
  for(const more of [{ctrlKey:true,shiftKey:true},{metaKey:true,altKey:true},{ctrlKey:true,altKey:true,shiftKey:true},{ctrlKey:true,metaKey:true}]){run("setTool('select');setSelection({rooms:['a']})");const before=state();key(doc.body,'C',more);assert.equal(state(),before);}
