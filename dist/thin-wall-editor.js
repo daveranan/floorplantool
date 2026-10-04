@@ -36,7 +36,7 @@ function handlePointer(e){
   catch(error){notify(error.message);}return true;
  }return false;
 }
-function edit(fid,id,change,baseline,{absoluteXY=false}={}){const o=model.floors[fid]?.primitives?.find(o=>o.id===id);if(!o?.wall)return baseEdit(fid,id,change,baseline);try{if(!allowed(fid)||!L.available('primitives',id,fid))throw Error('Show and unlock this wall’s floor and layer before editing.');checkStorage();const next=W.normalizeEdit(o,change);if(absoluteXY)for(const k of ['x','y'])if(Object.hasOwn(change,k))next[k]=W.quarter(change[k]);P.validate(next);return baseEdit(fid,id,next,baseline);}catch(error){notify(error.message);render();return false;}}
+function edit(fid,id,change,baseline,{absoluteXY=false,resizeBounds=false}={}){const o=model.floors[fid]?.primitives?.find(o=>o.id===id);if(!o?.wall)return baseEdit(fid,id,change,baseline);try{if(!allowed(fid)||!L.available('primitives',id,fid))throw Error('Show and unlock this wall’s floor and layer before editing.');checkStorage();const next=resizeBounds?P.validate({...o,...change}):W.normalizeEdit(o,change);if(absoluteXY)for(const k of ['x','y'])if(Object.hasOwn(change,k))next[k]=W.quarter(change[k]);P.validate(next);return baseEdit(fid,id,next,baseline);}catch(error){notify(error.message);render();return false;}}
 const baseEdit=U.edit;U.edit=edit;
 function panel(){
  const s=selected();if(!enabled&&!s)return false;

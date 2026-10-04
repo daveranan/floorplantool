@@ -225,3 +225,21 @@ For garages and other dropped rooms, edit **Room surfaces → Offset from own fl
 Shared properties cover room labels/types/dimensions/positions, surfaces/heights/defaults/entrances, whole-room corners and boundary-wall settings; opening labels/types/dimensions/offsets, windows and low-opening presets; shape and thin-wall dimensions/elevation/orientation/colour; outline item types and dimensions; service route/terminal sizes and categories; annotations; connected-stair type/direction/arrival/handedness and route/local-stair scalar properties. Matching subsets have explicit counts. Stair landing elevations and linked endpoints keep their source-surface ownership. Per-point/per-edge selection, route topology, connected-floor membership, floor/crawlspace configuration and ownership changes remain in their dedicated editors.
 
 A bulk edit uses a cloned, fully validated proposal, checks selected and changed linked objects for floor/layer/model locks, rejects stale inspector drafts and storage conflicts, and commits once. Invalid dimensions or openings never leave a partially edited selection. Thin walls retain their quarter-metre rules. On enabled floors, Shift-clicking a 3D shape adds/removes the object without changing floor visibility or edit scope; explicit floor-selection controls retain their existing behavior.
+
+## Ramp paths
+
+The existing **Stair path** tool now offers **Path surface → Stair / Ramp**, both before drawing and in the selected path inspector. Set **Width** to 8 m for a broad garage ramp. Existing paths can switch surfaces without losing their route points, endpoint links, per-leg widths or authored landing outlines; the choice participates in ordinary Undo/Redo, copies, JSON imports and local backups. Omitted surface values remain stairs.
+
+Ramp runs are continuous, full-width slabs. Automatic endpoint aprons are 0.60 m deep; a full-width right-angle turn has a square landing, rather than stair-style triangular join extensions. The inspector shows run length and maximum grade. A grade over 20% is an advisory to review vehicle clearance, not a code limit or a blocked edit. Tight/reversing routes and incompatible custom landing edges report the geometry change needed; use separated turn points for a U-turn. Start/end surface links resolve the actual selected room elevations and offsets.
+
+3D, live route previews, walking and concrete/wall/floor openings use the same planar slopes. Cutouts end at the configured headroom above each local ramp surface, retaining mass underneath, beside and above them. Walk remains a person-sized concept preview; vehicle turning radii, breakover clearance, structural design and code compliance are not certified.
+
+### 3D object bounds and dimensions
+
+Select one blockout shape or standalone thin wall in 3D to show its oriented bounding box, six face sizing handles, and live width/depth/height measurements. Drag a face handle to resize on that object's local axis while the opposite face stays fixed. The controls follow rotation and tilt. Grid snapping applies to size; hold Ctrl for free sizing. Thin walls retain their 0.25 m size rules and allowed thicknesses.
+
+Small objects use screen-spaced handles with leaders back to their faces, keeping the object center available for selection and the W/E/R gizmos. Nearly end-on axis handles hide until the camera is angled enough for a stable drag. Escape, pointer cancellation, mode/floor changes and Walk entry restore the original geometry; a completed drag saves as one Undo step. Dimensions follow the live preview and disappear with hidden, locked or multiple-object selections.
+
+### Bulk field focus and blur safety
+
+Multi-object property edits now complete their model transaction before repainting the inspector after the native change/blur event finishes. Replacing a focused inspector control cannot trigger another property edit or recursively rebuild its parent. Untouched drafts survive an ordinary redraw, Escape discards them, invalid edits reset to the saved value, and switching fields keeps the newly focused field usable.

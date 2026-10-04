@@ -212,8 +212,8 @@ function markup(detail){
   const cutTread=f.treads[Math.min(f.treads.length-1,Math.max(0,Math.floor(1.2/f.riserHeight)-1))];if(cutTread){const [a,b]=cutTread.line;s+=`<path class="stair-cut-line" d="M${a[0]} ${a[1]}L${b[0]} ${b[1]}" stroke="${c}" stroke-width=".08" stroke-dasharray=".13 .07"/>`;}
   const [a,b]=f.arrowPath,dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len,from=[a[0]+ux*.25,a[1]+uy*.25],to=[b[0]-ux*.25,b[1]-uy*.25];
   s+=`<path d="M${from.map(n).join(' ')}L${to.map(n).join(' ')}m${n(-ux*.28-uy*.15)} ${n(-uy*.28+ux*.15)}L${to.map(n).join(' ')}l${n(-ux*.28+uy*.15)} ${n(-uy*.28-ux*.15)}" fill="none" stroke="${c}" stroke-width=".095"/>`;
-  const cx=(a[0]+b[0])/2,cy=(a[1]+b[1])/2,label=f.direction==='up'?'UP':'DOWN',target=f.direction==='up'?f.z1:f.z0;
-  const bw=Math.min(1.2,Math.max(.8,f.rect.w-.12)),font=Math.min(.27,bw/(label.length*.68)),sub=(target>=0?'+':'')+target.toFixed(1)+'m';
+  const cx=(a[0]+b[0])/2,cy=(a[1]+b[1])/2,label=f.ramp?'RAMP':f.direction==='up'?'UP':'DOWN',target=f.direction==='up'?f.z1:f.z0;
+  const bw=Math.min(1.2,Math.max(.8,f.rect.w-.12)),font=Math.min(.27,bw/(label.length*.68)),sub=f.ramp?(f.gradePercent||0).toFixed(1)+'%':(target>=0?'+':'')+target.toFixed(1)+'m';
   badges+=`<g aria-label="${esc(f.label)}" transform="translate(${n(cx)} ${n(cy)})"><rect x="${n(-bw/2)}" y="-.43" width="${n(bw)}" height=".86" rx=".08" fill="#f7f7f2" stroke="${c}" stroke-width=".04"/><text x="0" y="-.07" text-anchor="middle" font-family="Arial,sans-serif" style="font-size:${font}px;font-weight:700;letter-spacing:0" fill="${c}">${label}</text><text x="0" y=".25" text-anchor="middle" font-family="Arial,sans-serif" style="font-size:${Math.min(.2,bw/(sub.length*.62))}px;letter-spacing:0" fill="${c}">${sub}</text></g>`;
 
  }

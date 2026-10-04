@@ -42,7 +42,7 @@ const sharedSnapGroup=window.KERN_SHAPE_UI.snapGroup;window.KERN_SHAPE_UI.snapGr
 };
 const previousUndo=undo;undo=function(){if(B.getViewer()?.primitiveDragging?.()){B.getViewer().cancelPrimitive();return;}return previousUndo();};$('undo').onclick=()=>undo();
 const oldReset=resetTransient;resetTransient=function(...args){B.getViewer()?.cancelPrimitive?.();close();return oldReset(...args);};
-const shortcutHelp=document.createElement('p');shortcutHelp.className='small';shortcutHelp.textContent='Selected 3D shapes: W moves, E rotates, R scales, and Shift+D duplicates in place. Move and scale follow the grid setting; Ctrl bypasses it. Hold Shift during rotation for 5° steps. Thin walls keep their 0.25 m editing rules. Shift+D clears selection in other contexts.';$('helpdialog').append(shortcutHelp);
+const shortcutHelp=document.createElement('p');shortcutHelp.className='small';shortcutHelp.textContent='Selected 3D shapes show width, depth and height. Drag a box face handle to resize from the opposite face. W moves, E rotates, R scales, and Shift+D duplicates in place. Move and scale follow the grid setting; Ctrl bypasses it. Hold Shift during rotation for 5° steps. Thin walls keep their 0.25 m editing rules. Shift+D clears selection in other contexts.';$('helpdialog').append(shortcutHelp);
 window.KERN_PRIMITIVE_UI={open,add,edit,select,duplicate,handleKey,menuKey,setGizmoMode,mode:()=>gizmoMode,isEditing:()=>!!B.getViewer()?.primitiveDragging?.()};
 draw();
 })();
