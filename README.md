@@ -211,3 +211,7 @@ Choose a main floor and use **Add crawlspace** in its floor properties. The sett
 The indented crawlspace row has its own editing and visibility state. **Show / Hide** only changes the view. Removal is available only when the layer is empty and unreferenced, and keeps upper floors at their current elevations; it does not compress the building. Crawlspace elevation follows its host ceiling and slab. Use settings or Heights to preview height changes.
 
 Choose **Low door** or **Low passage** from the connection type controls. New low openings default to 0.80 m wide and 1.40 m clear, and their inspector reports the actual shared clearance. Half-height or absent walls may allow standing over the opening and are flagged. **Walk from here**, saved starts, reset and Fly-to-Walk can start crouched when standing clearance is unavailable. Continue holding C to crouch; releasing it stands only when there is room.
+
+### Small-shape 2D dragging
+
+Drag the body of a selected blockout shape to move it. The eight visible edge/corner handles still resize it. On small selections, their invisible hit areas extend outward and leave the middle of the shape free for movement, including when zoomed out or using coarse-pointer targeting.

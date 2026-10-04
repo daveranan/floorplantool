@@ -58,7 +58,7 @@ function groupSelectionMarkup(){
  const plan=groupPlan(),b=plan.bounds;if(!b)return '';const color='#c07930';let s='<g class="group-selection">';
  for(const id of plan.selection.rooms){const r=room(id);s+=`<path class="group-member" d="M${window.KERN_SHAPES.points(r).map(p=>p.join(' ')).join('L')}Z" fill="none" stroke="${color}" stroke-width=".1" stroke-dasharray=".3 .16" pointer-events="none"/>`}
  s+=`<rect data-group-box="true" class="group-bounds" x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" fill="none" stroke="${color}" stroke-width="${screenUnits(1.5)}" pointer-events="stroke"/>`;
- if(!preview&&tool==='select'&&!plan.blocked.length&&plan.kind!=='doors')for(const [edge,x,y]of [['nw',b.x,b.y],['n',b.x+b.w/2,b.y],['ne',b.x+b.w,b.y],['e',b.x+b.w,b.y+b.h/2],['se',b.x+b.w,b.y+b.h],['s',b.x+b.w/2,b.y+b.h],['sw',b.x,b.y+b.h],['w',b.x,b.y+b.h/2]])s+=resizeHandle(edge,x,y,`data-group-handle="${edge}"`,true);
+ if(!preview&&tool==='select'&&!plan.blocked.length&&plan.kind!=='doors')for(const [edge,x,y]of [['nw',b.x,b.y],['n',b.x+b.w/2,b.y],['ne',b.x+b.w,b.y],['e',b.x+b.w,b.y+b.h/2],['se',b.x+b.w,b.y+b.h],['s',b.x+b.w/2,b.y+b.h],['sw',b.x,b.y+b.h],['w',b.x,b.y+b.h/2]])s+=resizeHandle(edge,x,y,`data-group-handle="${edge}"`,true,b);
  return s+'</g>';
 }
 function marqueeRect(d){return{x:Math.min(d.start.x,d.current.x),y:Math.min(d.start.y,d.current.y),w:Math.abs(d.current.x-d.start.x),h:Math.abs(d.current.y-d.start.y)}}
@@ -197,9 +197,13 @@ function screenUnits(pixels){
  const rect=$('plan').getBoundingClientRect(),b=viewBounds||bounds(),scale=Math.min(rect.width/b.w,rect.height/b.h)*zoom;
  return pixels/(Number.isFinite(scale)&&scale>0?scale:10*zoom);
 }
-function resizeHandle(edge,x,y,attributes,group=false){
+function resizeHandle(edge,x,y,attributes,group=false,bounds=null){
  const size=screenUnits(7),hit=screenUnits(window.matchMedia?.('(pointer: coarse)').matches?44:22),border=screenUnits(1);
- return `<g class="handle handle-${edge}${group?' group-handle':''}" ${attributes}><title>Resize ${group?'selection ':''}${edge.toUpperCase()}</title><rect class="handle-hit" x="${x-hit/2}" y="${y-hit/2}" width="${hit}" height="${hit}" fill="#fff" fill-opacity="0" pointer-events="all"/><rect class="handle-visual" x="${x-size/2}" y="${y-size/2}" width="${size}" height="${size}" fill="#c07930" stroke="#fff" stroke-width="${border}" pointer-events="none"/></g>`;
+ // Keep a small selection's middle half available for moving. Crowded
+ // targets grow outward instead of swallowing the body or adjacent handles.
+ const range=(center,extent,negative,positive)=>{const inset=bounds?Math.min(hit/2,extent/4):hit/2;return negative?[center-hit+inset,hit]:positive?[center-inset,hit]:[center-inset,inset*2];};
+ const [hx,hw]=range(x,bounds?.w,edge.includes('w'),edge.includes('e')),[hy,hh]=range(y,bounds?.h,edge.includes('n'),edge.includes('s'));
+ return `<g class="handle handle-${edge}${group?' group-handle':''}" ${attributes}><title>Resize ${group?'selection ':''}${edge.toUpperCase()}</title><rect class="handle-hit" x="${hx}" y="${hy}" width="${hw}" height="${hh}" fill="#fff" fill-opacity="0" pointer-events="all"/><rect class="handle-visual" x="${x-size/2}" y="${y-size/2}" width="${size}" height="${size}" fill="#c07930" stroke="#fff" stroke-width="${border}" pointer-events="none"/></g>`;
 }
 function selectionMarkup(r){if(tool==='rotate')return ''; if(extraSelection().length)return groupSelectionMarkup();
  if(isMultiSelection())return groupSelectionMarkup();if(!r)return '';
