@@ -14,7 +14,18 @@ function allowed(e){
 }
 function paused(e){return typing(e.target)||window.KERN_WORKSPACE?.isHome?.()||window.KERN_EXPLORER?.active||e.target.closest?.('#workspace-tabs,#workspace-project-dialog,dialog,[role=menu],[role=listbox],.toolbar-popover')||document.querySelector('dialog[open]');}
 for(const name of ['pointerdown','pointermove','pointerup'])window.addEventListener(name,e=>window.KERN_THIN_WALL_UI?.handlePointer(e),true);
-window.addEventListener('keydown',e=>{if(window.KERN_PRIMITIVE_UI?.menuKey?.(e))return;if(window.KERN_WALL_EDGE_UI?.handleKey(e))return;
+window.addEventListener('keydown',e=>{
+ // Relocated chrome owns its native activation and mnemonic keys. Do not let
+ // later canvas capture handlers turn Space into pan or E into Rotate.
+ // Route menu navigation before canvas captures; retain native Tab behavior.
+ const nativeChrome=!typing(e.target)&&e.target.closest?.('#inspector-toolbar,.toolbar-popover,#workspace-editor-title')&&e.target.closest?.('button,summary,a');
+ if(nativeChrome&&!e.ctrlKey&&!e.metaKey&&!e.altKey){
+  document.documentElement.dataset.inputMode='keyboard';
+  const menu=e.target.closest('.toolbar-popover');
+  if(menu&&['Escape','ArrowDown','ArrowUp','Home','End'].includes(e.key)){menu.onkeydown?.(e);if(e.defaultPrevented){e.stopImmediatePropagation();return;}}
+  if([' ', 'Enter','Delete','Backspace','ArrowDown','ArrowUp','ArrowLeft','ArrowRight','Home','End'].includes(e.key)||/^[a-z0-9]$/i.test(e.key)){e.stopImmediatePropagation();return;}
+ }
+ if(window.KERN_PRIMITIVE_UI?.menuKey?.(e))return;if(window.KERN_WALL_EDGE_UI?.handleKey(e))return;
  if((e.code==='Slash'&&(e.ctrlKey||e.metaKey)||e.code==='KeyS'&&e.altKey&&(e.ctrlKey||e.metaKey))&&!allowed(e)){e.stopImmediatePropagation();return;}
  if(paused(e)||e.isComposing||e.key==='Process'||e.key==='Dead')return;
  if(window.KERN_MAX_PASSAGE_UI?.handleKey(e)||window.KERN_BRIDGE_UI?.handleKey(e)||window.KERN_THIN_WALL_UI?.handleKey(e))return;

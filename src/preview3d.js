@@ -287,11 +287,22 @@ function mount(container, data, options = {}) {
     if (t === 1) {transition = null; controls.update();}
     return true;
   }
-  function fit(preserveDirection = false, animate = false) {
+  let zoomFrameCache = null, lastReportedZoom = null;
+  function fitFrame() {
+    const key = `${visibleIds().join("|")}:${gap}:${camera.aspect}:${camera.fov}`;
+    if (zoomFrameCache?.key === key) return zoomFrameCache;
     const box = new THREE.Box3();
     for (const group of groups.values()) if (group.visible) {const level = data.levels.find(l => l.id === group.userData.id); for (const shape of [...level.boxes,...(level.polygons||[]),...primitiveBounds(level)]) {box.expandByPoint(new THREE.Vector3(shape.x, shape.z + group.position.y, shape.y)); box.expandByPoint(new THREE.Vector3(shape.x + shape.w, shape.z + shape.height + group.position.y, shape.y + shape.h));}}
     if (box.isEmpty()) {box.min.set(b.minX, b.minZ - groundRank * gap, b.minY); box.max.set(b.maxX, b.maxZ + (data.levels.length - 1 - groundRank) * gap, b.maxY);}
     const center = box.getCenter(new THREE.Vector3()), dimensions = box.getSize(new THREE.Vector3()), radius = Math.max(dimensions.length() / 2, 8), angle = THREE.MathUtils.degToRad(camera.fov / 2), distance = radius / Math.sin(angle) * Math.max(1, 1 / camera.aspect) * 1.1;
+    return zoomFrameCache = {key, center, distance};
+  }
+  // Orbit magnification is relative to the current visible-building fit.
+  // First-person cameras use their lens magnification (90 degrees = 100%).
+  function getZoom() {return walking ? 1 / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) : fitFrame().distance / Math.max(.001, camera.position.distanceTo(controls.target));}
+  function reportCamera() {const value = getZoom(), displayed = value < .1 ? Math.max(.1, Math.round(value * 1000) / 10) : Math.round(value * 100);if (Number.isFinite(value) && displayed !== lastReportedZoom) {lastReportedZoom = displayed;options.onCameraChange?.(value);}}
+  function fit(preserveDirection = false, animate = false) {
+    const {center, distance} = fitFrame();
     const direction = preserveDirection ? camera.position.clone().sub(controls.target).normalize() : new THREE.Vector3(1, .9, 1.2).normalize();
     camera.near = .05; camera.far = Math.max(5000, distance * 5); camera.updateProjectionMatrix(); moveCamera(center.clone().add(direction.multiplyScalar(distance)), center, animate, floorY(navigationFloor));
   }
@@ -436,7 +447,7 @@ if(!r.routeStair&&!window.KERN_ROTATE?.active()&&(r.isFloor||r.localSteps||windo
   cleanupOnFailure = dispose;observer.observe(container); resize(); updateMatrices();
   if (options.viewState) restoreViewState(options.viewState); else fit();
   // Open in overview; floor isolation is an explicit click.
-  renderer.setAnimationLoop(() => {if (disposed) return;primitives?.sync();if(walking){updateWalk();if(walkState?.fly)refreshOcclusion();renderer.render(scene,camera);return;} if (!advanceCamera()) controls.update(); updateDimensions();refreshOcclusion(); renderer.render(scene, camera);});
+  renderer.setAnimationLoop(() => {if (disposed) return;primitives?.sync();if(walking){updateWalk();if(walkState?.fly)refreshOcclusion();reportCamera();renderer.render(scene,camera);return;} if (!advanceCamera()) controls.update(); updateDimensions();refreshOcclusion(); reportCamera();renderer.render(scene, camera);});
   function getViewState() {
     return {fov:camera.fov,position: camera.position.toArray(), target: controls.target.toArray(), focused, navigationFloor, navigationY, navigationElevation: floorY(navigationFloor), visible: visibleIds(), gap, showWalls, showCeilings, showSlabs, cutaway, cutHeight, labels, xray, showGrid,
       overview: null};
@@ -467,7 +478,7 @@ if(!r.routeStair&&!window.KERN_ROTATE?.active()&&(r.isFloor||r.localSteps||windo
   }
   return {
     primitivePlacement:(e,fid,options)=>primitives?.placement(e,fid,options),previewWall:(o,fid)=>primitives?.previewWall(o,fid),setPrimitiveMode:mode=>primitives?.setMode(mode),cancelPrimitive:()=>primitives?.cancel(),primitiveDragging:()=>primitives?.dragging(),
-    cameraPose(){const d=camera.getWorldDirection(new THREE.Vector3());return{x:camera.position.x,y:camera.position.z,z:camera.position.y,yaw:Math.atan2(-d.x,-d.z),pitch:Math.asin(Math.max(-1,Math.min(1,d.y))),fov:camera.fov,roll:new THREE.Euler().setFromQuaternion(camera.quaternion,'YXZ').z};},setAuthoringMode,cancelAuthoring:()=>cancelAuthor(true),cancelEdit:editCancel,getOrbitViewState(){return walking&&orbitState?JSON.parse(JSON.stringify(orbitState)):getViewState();},applyFloorState,selectRoom,selectRooms,selectObjects,selectFloors,setEditableFloors,activateFloor,chooseFloor,frameSelection, setWalk, fit, dispose, showAll, isolate, hoverFloor, adjacentFloor, getViewState, restoreViewState, syncActiveFloor,
+    cameraPose(){const d=camera.getWorldDirection(new THREE.Vector3());return{x:camera.position.x,y:camera.position.z,z:camera.position.y,yaw:Math.atan2(-d.x,-d.z),pitch:Math.asin(Math.max(-1,Math.min(1,d.y))),fov:camera.fov,roll:new THREE.Euler().setFromQuaternion(camera.quaternion,'YXZ').z};},setAuthoringMode,cancelAuthoring:()=>cancelAuthor(true),cancelEdit:editCancel,getOrbitViewState(){return walking&&orbitState?JSON.parse(JSON.stringify(orbitState)):getViewState();},applyFloorState,selectRoom,selectRooms,selectObjects,selectFloors,setEditableFloors,activateFloor,chooseFloor,frameSelection, setWalk, fit, dispose, showAll, isolate, hoverFloor, adjacentFloor, getViewState, getZoom, restoreViewState, syncActiveFloor,
     zoomBy(factor) {if (!Number.isFinite(factor) || factor <= 0) return; const delta = camera.position.clone().sub(controls.target), distance = THREE.MathUtils.clamp(delta.length() * factor, controls.minDistance, controls.maxDistance); moveCamera(controls.target.clone().add(delta.normalize().multiplyScalar(distance)), controls.target, false);},
     setGrid(value) {showGrid = !!value; grid.visible = showGrid;},
     getFocusedFloor() {return focused;},

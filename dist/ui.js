@@ -14,7 +14,7 @@
     $('savecompactlabel').textContent = {saved: 'Saved locally', editing: 'Editing…', error: 'Not saved', loading: 'Importing…'}[state] || 'Saved locally';
     const failed = $('saved').dataset.state === 'error';
     $('savewarning').hidden = !failed;
-    $('savecompact').title = failed ? 'Changes are in memory only. Download a backup before closing.' : 'Saved in this browser on this device. File downloads portable backups.';
+    $('savecompact').title = failed ? 'Changes are in memory only. Download a backup before closing.' : 'Saved in this browser on this device. The building menu downloads portable backups.';
     if (failed) $('savewarningtext').textContent = ($('saved').title && !$('saved').title.startsWith('Saved') ? $('saved').title : buildingState.message) || 'Download a backup before closing or reloading.';
   }
   function sync() {

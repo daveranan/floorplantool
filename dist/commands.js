@@ -44,10 +44,9 @@ function closeDoorDefaults(){defaultsDialog.close();if(window.KERN_FOCUS)window.
 $('closedoordefaults').onclick=closeDoorDefaults;defaultsDialog.oncancel=e=>{e.preventDefault();closeDoorDefaults();};
 $('doordefaultsform').onsubmit=e=>{e.preventDefault();if(!setDefaultDoorWidths(Number($('defaultsinglewidth').value),Number($('defaultdoublewidth').value))){$('doordefaultserror').textContent='Use widths from 0.5 to 8 metres.';$('doordefaultserror').hidden=false;return;}closeDoorDefaults();notify('Default door widths saved · existing doors unchanged');};
 let helpReturnFocus=null;
-function closeHelp(){ $('helpdialog').close();if(document.documentElement.dataset.inputMode!=='pointer')helpReturnFocus?.()?.focus?.({preventScroll:true}) }
+function closeHelp(){ $('helpdialog').close();if(window.KERN_FOCUS)window.KERN_FOCUS.restore(helpReturnFocus);else helpReturnFocus?.node?.focus?.({preventScroll:true}); }
 function openHelp(){
- const previous=document.activeElement,id=previous?.id,key=previous?.dataset?.key,doorKey=previous?.dataset?.doorkey;
- helpReturnFocus=()=>previous?.isConnected?previous:id?$(id):key?$('inspector').querySelector('[data-key="'+key+'"]'):doorKey?$('inspector').querySelector('[data-doorkey="'+doorKey+'"]'): $('commands');
+ helpReturnFocus=window.KERN_FOCUS?.capture()||{node:document.activeElement};
  finishWidthEdit(false);if(drag||gesture||spaceHeld||pendingRoom)resetTransient(true,true);closeToolbarMenus();$('helpdialog').showModal();$('closehelp').focus();
 }
 $('help').onclick=openHelp;$('closehelp').onclick=closeHelp;$('helpdialog').oncancel=e=>{e.preventDefault();closeHelp()};$('helpdialog').onkeydown=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();closeHelp()}};

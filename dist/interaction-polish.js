@@ -1,7 +1,7 @@
 (function(){'use strict';let origin=null,cursor=null;
 const editable=e=>e?.matches?.('input,textarea,select,[contenteditable=true]')||e?.isContentEditable;
 const controls='input,textarea,select,button,a,summary,[contenteditable=true],[role=button],[role=combobox],[role=menuitem],[role=menuitemradio]';
-const visible=e=>!!e?.isConnected&&!e.closest?.('[hidden],dialog:not([open])');
+const visible=e=>!!e?.isConnected&&!e.closest?.('[hidden],dialog:not([open])')&&(!e.closest?.('details:not([open])')||e.closest('details:not([open])').querySelector('summary')?.contains(e));
 function popupOpen(){return [...document.querySelectorAll('dialog[open],.toolbar-popover[open],.connectionmenu:not([hidden]),[role=menu]:not([hidden]),[role=listbox]:not([hidden])')].some(visible);}
 function canvasFocus(options={}){
  if(window.KERN_WORKSPACE?.isHome()||popupOpen())return false;
@@ -24,7 +24,7 @@ function restore(state,{draft=false,fallback=true}={}){
  if(!target&&state.scope===selectionScope()&&state.selection===JSON.stringify(getSelection())){
   target=state.id?$(state.id):state.attrs.length?[...state.root.querySelectorAll(controls)].find(n=>state.attrs.every(([key,value])=>n.getAttribute(key)===value)):null;
  }
- if(!visible(target)){if(fallback)canvasFocus();return null;}
+ if(!visible(target)){const menu=(target||state.node)?.closest?.('.toolbar-popover'),summary=menu?.querySelector('summary');if(visible(summary))target=summary;else{if(fallback)canvasFocus();return null;}}
  if(draft&&state.value!==undefined)target.value=state.value;
  target.focus?.({preventScroll:true});if(state.start!==null&&state.start!==undefined)try{target.setSelectionRange(state.start,state.end);}catch{}
  return target;
