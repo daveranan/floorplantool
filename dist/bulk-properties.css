@@ -1,0 +1,7 @@
+.bulk-properties .bulk-property-section{border-top:1px solid var(--line,#d5dbdf);padding-top:.65rem;margin-top:.8rem}
+.bulk-properties .field{min-width:0;align-self:start}.bulk-properties .field span small{font-weight:400;opacity:.7;white-space:nowrap}
+.bulk-properties input::placeholder,.bulk-properties select.is-mixed{color:var(--muted,#75808c);opacity:1}
+.bulk-properties .bulk-locked{font-size:.75rem;line-height:1.35;color:var(--muted,#75808c)}
+.bulk-properties #bulk-group-movement{border-top:1px solid var(--line,#d5dbdf);padding-top:.65rem;margin-top:1rem}
+.bulk-properties #bulk-group-movement summary{cursor:pointer;padding:.5rem 0}
+.bulk-properties .bulk-existing-actions{margin-top:1rem}.bulk-properties .bulk-existing-actions>h2,.bulk-properties .bulk-existing-actions>h3{display:none}

@@ -307,3 +307,11 @@ The supplied screenshot was inspected at its actual pixels outside the repositor
 The aggregate `npm test` was also attempted. It stops at `test-floor-edit-scope.cjs:14` with the older expected `L1` versus current `L0` floor-selection rule. The exact same failure was reproduced with the unchanged v71 `app.js`; it is not caused by the hit-target correction. The current floor-controller suites remain in the focused release gate.
 
 Final v72 verification: all 77 focused release suites passed. Independent source/mathematical review found no remaining blocker. Tiny subpixel shapes still need zooming for practical pointer use; browser-native hit testing and physical touch accuracy remain unverified in this environment.
+
+## October 4: v73 shared multi-object properties
+
+New `test-bulk-properties.cjs` loads the complete production script order and covers common/mixed values, garage offsets, absolute values versus translation, matching heterogeneous subsets, duplicate IDs across floors, untouched fields, blank/zero/invalid input, stale drafts, model/layer/linked ownership guards, storage conflict refusal and atomic Undo/Redo. It exercises rooms, corners/boundaries, openings and low presets, window wrap center conversion, primitives/thin walls, symbols, services, annotations, route stairs and linked stack settings. Semantic default tests cover annotation size and explicitly overriding inherited room heights.
+
+New `test-bulk-properties-scene.cjs` verifies the actual rebuilt Three.js slab instance after one cross-floor room-offset edit, with mixed/common inspector state, unchanged object and floor selection, 2D/3D roundtrips, and one Undo/Redo boundary. The renderer/GPU is mocked. Primitive scene and gizmo regressions now assert that off-gizmo Shift picks add/remove shapes without changing enabled floors; Shift on the rotation gizmo still snaps the gesture.
+
+The current release command is `npm run test:release` (`scripts/test-v73.cjs`, 79 suites). The prior historical broad aggregate remains distinct from this current-production release gate. Plain-static Sites have no compatible managed interactive preview, so this release does not claim a new native-browser, touch-device or GPU visual pass. Source seed plans and shipped reference drawing assets remain unchanged; no private user plan was added to the release.

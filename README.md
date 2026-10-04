@@ -215,3 +215,13 @@ Choose **Low door** or **Low passage** from the connection type controls. New lo
 ### Small-shape 2D dragging
 
 Drag the body of a selected blockout shape to move it. The eight visible edge/corner handles still resize it. On small selections, their invisible hit areas extend outward and leave the middle of the shape free for movement, including when zoomed out or using coarse-pointer targeting.
+
+## Shared properties for multiple selected objects (v73)
+
+Select rooms or other objects together in the plan, Layers, or 3D. The inspector now shows their common values. A gray dash marks mixed values; leaving a field untouched preserves every object's original value. Typing a value changes only the selected compatible objects named by that field's count, with one Undo for the complete edit.
+
+For garages and other dropped rooms, edit **Room surfaces → Offset from own floor** to set all selected room offsets together. Each floor remains its own datum, including selections spanning enabled floors. **Absolute surface elevation** deliberately sets one world elevation. **Move selection / group actions** instead translates the group and preserves spacing; the old overall group-size controls are explicitly labeled as group bounds.
+
+Shared properties cover room labels/types/dimensions/positions, surfaces/heights/defaults/entrances, whole-room corners and boundary-wall settings; opening labels/types/dimensions/offsets, windows and low-opening presets; shape and thin-wall dimensions/elevation/orientation/colour; outline item types and dimensions; service route/terminal sizes and categories; annotations; connected-stair type/direction/arrival/handedness and route/local-stair scalar properties. Matching subsets have explicit counts. Stair landing elevations and linked endpoints keep their source-surface ownership. Per-point/per-edge selection, route topology, connected-floor membership, floor/crawlspace configuration and ownership changes remain in their dedicated editors.
+
+A bulk edit uses a cloned, fully validated proposal, checks selected and changed linked objects for floor/layer/model locks, rejects stale inspector drafts and storage conflicts, and commits once. Invalid dimensions or openings never leave a partially edited selection. Thin walls retain their quarter-metre rules. On enabled floors, Shift-clicking a 3D shape adds/removes the object without changing floor visibility or edit scope; explicit floor-selection controls retain their existing behavior.
