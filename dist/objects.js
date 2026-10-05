@@ -22,11 +22,11 @@ function transform(o,from,to){
 }
 function annotations(plan,fid){const f=plan.floors[fid];if(!f)return[];return [
  ...arr(f.annotations).map((a,i)=>({...a,id:a.id||'annotation-'+fid+'-'+i,fontSize:a.fontSize??.35})),
- ...f.rooms.flatMap(r=>arr(r.zones).map((z,i)=>({id:'zone-'+fid+'-'+r.id+'-'+i,text:String(z.name||''),x:z.x,y:z.y,fontSize:.45,sourceRoom:r.id})))
+ ...f.rooms.flatMap(r=>arr(r.zones).map((z,i)=>({id:'zone-'+fid+'-'+r.id+'-'+i,text:String(z.name||''),x:z.x,y:z.y,fontSize:.45,...(z.rotation!==undefined?{rotation:z.rotation}:{}),sourceRoom:r.id})))
  ];}
 function normalizeAnnotations(plan){for(const fid of Object.keys(plan.floors)){const f=plan.floors[fid],values=annotations(plan,fid);if(values.length||f.annotations)f.annotations=values;for(const r of f.rooms)if(r.zones)delete r.zones;}return plan;}
 function validateFloor(f){
- for(const r of f.rooms)caps?.validateRoom(r);
+ for(const r of f.rooms){caps?.validateRoom(r);if(r.stairCrossFlip!==undefined&&typeof r.stairCrossFlip!=='boolean')throw Error('Invalid stair cross direction');}
  const ids=new Set([...f.rooms.map(r=>r.id),...f.doors.map(d=>d.id)]);
  const number=(v,min,max)=>Number.isFinite(v)&&v>=min&&v<=max&&Math.abs(v*1e6-Math.round(v*1e6))<1e-4;
  for(const key of ['symbols','services','annotations','primitives']){

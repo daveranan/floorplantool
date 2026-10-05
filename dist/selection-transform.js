@@ -235,6 +235,6 @@ function bounds(plan,refs,options={}){
  if(!points.length)return null;const minX=Math.min(...points.map(p=>p[0])),minY=Math.min(...points.map(p=>p[1])),maxX=Math.max(...points.map(p=>p[0])),maxY=Math.max(...points.map(p=>p[1]));return{x:minX,y:minY,w:maxX-minX,h:maxY-minY,minX,minY,maxX,maxY};
 }
 
-const api={bounds,remove,paste,kinds,key,normalizeRefs,resolve,sourceFor,analyze,translate,copy,SelectionError,TranslationError:SelectionError};
+const api={indexPlan,bounds,remove,paste,kinds,key,normalizeRefs,resolve,sourceFor,analyze,translate,copy,SelectionError,TranslationError:SelectionError};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.KERN_SELECTION_TRANSFORM=api;
 })(typeof window!=='undefined'?window:globalThis);

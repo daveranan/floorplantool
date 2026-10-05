@@ -40,8 +40,8 @@ function hasLandingAccess(plan,floorId,door,detailFor){
 function coordinateFrame(r,axis,end){
  const long=axis==='x'?r.w:r.h,short=axis==='x'?r.h:r.w;
  const reverse=(axis==='x'&&end==='east')||(axis==='y'&&end==='south');
- const xy=(u,v)=>axis==='x'?[r.x+(reverse?long-u:u),r.y+v]:[r.x+v,r.y+(reverse?long-u:u)];
- const uv=(x,y)=>axis==='x'?[reverse?r.x+long-x:x-r.x,y-r.y]:[reverse?r.y+long-y:y-r.y,x-r.x];
+ const xy=(u,v)=>axis==='x'?[r.x+(reverse?long-u:u),r.y+(r.stairCrossFlip?short-v:v)]:[r.x+(r.stairCrossFlip?short-v:v),r.y+(reverse?long-u:u)];
+ const uv=(x,y)=>axis==='x'?[reverse?r.x+long-x:x-r.x,r.stairCrossFlip?r.y+short-y:y-r.y]:[reverse?r.y+long-y:y-r.y,r.stairCrossFlip?r.x+short-x:x-r.x];
  const world=local=>{const a=xy(local.u0,local.v0),b=xy(local.u1,local.v1);return{x:Math.min(a[0],b[0]),y:Math.min(a[1],b[1]),w:Math.abs(a[0]-b[0]),h:Math.abs(a[1]-b[1])}};
  return{axis,end,long,short,reverse,xy,uv,world};
 }

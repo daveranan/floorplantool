@@ -43,6 +43,7 @@ function allowed(e){
 function paused(e){return typing(e.target)||window.KERN_WORKSPACE?.isHome?.()||window.KERN_EXPLORER?.active||e.target.closest?.('#workspace-tabs,#workspace-project-dialog,dialog,[role=menu],[role=listbox],.toolbar-popover')||document.querySelector('dialog[open]');}
 for(const name of ['pointerdown','pointermove','pointerup'])window.addEventListener(name,e=>window.KERN_THIN_WALL_UI?.handlePointer(e),true);
 window.addEventListener('keydown',e=>{
+ if(window.KERN_GROUP_ROTATE?.isEditing?.()&&window.KERN_GROUP_ROTATE.handleKey(e))return;
  if(window.KERN_DRAG_AXES.key(e))return;
  if(e.key==='Escape')window.KERN_DRAG_AXES.clear(true);
  // Relocated chrome owns its native activation and mnemonic keys. Do not let
@@ -64,6 +65,7 @@ window.addEventListener('keydown',e=>{
  // Reject a loose letter match before an older independent tool handler sees it.
  // Browser/OS defaults remain available for unassigned modified combinations.
  if((reserved.has(key)||['Slash','KeyS'].includes(e.code)&&!!(e.ctrlKey||e.metaKey)||/^Digit\d$/.test(e.code||''))&&!allowed(e)){e.stopImmediatePropagation();return;}
+ if(window.KERN_GROUP_ROTATE?.handleKey?.(e))return;
  if(window.KERN_PRIMITIVE_UI?.handleKey?.(e))return;
  if(window.KERN_LAYERS?.handleKey?.(e))return;
  if(chord(e)==='Shift+d'){

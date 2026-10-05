@@ -10,7 +10,7 @@
     "test:ui": "node test-ui.cjs",
     "test:preview": "node test-preview.cjs",
     "test:elevation": "node test-local-elevation.cjs && node test-elevation-ui.cjs && node test-elevation-scene.cjs && node test-elevation-safety.cjs",
-    "test:release": "node scripts/test-v81.cjs"
+    "test:release": "node scripts/test-v82.cjs"
   },
   "dependencies": {
     "polygon-clipping": "^0.15.7",
@@ -22,6 +22,7 @@
   },
   "imports": {
     "#primitive-scene": "./src/primitive-scene.js",
-    "#drag-feedback": "./src/drag-feedback.js"
+    "#drag-feedback": "./src/drag-feedback.js",
+    "#group-rotation-scene": "./src/group-rotation-scene.js"
   }
 }

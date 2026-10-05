@@ -13,7 +13,7 @@ function build(input){
  const {plan,floorId,room,c,spec,axis,end,stops}=input,type=room.stairType||c.stairType,warnings=[...input.warnings],warn=(code,text,severity='error')=>warnings.push({code,kind:'stair',text,severity});
  const p=spec.perimeter,C=spec.clearWidth,L=spec.landingDepth,G=spec.treadDepth,flights=[],landings=[],segments=[],surfaces=[];
  const footprint={x:room.x,y:room.y,w:room.w,h:room.h},long=axis==='x'?room.w:room.h,short=axis==='x'?room.h:room.w,reverse=axis==='x'?end==='east':end==='south';
- const xy=(u,v)=>axis==='x'?[room.x+(reverse?long-u:u),room.y+v]:[room.x+v,room.y+(reverse?long-u:u)],box=(u0,u1,v0,v1)=>{const a=xy(u0,v0),b=xy(u1,v1);return{x:Math.min(a[0],b[0]),y:Math.min(a[1],b[1]),w:Math.abs(a[0]-b[0]),h:Math.abs(a[1]-b[1])}};
+ const xy=(u,v)=>axis==='x'?[room.x+(reverse?long-u:u),room.y+(room.stairCrossFlip?short-v:v)]:[room.x+(room.stairCrossFlip?short-v:v),room.y+(reverse?long-u:u)],box=(u0,u1,v0,v1)=>{const a=xy(u0,v0),b=xy(u1,v1);return{x:Math.min(a[0],b[0]),y:Math.min(a[1],b[1]),w:Math.abs(a[0]-b[0]),h:Math.abs(a[1]-b[1])}};
  const makeLanding=(id,polygon,z,role,sid,pieces=[polygon])=>{const existing=landings.find(l=>Math.abs(l.z-z)<EPS&&JSON.stringify(l.polygon)===JSON.stringify(polygon));if(existing)return existing;const l={id,kind:'landing',polygon,rect:bounds(polygon),z,role,segmentId:sid,depth:L,clearWidth:C,pieces};landings.push(l);pieces.forEach((q,i)=>surfaces.push({id:id+'-'+i,polygon:q,z,parent:id,kind:'landing'}));return l};
  let requiredLong=0,requiredShort=0,minRiser=Infinity,maxRiser=0,walkingRadius=null,angleStep=null,pitch=null;
  if(type==='straight'){
