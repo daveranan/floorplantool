@@ -64,7 +64,7 @@ export function primitiveScene({scene,camera,renderer,controls,groups,data,prism
       if(g.group){const edits=g.members.map(m=>({floor:m.root.userData.level,id:m.root.userData.primitive,changes:changesFor(m.root,m.original,g.mode!=='rotate'),baseline:m.original}));if(edits.some(o=>changed(o.changes,o.baseline))){if(onEditMany?.(edits,g.scope)!==true)group.restore(g);}else group.restore(g);}
       else{const r=g.root,changes=changesFor(r,g.original,g.bounds);if(changed(changes,g.original)){if(onEdit(r.userData.level,r.userData.primitive,changes,g.original,{resizeBounds:!!g.bounds})===false)apply(r,g.original);}else apply(r,g.original);}
       updateBounds();return true;}
-    if(pressed&&e.pointerId===pressed.id){const p=pressed;pressed=null;release(e.pointerId);swallow(e);if(Math.hypot(e.clientX-p.x,e.clientY-p.y)<=5)onSelect(p.root.userData.level,p.root.userData.primitive,p.shift);return true;}return false;
+    if(pressed&&e.pointerId===pressed.id){const p=pressed;pressed=null;release(e.pointerId);swallow(e);if(Math.hypot(e.clientX-p.x,e.clientY-p.y)<=5&&!(multiple()&&control.mode==='rotate'&&!p.shift&&selectedRoots.includes(p.root)))onSelect(p.root.userData.level,p.root.userData.primitive,p.shift);return true;}return false;
   }
   function cancel(id){if(id!==undefined&&id!==null&&(gesture?.id??pressed?.id)!==id)return false;const g=gesture,p=pressed;gesture=null;pressed=null;window.KERN_DRAG_AXES?.refresh?.();bounds.hover(null);if(g){if(g.group)group.restore(g);else apply(g.root,g.original);control.pointerUp({button:0});controls.enabled=canNavigate();release(g.id);}if(p)release(p.id);updateBounds();return !!(g||p);}
   // Pointer capture can begin while an inspector input still owns keyboard
@@ -75,5 +75,5 @@ export function primitiveScene({scene,camera,renderer,controls,groups,data,prism
     const p=selected.point,n=selected.normal||new THREE.Vector3(0,1,0);return{x:p.x,y:p.z,z:p.y-groups.get(fid).position.y,normal:{x:n.x,y:n.z,z:n.y}};
   }
   function dispose(){if(disposed)return;unregisterAxes?.();previewWall(null);cancel();disposed=true;window.removeEventListener('keydown',escapeGesture,true);bounds.dispose();group.dispose();scaleHandles(false);control.detach();control.dispose();scene.remove(helper);for(const r of roots)r.removeFromParent();for(const g of [...Object.values(geometries),...cutGeometries])g.dispose();cap.dispose();for(const m of materials)m.dispose();}
-  return{select,sync,updateBounds,down,move,up,cancel,placement,previewWall,dispose,dragging:()=>!!gesture,ownsGesture:owner=>owner===gesture,busy:()=>!!(gesture||pressed),setMode(mode){if(['translate','scale','rotate'].includes(mode)){cancel();control.setMode(mode);control.setSpace(mode==='scale'?'local':'world');configure();}},objects:()=>roots};
+  return{pick:hit,select,sync,updateBounds,down,move,up,cancel,placement,previewWall,dispose,dragging:()=>!!gesture,ownsGesture:owner=>owner===gesture,busy:()=>!!(gesture||pressed),setMode(mode){if(['translate','scale','rotate'].includes(mode)){cancel();control.setMode(mode);control.setSpace(mode==='scale'?'local':'world');configure();}},objects:()=>roots};
 }

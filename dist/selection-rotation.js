@@ -9,8 +9,10 @@ function turn(p,c,d){const a=d*Math.PI/180,x=p[0]-c.x,y=p[1]-c.y;return[round(c.
 function legacyConnection(plan,ref,o){return !o.routeStair&&(arr(plan.verticalConnections).find(c=>c.room===ref.id&&arr(c.floors).includes(ref.floor)&&c.type==='stair')||arr(plan.splitLevelConnections).find(c=>c.room===ref.id&&(c.floor||c.level)===ref.floor&&!c.localSteps)||o.stairTransition&&!o.localSteps);}
 function inspect(plan,refs,options={}){
  const a=T.analyze(plan,refs,{...options,operation:'rotate'});if(!a.ok)throw new T.SelectionError(a.reason,a.code,{analysis:a});
- const boundary=a.warnings.find(w=>w.code==='boundary-opening');if(boundary)throw new T.SelectionError('Select both rooms connected by '+boundary.ref.id+' before rotating, so its opening stays attached.','rotation-opening-boundary');
- const index=T.indexPlan(plan);let step=0;for(const ref of a.refs){const o=index.map.get(T.key(ref)).object;
+ // Boundary connection records stay unchanged, as in Move. Existing geometry
+ // checks keep detached links invalid; do not expand selection or invent a wall.
+ for(const warning of a.warnings)if(warning.code==='boundary-opening')warning.reason='Opening '+warning.ref.id+' connects to an unselected room and may need reconnecting after rotation.';
+ const index=T.indexPlan(plan);let step=0;for(const ref of a.refs){const o=index.map.get(T.key(ref)).object;if(ref.kind==='doors'&&(!S.opening(o,plan.floors[ref.floor])||!S.wall(o,plan.floors[ref.floor]))){if(a.requested.some(r=>T.key(r)===T.key(ref)))throw new T.SelectionError('Opening '+ref.id+' is already detached. Deselect that opening to rotate the objects; its connection record will be retained.','rotation-detached-opening');a.warnings.push({code:'detached-opening',ref,reason:'Opening '+ref.id+' was already detached and still needs reconnecting.'});}
   if(ref.kind==='rooms'&&legacyConnection(plan,ref,o))step=90;
   if(ref.kind==='rooms'&&o.localSteps&&!o.routeStair)step=90;
  }
@@ -41,7 +43,7 @@ function rotate(plan,refs,degrees,options={}){
  }
  const openings=[];
  for(const ref of analysis.refs)if(ref.kind==='doors'){
-  const e=index.map.get(T.key(ref)),original=e.object,o=at(next,e.path),f=plan.floors[ref.floor],g=S.opening(original,f),wall=S.wall(original,f);if(!g||!wall)throw Error('Opening '+ref.id+' has no valid owning wall. Repair it before rotating.');
+  const e=index.map.get(T.key(ref)),original=e.object,o=at(next,e.path),f=plan.floors[ref.floor],g=S.opening(original,f),wall=S.wall(original,f);if(!g||!wall)continue;
   if(!original.wrap)o.edge=wall.edge;
   const tangent=turn(wall.u,{x:0,y:0},degrees),newLine=S.line({a:turn(S.at(wall,wall.lo),c,degrees),b:turn(S.at(wall,wall.hi),c,degrees)});if(!original.wrap&&tangent[0]*newLine.u[0]+tangent[1]*newLine.u[1]<0){o.offset=1-(original.offset??.5);if(original.maximumWallOffset!==undefined)o.maximumWallOffset=1-original.maximumWallOffset;}
   if(info.step&&original.side)o.side=direction(original.side);
