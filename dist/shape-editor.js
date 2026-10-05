@@ -1,6 +1,6 @@
 (function(){'use strict';const S=window.KERN_SHAPES;let editing=null,vertex=null,selectedVertices=new Set(),selectedVertexIds=new Set(),primaryVertexId=null,gesture=null,draft=[],cursor=null,hoverEdge=null,scope=null,lastTap=null,tapDown=null,snapGuide=null;
 const pen=document.createElement('button');pen.id='tool-pen';pen.innerHTML='Pen <kbd>P</kbd>';pen.title='P · Draw a polygon room';pen.setAttribute('aria-keyshortcuts','P');$('tool-draw').after(pen);pen.onclick=()=>{cancel();setTool(tool==='pen'?'select':'pen');};
-window.KERN_DRAG_AXES?.register(()=>gesture&&!gesture.marquee&&!gesture.rotate&&!gesture.adjoin&&!gesture.radius&&(!gesture.pointTransform||gesture.pointTransform==='move')?gesture:null,()=>{cancel();render();});
+window.KERN_DRAG_AXES?.register(()=>gesture&&!gesture.marquee&&!gesture.rotate&&!gesture.adjoin&&!gesture.radius&&(!gesture.pointTransform||gesture.pointTransform==='move')?gesture:null,()=>{cancel();render();},g=>{const p=g.pointTransform==='move'?g.start:{x:S.raw(g.original)[g.index][0],y:S.raw(g.original)[g.index][1]};return{space:'2d',origin:{x:p.x,y:0,z:p.y},supported:['x','z'],label:'Point move'};});
 const eligible=r=>r&&canEdit(r)&&!isStair(r)&&!r.stairTransition;
 function current(){return editing===selected?room(editing):null;}
 // Indices are transient: Undo can remove an inserted point or shift later ones.

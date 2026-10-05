@@ -2,7 +2,7 @@
 (function(){
 'use strict';
 const kinds=['rooms','doors','symbols','services','annotations','primitives'],sanitized=new WeakSet();
-window.KERN_DRAG_AXES?.register(()=>moving&&!moving.marquee?moving:null,()=>finishMove(true));
+window.KERN_DRAG_AXES?.register(()=>moving&&!moving.marquee?moving:null,()=>finishMove(true),d=>({space:'2d',origin:{x:d.start.x,y:0,z:d.start.y},supported:['x','z'],label:'Group move'}));
 let query='',rendering=false,renderSource=null,projecting=false,moving=null,clipboard=null,pasteCount=0,scene=null,revision=0,projectedScope='',projectedSignature='';
 const key=(kind,id)=>kind+':'+id,refKey=r=>r.floor+'\u0000'+r.kind+'\u0000'+r.id;
 const eyeIcon=shown=>`<svg class="layer-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M1 8s2.5-4 7-4 7 4 7 4-2.5 4-7 4-7-4-7-4Z"/><circle cx="8" cy="8" r="2"/>${shown?'':'<path d="M2 2l12 12"/>'}</svg>`;

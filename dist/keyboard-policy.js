@@ -3,22 +3,27 @@
  * key boundaries so engaging or releasing a lock never catches up to the mouse. */
 (function(){
 'use strict';
-const providers=new Map(),states=new WeakMap(),swallowed=new Set(),axes={x:'x',c:'y',z:'z'};
+const providers=new Map(),states=new WeakMap(),swallowed=new Set(),listeners=new Set(),axes={x:'x',c:'y',z:'z'};
 const copy=p=>({x:p.x||0,y:p.y||0,z:p.z||0});
-function state(owner,initial={}){let s=states.get(owner);if(!s){const p=copy(initial);s={raw:copy(p),out:copy(p),anchorRaw:copy(p),anchorOut:copy(p),held:new Set(),fallback:null};states.set(owner,s);}return s;}
-function active(){for(const [get,cancel] of providers){const owner=get();if(owner)return{owner,cancel};}return null;}
+function state(owner,initial={}){let s=states.get(owner);if(!s){const p=copy(initial);s={initial:copy(p),raw:copy(p),out:copy(p),anchorRaw:copy(p),anchorOut:copy(p),held:new Set(),fallback:null};states.set(owner,s);}return s;}
+function active(){for(const [get,provider] of providers){const owner=get();if(owner)return{owner,...provider};}return null;}
+function snapshot(){const current=active();if(!current?.describe)return null;const d=current.describe(current.owner);if(!d?.origin||!['2d','3d'].includes(d.space))return null;const s=state(current.owner),delta=d.delta||{x:s.out.x-s.initial.x,y:s.out.y-s.initial.y,z:s.out.z-s.initial.z};if(!['x','y','z'].every(a=>Number.isFinite(d.origin[a]??0)&&Number.isFinite(delta[a]??0)))return null;return{owner:current.owner,space:d.space,origin:copy(d.origin),delta:copy(delta),axes:['x','y','z'].filter(a=>s.held.has(a)),supported:(d.supported||['x','y','z']).filter(a=>['x','y','z'].includes(a)),label:d.label||'Move'};}
+let refreshing=false,queued=false;
+function refresh(){if(refreshing)return;refreshing=true;try{const value=snapshot();for(const listener of listeners)listener(value);}finally{refreshing=false;}}
+function later(){if(queued)return;queued=true;queueMicrotask(()=>{queued=false;refresh();});}
 function rebase(s){s.anchorRaw=copy(s.raw);s.anchorOut=copy(s.out);}
-function apply(owner,raw,initial){if(!owner)return copy(raw);const s=state(owner,initial),next=copy(raw),out={},allowed=s.held.size?s.held:s.fallback;for(const a of ['x','y','z'])out[a]=s.anchorOut[a]+(!allowed?.size||allowed.has(a)?next[a]-s.anchorRaw[a]:0);s.raw=next;s.out=out;return copy(out);}
+function apply(owner,raw,initial){if(!owner)return copy(raw);const s=state(owner,initial),next=copy(raw),out={},allowed=s.held.size?s.held:s.fallback;for(const a of ['x','y','z'])out[a]=s.anchorOut[a]+(!allowed?.size||allowed.has(a)?next[a]-s.anchorRaw[a]:0);s.raw=next;s.out=out;refresh();return copy(out);}
 function plan(owner,p,initial){const q=apply(owner,{x:p.x,z:p.y},initial&&{x:initial.x,z:initial.y});return{x:q.x,y:q.z};}
 function fallback(owner,axis){const s=state(owner),next=axis?new Set([axis]):null;if((s.fallback?.values().next().value||null)!==(axis||null)){rebase(s);s.fallback=next;}}
-function accept(owner,p){const s=owner&&states.get(owner);if(s)s.out=copy(p);}
+function accept(owner,p){const s=owner&&states.get(owner);if(s){s.out=copy(p);refresh();}}
 function acceptPlan(owner,p){accept(owner,{x:p.x,z:p.y});}
 function validPlan(owner,p,anchor){const s=owner&&states.get(owner),origin=anchor?{x:anchor.x,z:anchor.y}:s?.anchorOut;return !s||!s.held.size||[['x',p.x],['z',p.y]].every(([a,v])=>s.held.has(a)||Math.abs(v-origin[a])<1e-6);}
-function key(e,up=false){const current=active();if(!up&&e.key==='Escape'&&current?.cancel){e.preventDefault();e.stopImmediatePropagation();clear(true);current.cancel();return true;}const letter=({KeyX:'x',KeyZ:'z',KeyC:'c'})[e.code]||String(e.key||'').toLowerCase(),axis=axes[letter];if(!axis)return false;const owner=current?.owner,s=owner&&state(owner);if(up){if(!swallowed.has(letter)&&!s?.held.has(axis))return false;swallowed.delete(letter);if(s?.held.has(axis)){rebase(s);s.held.delete(axis);}}else{if(!owner){if(!swallowed.has(letter))return false;e.preventDefault();e.stopImmediatePropagation();return true;}if(e.isComposing||e.key==='Process'||e.key==='Dead')return false;if(!s.held.has(axis)){rebase(s);s.held.add(axis);}swallowed.add(letter);}e.preventDefault();e.stopImmediatePropagation();return true;}
-function clear(preserveKeys=false){if(!preserveKeys)swallowed.clear();for(const get of providers.keys()){const owner=get();if(owner){const s=states.get(owner);if(s){rebase(s);s.held.clear();}}}}
-window.KERN_DRAG_AXES={register(get,cancel){providers.set(get,cancel);return()=>providers.delete(get);},begin:state,apply,plan,fallback,accept,acceptPlan,validPlan,key,clear,locked:owner=>!!states.get(owner)?.held.size};
+function key(e,up=false){const current=active();if(!up&&e.key==='Escape'&&current?.cancel){e.preventDefault();e.stopImmediatePropagation();clear(true);current.cancel();refresh();return true;}const letter=({KeyX:'x',KeyZ:'z',KeyC:'c'})[e.code]||String(e.key||'').toLowerCase(),axis=axes[letter];if(!axis)return false;const owner=current?.owner,s=owner&&state(owner);if(up){if(!swallowed.has(letter)&&!s?.held.has(axis))return false;swallowed.delete(letter);if(s?.held.has(axis)){rebase(s);s.held.delete(axis);}}else{if(!owner){if(!swallowed.has(letter))return false;e.preventDefault();e.stopImmediatePropagation();return true;}if(e.isComposing||e.key==='Process'||e.key==='Dead')return false;if(!s.held.has(axis)){rebase(s);s.held.add(axis);}swallowed.add(letter);}e.preventDefault();e.stopImmediatePropagation();refresh();return true;}
+function clear(preserveKeys=false){if(!preserveKeys)swallowed.clear();for(const get of providers.keys()){const owner=get();if(owner){const s=states.get(owner);if(s){rebase(s);s.held.clear();}}}refresh();}
+window.KERN_DRAG_AXES={register(get,cancel,describe){providers.set(get,{cancel,describe});return()=>{providers.delete(get);refresh();};},begin(owner,initial){const s=state(owner,initial);refresh();return s;},snapshot,subscribe(listener){listeners.add(listener);listener(snapshot());return()=>listeners.delete(listener);},refresh,apply,plan,fallback,accept,acceptPlan,validPlan,key,clear,locked:owner=>!!states.get(owner)?.held.size};
 window.addEventListener('keyup',e=>key(e,true),true);
-window.addEventListener('blur',()=>clear(),true);
+window.addEventListener('blur',()=>{clear();later();},true);
+for(const type of ['pointerdown','pointermove','pointerup','pointercancel','lostpointercapture','click','change'])window.addEventListener(type,later,true);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)clear();},true);
 })();
 /* One early modifier policy for every editor listener. Load before app.js. */
