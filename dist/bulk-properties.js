@@ -37,7 +37,7 @@ function roomSet(e,k,v){const r=e.o;
  if(k==='heightDefault'){if(v)delete r.height;else r.height=e.f.clearHeight??3;return;}
  if(k==='entrance'){e.f.entrances=(e.f.entrances||[]).filter(id=>id!==r.id);if(v)e.f.entrances.push(r.id);return;}
  if(k==='type'){const option=roomTypeOption(r,v);if(!option.valid)throw Error(option.reason);const linked=groupRefs(stairGroup(r));for(const target of linked.length?linked.map(x=>x.room):[r])window.KERN_CONCRETE_CAPS.setType(target,v);return;}
- r[k]=v;if(k==='name'&&r.diagramLabel!==undefined)r.diagramLabel=v;
+ if(r.routeStair&&['x','y'].includes(k))r[k]=cleanNumber(r[k]+v-window.KERN_ROUTE_STAIRS.bounds(r)[k]);else r[k]=v;if(k==='name'&&r.diagramLabel!==undefined)r.diagramLabel=v;
  if(['x','y','w','h'].includes(k))syncStairEdit(r);
 }
 function doorSet(e,k,v){const d=e.o,g=doorGeometry(d);
@@ -71,7 +71,7 @@ function fields(selection=refs()){
  const yesno=(id,section,label,filter,k,extra={})=>choose(id,section,label,filter,k,[[true,'Yes'],[false,'No']],{get:e=>!!e.o[k],...extra});
  text('rooms.name','Rooms','Label',rooms,'name');
  choose('rooms.type','Rooms','Room type',rooms,'type',roomTypes.map(v=>[v,roomTypeLabels[v]]));
- for(const [k,label]of [['x','X position'],['y','Y position'],['w','Width'],['h','Depth']])numeric('rooms.'+k,'Rooms',label+' · m',rooms,k,k==='w'||k==='h'?1:-150,150);
+ for(const [k,label]of [['x','X position'],['y','Y position'],['w','Width'],['h','Depth']])numeric('rooms.'+k,'Rooms',label+' · m',e=>rooms(e)&&(!['w','h'].includes(k)||!e.o.routeStair),k,k==='w'||k==='h'?1:-150,150,{get:e=>e.o.routeStair?window.KERN_ROUTE_STAIRS.bounds(e.o)[k]:e.o[k]});
  numeric('rooms.offset','Room surfaces','Offset from own floor · m',regular,'offset',-150,150,{get:e=>cleanNumber((e.o.z??e.f.z)-e.f.z)});
  numeric('rooms.z','Room surfaces','Absolute surface elevation · m',regular,'z',-150,150,{get:e=>e.o.z??e.f.z});
  numeric('rooms.height','Room surfaces','Clear height / solid thickness · m',volumes,'height',.5,50,{get:e=>e.o.height??e.f.clearHeight??3,needsChange:(e,v)=>e.o.height===undefined||!eq(e.o.height,v)});

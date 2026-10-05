@@ -1,3 +1,26 @@
+/* Held translation axes use the viewport convention: X/right, Y/up, Z/depth.
+ * Each gesture owns its last unconstrained and displayed coordinates. Rebase at
+ * key boundaries so engaging or releasing a lock never catches up to the mouse. */
+(function(){
+'use strict';
+const providers=new Map(),states=new WeakMap(),swallowed=new Set(),axes={x:'x',c:'y',z:'z'};
+const copy=p=>({x:p.x||0,y:p.y||0,z:p.z||0});
+function state(owner,initial={}){let s=states.get(owner);if(!s){const p=copy(initial);s={raw:copy(p),out:copy(p),anchorRaw:copy(p),anchorOut:copy(p),held:new Set(),fallback:null};states.set(owner,s);}return s;}
+function active(){for(const [get,cancel] of providers){const owner=get();if(owner)return{owner,cancel};}return null;}
+function rebase(s){s.anchorRaw=copy(s.raw);s.anchorOut=copy(s.out);}
+function apply(owner,raw,initial){if(!owner)return copy(raw);const s=state(owner,initial),next=copy(raw),out={},allowed=s.held.size?s.held:s.fallback;for(const a of ['x','y','z'])out[a]=s.anchorOut[a]+(!allowed?.size||allowed.has(a)?next[a]-s.anchorRaw[a]:0);s.raw=next;s.out=out;return copy(out);}
+function plan(owner,p,initial){const q=apply(owner,{x:p.x,z:p.y},initial&&{x:initial.x,z:initial.y});return{x:q.x,y:q.z};}
+function fallback(owner,axis){const s=state(owner),next=axis?new Set([axis]):null;if((s.fallback?.values().next().value||null)!==(axis||null)){rebase(s);s.fallback=next;}}
+function accept(owner,p){const s=owner&&states.get(owner);if(s)s.out=copy(p);}
+function acceptPlan(owner,p){accept(owner,{x:p.x,z:p.y});}
+function validPlan(owner,p,anchor){const s=owner&&states.get(owner),origin=anchor?{x:anchor.x,z:anchor.y}:s?.anchorOut;return !s||!s.held.size||[['x',p.x],['z',p.y]].every(([a,v])=>s.held.has(a)||Math.abs(v-origin[a])<1e-6);}
+function key(e,up=false){const current=active();if(!up&&e.key==='Escape'&&current?.cancel){e.preventDefault();e.stopImmediatePropagation();clear(true);current.cancel();return true;}const letter=({KeyX:'x',KeyZ:'z',KeyC:'c'})[e.code]||String(e.key||'').toLowerCase(),axis=axes[letter];if(!axis)return false;const owner=current?.owner,s=owner&&state(owner);if(up){if(!swallowed.has(letter)&&!s?.held.has(axis))return false;swallowed.delete(letter);if(s?.held.has(axis)){rebase(s);s.held.delete(axis);}}else{if(!owner){if(!swallowed.has(letter))return false;e.preventDefault();e.stopImmediatePropagation();return true;}if(e.isComposing||e.key==='Process'||e.key==='Dead')return false;if(!s.held.has(axis)){rebase(s);s.held.add(axis);}swallowed.add(letter);}e.preventDefault();e.stopImmediatePropagation();return true;}
+function clear(preserveKeys=false){if(!preserveKeys)swallowed.clear();for(const get of providers.keys()){const owner=get();if(owner){const s=states.get(owner);if(s){rebase(s);s.held.clear();}}}}
+window.KERN_DRAG_AXES={register(get,cancel){providers.set(get,cancel);return()=>providers.delete(get);},begin:state,apply,plan,fallback,accept,acceptPlan,validPlan,key,clear,locked:owner=>!!states.get(owner)?.held.size};
+window.addEventListener('keyup',e=>key(e,true),true);
+window.addEventListener('blur',()=>clear(),true);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)clear();},true);
+})();
 /* One early modifier policy for every editor listener. Load before app.js. */
 (function(){
 'use strict';
@@ -15,6 +38,8 @@ function allowed(e){
 function paused(e){return typing(e.target)||window.KERN_WORKSPACE?.isHome?.()||window.KERN_EXPLORER?.active||e.target.closest?.('#workspace-tabs,#workspace-project-dialog,dialog,[role=menu],[role=listbox],.toolbar-popover')||document.querySelector('dialog[open]');}
 for(const name of ['pointerdown','pointermove','pointerup'])window.addEventListener(name,e=>window.KERN_THIN_WALL_UI?.handlePointer(e),true);
 window.addEventListener('keydown',e=>{
+ if(window.KERN_DRAG_AXES.key(e))return;
+ if(e.key==='Escape')window.KERN_DRAG_AXES.clear(true);
  // Relocated chrome owns its native activation and mnemonic keys. Do not let
  // later canvas capture handlers turn Space into pan or E into Rotate.
  // Route menu navigation before canvas captures; retain native Tab behavior.

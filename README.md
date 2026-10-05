@@ -249,3 +249,19 @@ Multi-object property edits now complete their model transaction before repainti
 Shift-select two or more blockout shapes or thin walls in 3D to use a shared gizmo at their selection center. W moves them together, E rotates their positions and orientations around that center, and R uniformly scales their dimensions and spacing. The bulk inspector has the same mode buttons. Group scaling uses the center handle only: drag right/up to enlarge or left/down to shrink, keeping proportions even when selected objects have different rotations; single-object selection restores ordinary axis scaling and face handles.
 
 Move snapping follows the grid. Uniform-scale snapping applies to the change in the group's longest dimension; Ctrl allows free movement/scaling. Shift snaps rotation to 5 degrees. A group containing thin walls rotates only around the upright axis and scales in compatible steps that keep every wall's quarter-metre dimensions and supported thickness. Exploded floor spacing remains display-only, and each object keeps its owning floor. One completed gesture is one Undo step; interrupted or rejected gestures restore the entire group.
+
+### Live path bounds
+
+Route Stair and Ramp selection outlines and dimensions follow the current path,
+including flight widths, end/turn landings and edited landing outlines. Moving,
+inserting or removing route points updates the bounds immediately in 2D and 3D.
+The common Width/Depth fields show measured bounds; use the path width and
+point/landing controls to edit the route. Common X/Y fields move the measured
+footprint. Selecting, measuring, framing or exporting does not change the saved
+path's coordinate frame or normalized points.
+
+## Held world-axis movement and viewport Shift selection
+
+While an object or point translation is active, hold **X** for world X, **Z** for world Z (plan depth), or **C** for world Y (vertical). Hold multiple keys to allow that combination of axes. Releasing keys resumes unconstrained movement from the current position without catching up to mouse travel on blocked axes. The move owns these keys, including repeated/modified presses, so they cannot also Disconnect, Connect, Copy/Cut or Undo. Those ordinary shortcuts, including C in Walk, retain their normal behavior outside a move. Planar-only edits stay on their plane, so C alone temporarily holds their position; existing 3D vertical handles and primitive gizmos support Y movement. Escape, pointer cancellation and blur discard the edit.
+
+Shift-click in the 3D viewport adds/removes the picked object without changing the checked floor set or active floor. A bare floor-label Shift-click does nothing. Use Shift-click on the Floors panel to change the checked floor set. Plain viewport floor navigation is unchanged.

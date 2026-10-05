@@ -134,9 +134,11 @@ function hit(h,id,kind,shift=false){
    await mode(h,'3d');check(`${currentMode} empty scope survives mode change`,()=>assertState(h,[],undefined,{baseline}));
   }
   for(const kind of ['slab','wall','roomLabel','floorLabel']){
-   clickRow(h,'L0');hit(h,'L2',kind,true);check(`Shift ${kind} adds clicked floor`,()=>assertState(h,['L0','L2'],undefined,{baseline}));
-   hit(h,'L2',kind,true);check(`Shift ${kind} removes clicked floor`,()=>assertState(h,['L0'],undefined,{baseline}));
-   hit(h,'L0',kind,true);check(`Shift ${kind} removes final floor`,()=>assertState(h,[],undefined,{baseline}));
+   clickRow(h,'L0');clickRow(h,'L2',true);hit(h,'L2',kind,true);
+   check(`Shift viewport ${kind} preserves enabled floors and active floor`,()=>assertState(h,['L0','L2'],'L0',{baseline}));
+   check(`Shift viewport ${kind} selects only the room metadata`,()=>assert.deepEqual(h.selected(),kind==='floorLabel'?[]:[{floor:'L2',kind:'rooms',id:'a'}]));
+   clickRow(h,'L0');hit(h,'L0',kind,true);
+   check(`Shift viewport ${kind} cannot remove the final floor`,()=>assertState(h,['L0'],'L0',{baseline}));
   }
  });
  await scenario('plain selection resets Shift union and eye inspection',async h=>{
@@ -180,7 +182,7 @@ function hit(h,id,kind,shift=false){
   const baseline=h.snapshot();clickRow(h,'L0');hit(h,'L2','cap');check('actual concrete cap atomically selects exclusive floor',()=>assertState(h,['L2'],'L2',{baseline}));
   hit(h,'L2','cap');check('second cap click selects protected cap details',()=>assert.deepEqual(h.selected(),[{floor:'L2',kind:'rooms',id:'cap'}]));
   check('cap retains source protection',()=>{assert(h.run("model.floors.L2.rooms[0].locked"));assert(h.run("model.floors.L2.rooms[0].derivedFootprint"));let handles=[];h.current().scene.traverse(o=>{if(o.userData.edge&&meshShown(o))handles.push(o.userData.edge)});assert.equal(handles.length,0);});
-  hit(h,'L2','cap',true);check('Shift cap removes floor',()=>assertState(h,[],undefined,{baseline}));
+  hit(h,'L2','cap',true);check('Shift cap toggles only the object and retains its floor',()=>{assertState(h,['L2'],'L2',{baseline});assert.deepEqual(h.selected(),[])});
  },capPlan);
  await scenario('retained object while Shift enabling floor',async h=>{clickRow(h,'L0');h.L.selectLayer('rooms','a',{},'L0');const refs=h.selected();h.key('f');const target=h.pose().target;clickRow(h,'L2',true);h.key('f');check('Shift floor add retains object selection and F target',()=>{assert.deepEqual(h.selected(),refs);close(h.pose().target,target,'retained object target')});await mode(h,'2d');await mode(h,'3d');h.key('f');check('retained object F target survives mode roundtrip after Shift scope change',()=>{assert.deepEqual(h.selected(),refs);close(h.pose().target,target,'restored retained target')});});
  console.log(JSON.stringify({passed:success.length,failed:failures.length,failures},null,2));if(failures.length)process.exitCode=1;

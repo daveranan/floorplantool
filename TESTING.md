@@ -365,3 +365,34 @@ Independent review passed 1,000 rigid-transform/explode probes, 1,280 thin-wall 
 No schema, seed-plan or audience change is made, and the supplied reference remains outside the source/deployment. Current cloud-browser access supports native DOM checks but has no WebGL2 context, so physical 3D pointer behavior and GPU rendering remain unverified. Real camera, ray, transform, persistence and event behavior are covered by the renderer-mocked tests.
 
 Final v77 verification: all 88 focused release suites passed on the final application source and rebuilt preview bundle. The dedicated `test-primitive-group-ui.cjs` covers exact selection coverage, opaque/stale scopes, in-place model changes, malformed transforms, hidden/locked/storage guards, cross-floor duplicate IDs, no-op/Undo behavior, toolbar shortcuts and atomic rollback. Persistence tests distinguish a thrown pre-save guard from a post-save render failure using actual stored-plan proof, retaining correct model, disk and history state in either case.
+
+### Dynamic route bounds correction
+
+`node test-route-dynamic-bounds.cjs` exercises production-derived Stair and Ramp
+bounds, point/width/landing edits, rotated frames, inspector and selection
+measurements, marquee/hit testing, persistence and Three.js selection geometry.
+The measured frame is a non-mutating clone; the authored room frame and local
+route coordinates remain unchanged during display. Sheet export and cross-floor
+selection use the same current geometry rather than the route's creation frame.
+
+Independent numerical review covered 300 deterministic Stair/Ramp variants with
+arbitrary rotations, affine skew, moved endpoints, per-flight widths, landing
+depths and custom outlines. Reframed world points differed by at most 1.6e-14 m;
+footprint symmetric difference was at most 1.16e-9 m². Seven production DOM
+render cases preserved exact authored JSON while updating the measured fields.
+Existing route geometry/UI, ramp UI, building-transform (17 cases plus 35
+random fixtures), selection-transform (30 cases), transform modifiers, point
+transforms, corner-rotation scene and ramp scene (317 checks) passed. Three.js
+scene tests use a renderer double; native GPU presentation remains unverified.
+
+## Held-axis translation and viewport Shift selection
+
+`test-translation-axis-lock.cjs` dispatches production-order events for held X/Z/C keys, simultaneous axes, uppercase/repeated/modified chords, key release continuity, input-targeted Escape, pointer/capture/blur cancellation, room and primitive groups, qualified cross-floor movement, polygon vertices/point groups, and route points/custom landing vertices. Constraint projection follows existing snapping and uses Three's world convention: X/right, Z/depth, C/Y vertical. Planar-only gestures remain planar. Existing Walk crouch and exact-keyboard-policy suites preserve non-drag C and normal shortcuts.
+
+`test-viewport-shift-selection.cjs` adds 33 actual-ray/production-selection checks. It covers floor surfaces, room labels and walls, pure floor labels, doors/windows, groups and primitives, disabled/hidden/locked scopes, and 2D/3D roundtrips. Its first test reproduces the original floor-deselection bug against unchanged v77 source. The shared-floor controller's 187 checks retain plain viewport and Floors-panel navigation behavior. Real Three camera/raycast geometry is exercised with WebGL drawing replaced; no new GPU or physical-input claim is made.
+
+`test-translation-axis-scene.cjs` adds 109 production/real-Three checks across all four primitive types and shared gizmos, snapped/free world XYZ translation, held-key unions and exact key-boundary continuity, room movement/elevation, route node/height/landing handles, linked endpoint no-ops, foreign pointers, interrupted gestures, one-step Undo, and persisted reload. The invisible XYZ interaction plane is retained for the gesture, so projecting the displayed object off that plane cannot shift subsequent ray intersections. `test-translation-axis-rejections.cjs` adds eleven validation/lifecycle groups for rejected polygon/service/landing positions, hard bounds, oblique wall-bound openings, symbols/annotations/service-body movement, and capture/no-op/cancellation safety. Axis anchors use the last accepted geometry rather than invalid proposals. Existing Ctrl+Z cancellation coverage for an active move uses the visible Undo control, since the requested drag now exclusively owns Z; normal Ctrl+Z is verified after release.
+
+The combined v78 gate is `npm run test:release` (`scripts/test-v78.cjs`, 93 focused suites). Private plans/screenshots, saved schema and audience remain unchanged. No fresh native-browser/GPU or physical-device pass is claimed.
+
+Final v78 verification: all 93 focused release suites passed on the final application source. The rebuilt preview bundle was independently rebuilt to a comparison file and matched byte-for-byte. All five new suites passed, including 109 scene-axis checks, 12 2D held-axis groups, 11 rejected-input/lifecycle groups, 33 viewport Shift-selection checks and 21 dynamic-route bounds groups. The enlarged isolated-scene matrix has a five-minute process budget; an earlier run reached the previous two-minute harness limit without an assertion failure, then completed under the appropriate budget.

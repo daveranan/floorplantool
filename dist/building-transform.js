@@ -45,6 +45,7 @@ function objectPoints(o,key,options){
  * outer XY extrema as its base polygon plus the attached flight faces. Calculating
  * those vertices directly also avoids translation-sensitive clip rounding failures. */
 function routePolygons(r){
+  const R=root.KERN_ROUTE_STAIRS||(typeof require==='function'?require('./route-stairs.js'):null);if(R?.displayGeometry)return R.displayGeometry(r).polygons.map((polygon,i)=>({id:r.id+'-part-'+i,polygon}));
   const vs=r.shape?.vertices||[{x:0,y:0},{x:1,y:0},{x:1,y:1},{x:0,y:1}],raw=vs.map(v=>[r.x+v.x*r.w,r.y+v.y*r.h]);
   if(raw.length<4)throw new TranslationError('A stair route requires a valid affine room frame.','invalid-route-frame');
   const origin=raw[0],u=[raw[1][0]-origin[0],raw[1][1]-origin[1]],v=[raw[3][0]-origin[0],raw[3][1]-origin[1]],ul=Math.hypot(...u),vl=Math.hypot(...v);
