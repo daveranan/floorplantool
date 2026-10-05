@@ -91,6 +91,7 @@ function fields(selection=refs()){
  text('primitives.name','Shapes / thin walls','Name',primitives,'name');
  for(const [k,label,min,max]of [['x','X position',-150,150],['y','Y position',-150,150],['z','Height above own floor',-150,150],['w','Width / wall length',.02,150],['h','Depth / wall thickness',.02,150],['height','Shape / wall height',.02,150],['rotation','Turn · °',-360,360]])numeric('primitives.'+k,'Shapes / thin walls',label+(k==='rotation'?'':' · m'),primitives,k,min,max);
  for(const k of ['tiltX','tiltY'])numeric('primitives.'+k,'Shapes / thin walls',k==='tiltX'?'Tilt X · °':'Tilt Y · °',e=>primitives(e)&&!e.o.wall,k,-360,360);
+ for(const [k,label]of [['topWidth','Top width'],['topDepth','Top depth'],['bottomWidth','Bottom width'],['bottomDepth','Bottom depth']])numeric('primitives.'+k,'Cube taper',label+' · m',e=>primitives(e)&&e.o.primitive==='cube'&&!e.o.wall,k,0,150,{get:e=>window.KERN_PRIMITIVES.endSizes(e.o)[k],set:(e,v)=>{const next=window.KERN_PRIMITIVES.reshape(e.o,{[k]:v});Object.assign(e.o,next);if(!next.taper)delete e.o.taper;}});
  text('primitives.color','Shapes / thin walls','Colour · #rrggbb',primitives,'color',{pattern:/^#[\da-f]{6}$/i,get:e=>e.o.color||'#d6a46b'});
  text('symbols.name','Outline items','Label',symbols,'name');
  choose('symbols.kind','Outline items','Item type',symbols,'kind',window.KERN_OBJECTS.catalog.map(o=>[o.kind,o.name]));

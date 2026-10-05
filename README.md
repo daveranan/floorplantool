@@ -274,3 +274,9 @@ Active point and object moves show a small live measurement from the drag start:
 ## Stable Walk entry
 
 Walk from here keeps the picked physical surface position and the current horizontal facing. A short 360 ms camera move brings the view to the character's eye height along the shortest rotation path; reduced-motion settings skip the animation. Labels do not displace the pick, exploded spacing stays display-only, and ramps and dropped rooms use their actual surface height. Wall/ceiling hits and blocked spots are rejected without relocating the character. Movement and look input wait for the entry to settle. Saved starts retain their authored facing, and Fly-to-Walk keeps the local view direction.
+
+## Centered cube taper
+
+Select a cube to set its **Top width**, **Top depth**, **Bottom width** and **Bottom depth** in metres. Both ends share the same center, so reducing the bottom makes an inward-tapered base; reducing the top makes an upward taper. Zero end sizes can form a wedge or pyramid. Equal end sizes restore an ordinary cube. Height and orientation keep their existing controls.
+
+Overall Width/Depth and the 2D/3D resize handles scale the profile proportionally. Group scaling also retains the taper. Multi-selection exposes the four shared end-size fields only for selected blockout cubes, excluding other primitives and thin walls. The actual silhouette and inset edges appear in plan view and floor exports, and the solid mesh follows those same corners in 3D. Taper travels with Copy, Duplicate, floor transfers, Undo/Redo and portable backups. Existing cubes load unchanged.

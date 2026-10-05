@@ -5,7 +5,7 @@
 #workspace-building-project[hidden]{display:none!important}
 #buildingmenu>.toolbar-popover-panel{width:290px;max-width:calc(100vw - 16px)}
 #buildingmenu>.toolbar-popover-panel>#buildingname{display:none}
-#inspectorpanel,body.panelsopen #inspectorpanel,body[data-view-mode=3d] #inspectorpanel{display:flex;flex-direction:column;min-height:0;padding:0;overflow:hidden;scrollbar-gutter:auto}
+#inspectorpanel,body.panelsopen #inspectorpanel,body[data-view-mode="3d"] #inspectorpanel{display:flex;flex-direction:column;min-height:0;padding:0;overflow:hidden;scrollbar-gutter:auto}
 .inspector-toolbar{position:relative;z-index:35;display:flex;align-items:center;justify-content:space-between;gap:8px;flex:none;min-width:0;min-height:51px;padding:8px 10px;background:var(--panel);border-bottom:1px solid var(--line)}
 /* Relocate the original segmented control without restyling it. */
 .inspector-toolbar .viewmode{margin:0;min-width:0}
@@ -20,8 +20,8 @@
 #inspectorpanel>#inspector{display:block;flex:1;min-height:0;max-height:none;overflow:auto;overscroll-behavior:contain;padding:0 14px 14px}
 #inspectorpanel>#inspector[data-selection=none]{display:flex;flex-direction:column}
 #inspectorpanel>#inspector[data-selection=none] .connectionlist{overflow:auto}
-body.editing3d[data-view-mode=3d] #inspectorpanel>#inspector{flex:1;max-height:none;padding:0 14px 12px}
-body.editing3d[data-view-mode=3d] #inspectorpanel>.threeoptions{flex:0 1 35%;min-height:0}
+body.editing3d[data-view-mode="3d"] #inspectorpanel>#inspector{flex:1;max-height:none;padding:0 14px 12px}
+body.editing3d[data-view-mode="3d"] #inspectorpanel>.threeoptions{flex:0 1 35%;min-height:0}
 #inspectorpanel>.threeoptions{min-height:0;overscroll-behavior:contain}
 .inspector-toolbar #collapseinspector{flex:none;margin:0}
 @media(min-width:721px){.appbar .toolbar{flex-wrap:nowrap}.appbar .editbar{min-width:0;overflow-x:auto;scrollbar-width:thin}.appbar .viewtools{display:none}.inspector-toolbar #collapseinspector{display:none!important}}
@@ -40,7 +40,7 @@ body.editing3d[data-view-mode=3d] #inspectorpanel>.threeoptions{flex:0 1 35%;min
   .zoom-control #viewmenu>summary{min-height:40px;min-width:30px}
   .inspector-toolbar #collapseinspector{min-height:40px;min-width:32px;font-size:18px;padding:0}
   .inspector-collapsed main{grid-template-rows:118px minmax(0,1fr) 48px}
-  .inspector-collapsed #inspectorpanel,.inspector-collapsed[data-view-mode=3d] #inspectorpanel{display:flex!important}
+  .inspector-collapsed #inspectorpanel,.inspector-collapsed[data-view-mode="3d"] #inspectorpanel{display:flex!important}
   .inspector-collapsed #inspectorpanel>:not(.inspector-toolbar){display:none!important}
   .inspector-collapsed .inspector-toolbar #collapseinspector{transform:rotate(180deg)}
 }

@@ -17,7 +17,11 @@ export function primitiveScene({scene,camera,renderer,controls,groups,data,prism
     root.userData={primitive:o.id,level:level.id,record,floorZ:level.z};
     apply(root,o);
     if(Array.isArray(cutPieces)&&prismGeometry){const inverse=root.matrixWorld.clone().invert();for(const part of cutPieces){const geometry=prismGeometry(part);geometry.translate(0,part.z,0);geometry.applyMatrix4(inverse);cutGeometries.push(geometry);root.add(new THREE.Mesh(geometry,material));}}
-    else{root.add(new THREE.Mesh(geometries[o.primitive],material));if(o.primitive==='hemisphere')root.add(new THREE.Mesh(cap,material));}
+    else{let geometry=geometries[o.primitive];if(o.primitive==='cube'&&o.taper){
+      geometry=geometry.clone();const positions=geometry.attributes.position,t=o.taper;
+      for(let i=0;i<positions.count;i++){const top=positions.getY(i)>0;positions.setX(i,positions.getX(i)*(top?t.topX:t.bottomX));positions.setZ(i,positions.getZ(i)*(top?t.topY:t.bottomY));}
+      positions.needsUpdate=true;geometry.computeVertexNormals();geometry.computeBoundingBox();geometry.computeBoundingSphere();cutGeometries.push(geometry);
+    }root.add(new THREE.Mesh(geometry,material));if(o.primitive==='hemisphere')root.add(new THREE.Mesh(cap,material));}
     groups.get(level.id).add(root);roots.push(root);byId.set(level.id+'\0'+o.id,root);
   }
   const control=new TransformControls(camera,canvas);control.disconnect();canvas.style.touchAction='none';control.setSize(.8);control.setSpace('world');const helper=control.getHelper();scene.add(helper);

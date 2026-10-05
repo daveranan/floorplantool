@@ -417,3 +417,25 @@ Walk now awaits an in-progress renderer rebuild, clears old held input on entry 
 The historical partial-harness `test-fly-mode.cjs` still fails its Tab/active assertion with the unchanged v79 Explorer as well. The production-order entry suite and existing production crouch/lift suites exercise and pass the corresponding Fly/Walk transition behavior.
 
 Final v80 verification: all 96 focused release suites passed. The final 21-group entry suite passed after all review fixes. Focused drag-feedback, crawl-spawn, lift-camera, ordinary Walk/Fly camera and gait suites also passed. Script syntax and whitespace checks passed, and an independent 3D rebuild matched the shipping bundle byte-for-byte. The read-only review found no remaining concrete blockers. Native-browser pointer lock and GPU presentation remain unverified.
+
+## Centered cube taper
+
+`test-cube-taper.cjs` covers implicit legacy ends; centered width/depth changes; true projected hulls; zero-end pyramid/wedge geometry; Euler rotations; proportion-preserving overall resize; support placement; malformed-profile rejection; repeat-edit center stability; and copy/floor transfer.
+
+Taper is an optional normalized local profile on blockout cubes. Each axis retains a maximum end ratio of one, so the existing dimension/transform pipeline can resize both ends without rewriting the profile. Thin walls retain their rectangular geometry and existing constraints. The reference image and other private input files are not part of the application source or deployment.
+
+`test-cube-taper-ui.cjs` adds 12 production UI/persistence groups: cube-only controls, one-step/no-op history, invalid/zero sizes, protected/stale/detached edits, mixed and cross-floor bulk changes, proportional scaling, duplicate/delete Undo, plan/preview export and SHA-backed portable import-as-copy.
+
+`test-cube-taper-scene.cjs` adds 24 real-Three groups for normalized-profile meshes and Euler rotations; sloped normals/raycasts and placement; ordinary-cube geometry isolation; endpoint edits/rebuilds; all six face handles for straight and rotated frustums; zero-end geometry; exploded floors; uniform group scaling; cancellation; and resource disposal. WebGL drawing is mocked, so native GPU presentation and physical-device interactions are not claimed.
+
+The v81 release gate includes these three suites and the v80 Walk-entry coverage (100 focused suites total, including the scrolling regression).
+
+## October 5: inspector scrolling regression
+
+The pinned-toolbar stylesheet grouped the inspector's flex-container selector with an invalid unquoted numeric-leading attribute value, `[data-view-mode=3d]`. Chrome discarded the entire group. In the observed 1180 × 757 bulk inspector, the outer sidebar was 661 px high but the inner inspector expanded to 1046 px, leaving it without a local scroll range. Its `overscroll-behavior: contain` then trapped wheel events instead of forwarding them to the outer sidebar. Native wheel input left both scroll positions at zero; the 2D camera percentage stayed unchanged. Chrome `CSS.supports('selector(body[data-view-mode=3d])')` returned false and the quoted form returned true.
+
+All `data-view-mode="3d"` CSS values in `ui.css` and `toolbar-layout.css` are now quoted. This restores the intended bounded flex container, independent inspector/3D display scroll regions, zero minimum flex heights and the original pinned segmented mode controls. No model, persistence, selection or camera logic changes.
+
+`node test-inspector-scroll.cjs` fails on the original malformed selectors and passes on the correction. It checks selector validity boundaries (JSDOM otherwise accepts these invalid selectors), bounded-scroller CSS contracts, pinned header structure, and uncanceled native wheel routing without model/history/2D camera changes for empty, room, single-cube, bulk, 3D-display and menu targets. The existing 26 `test-toolbar-layout.cjs` checks and `test-ui-static.cjs` also pass on the corrected CSS, covering original mode styling, menu/focus/keyboard behavior, collapsed mobile header rules, and actual Three.js camera math through a mocked renderer. These are DOM/CSS/camera checks, not native after-fix layout or GPU evidence. Current managed preview constraints prevent a supported after-fix browser pass for this static app; short/narrow viewport and post-fix wheel behavior remain unverified in a real browser.
+
+Final v81 verification completed 100 focused suites: the original 99-suite taper/camera gate completed in two verified segments after its runner was interrupted (67 suites, then the remaining 32). The newly added inspector-scrolling suite passed, and toolbar/UI checks were rerun on the final CSS. Application/test sources in the first segment were matched to the final checkout; only the documented CSS selector correction followed, with affected checks repeated. All 48 new taper model/editor/scene groups passed. Shift+D behavior is unchanged in this release.
