@@ -24,14 +24,14 @@ export function primitiveBounds({scene,camera,canvas}) {
   function project(point,r){viewPoint.copy(point).applyMatrix4(camera.matrixWorldInverse);screenPoint.copy(point).project(camera);return{x:r.left+(screenPoint.x+1)*r.width/2,y:r.top+(1-screenPoint.y)*r.height/2,depth:viewPoint.z,visible:viewPoint.z<0&&screenPoint.z>=-1&&screenPoint.z<=1};}
   function unitsAt(point,r){const p=point.clone().applyMatrix4(camera.matrixWorldInverse);return Math.max(.000001,2*Math.abs(p.z)*Math.tan(camera.fov*Math.PI/360)/Math.max(1,r.height));}
   function setRay(e){const r=rect();ray.setFromCamera(new THREE.Vector2((e.clientX-r.left)/Math.max(1,r.width)*2-1,1-(e.clientY-r.top)/Math.max(1,r.height)*2),camera);}
-  function update(root,active){
+  function update(root,active,{handles:showHandles=true}={}){
     current=root;overlay.visible=!!(active&&root);for(const label of labels)label.style.display='none';if(!overlay.visible)return;
     camera.updateMatrixWorld(true);root.updateWorldMatrix(true,false);const r=rect(),center=root.getWorldPosition(new THREE.Vector3()),quaternion=root.getWorldQuaternion(new THREE.Quaternion()),units=unitsAt(center,r);
     outline.position.copy(center);outline.quaternion.copy(quaternion);outline.scale.copy(root.scale);
     const centerScreen=project(center,r),used=[],leaderPositions=leaderGeometry.attributes.position;let leaderIndex=0,outboard=false;
     for(const handle of handles){
       const {axis,sign}=handle.userData.boundsHandle,p=new THREE.Vector3(),direction=new THREE.Vector3();p[axis]=sign*.5;direction[axis]=1;direction.applyQuaternion(quaternion);root.localToWorld(p);
-      handle.userData.facePosition=p.clone();const point=project(p,r),view=camera.position.clone().sub(p).normalize();handle.visible=point.visible&&Math.abs(view.dot(direction))<.98;
+      handle.userData.facePosition=p.clone();const point=project(p,r),view=camera.position.clone().sub(p).normalize();handle.visible=showHandles&&point.visible&&Math.abs(view.dot(direction))<.98;
       if(handle.visible){
         const dx=point.x-centerScreen.x,dy=point.y-centerScreen.y,length=Math.hypot(dx,dy),ux=length>1e-6?dx/length:1,uy=length>1e-6?dy/length:0;
         let distance=Math.max(24,length),x=centerScreen.x+ux*distance,y=centerScreen.y+uy*distance;

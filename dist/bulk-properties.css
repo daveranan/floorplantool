@@ -5,3 +5,5 @@
 .bulk-properties #bulk-group-movement{border-top:1px solid var(--line,#d5dbdf);padding-top:.65rem;margin-top:1rem}
 .bulk-properties #bulk-group-movement summary{cursor:pointer;padding:.5rem 0}
 .bulk-properties .bulk-existing-actions{margin-top:1rem}.bulk-properties .bulk-existing-actions>h2,.bulk-properties .bulk-existing-actions>h3{display:none}
+
+.bulk-properties .primitive-gizmo{display:flex;gap:4px;margin:8px 0 12px}.bulk-properties .primitive-gizmo button{min-width:0;white-space:normal}

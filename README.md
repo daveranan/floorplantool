@@ -238,8 +238,14 @@ Ramp runs are continuous, full-width slabs. Automatic endpoint aprons are 0.60 m
 
 Select one blockout shape or standalone thin wall in 3D to show its oriented bounding box, six face sizing handles, and live width/depth/height measurements. Drag a face handle to resize on that object's local axis while the opposite face stays fixed. The controls follow rotation and tilt. Grid snapping applies to size; hold Ctrl for free sizing. Thin walls retain their 0.25 m size rules and allowed thicknesses.
 
-Small objects use screen-spaced handles with leaders back to their faces, keeping the object center available for selection and the W/E/R gizmos. Nearly end-on axis handles hide until the camera is angled enough for a stable drag. Escape, pointer cancellation, mode/floor changes and Walk entry restore the original geometry; a completed drag saves as one Undo step. Dimensions follow the live preview and disappear with hidden, locked or multiple-object selections.
+Small objects use screen-spaced handles with leaders back to their faces, keeping the object center available for selection and the W/E/R gizmos. Nearly end-on axis handles hide until the camera is angled enough for a stable drag. Escape, pointer cancellation, mode/floor changes and Walk entry restore the original geometry; a completed drag saves as one Undo step. Dimensions follow the live preview; hidden or locked selections hide the controls. Multiple shapes use the shared group controls below.
 
 ### Bulk field focus and blur safety
 
 Multi-object property edits now complete their model transaction before repainting the inspector after the native change/blur event finishes. Replacing a focused inspector control cannot trigger another property edit or recursively rebuild its parent. Untouched drafts survive an ordinary redraw, Escape discards them, invalid edits reset to the saved value, and switching fields keeps the newly focused field usable.
+
+### Shared 3D gizmo for several shapes
+
+Shift-select two or more blockout shapes or thin walls in 3D to use a shared gizmo at their selection center. W moves them together, E rotates their positions and orientations around that center, and R uniformly scales their dimensions and spacing. The bulk inspector has the same mode buttons. Group scaling uses the center handle only: drag right/up to enlarge or left/down to shrink, keeping proportions even when selected objects have different rotations; single-object selection restores ordinary axis scaling and face handles.
+
+Move snapping follows the grid. Uniform-scale snapping applies to the change in the group's longest dimension; Ctrl allows free movement/scaling. Shift snaps rotation to 5 degrees. A group containing thin walls rotates only around the upright axis and scales in compatible steps that keep every wall's quarter-metre dimensions and supported thickness. Exploded floor spacing remains display-only, and each object keeps its owning floor. One completed gesture is one Undo step; interrupted or rejected gestures restore the entire group.
