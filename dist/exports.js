@@ -1,7 +1,7 @@
 /* Current-model drawings and previews. Exporting never changes floors, plans or undo history. */
 (function(){
 'use strict';
-let threePromise=null,threeView=null,threeToken=0,stackSnapshot=null,pngBusy=false,threeName='Building',viewMode='2d',threeBuildingId=null,threePlan=null;
+let threePromise=null,threeMountPromise=null,threeView=null,threeToken=0,stackSnapshot=null,pngBusy=false,threeName='Building',viewMode='2d',threeBuildingId=null,threePlan=null;
 const threeStates=new Map(),twoDTools=new Map(),floorSelections=new Map();
 const fmt=n=>`${n>0?'+':''}${Number(n).toFixed(2)} m`;
 function prepare(){finishWidthEdit(false);finishDrag(true);closeToolbarMenus();closeConnectionMenu();}
@@ -66,7 +66,8 @@ function syncThreeSettings(state={}){
  for(const [id,value]of [['threewalls',state.showWalls??true],['threecutaway',state.cutaway??true],['threelabels',state.labels??true],['threexray',state.xray??false],['threegrid',state.showGrid??true]])$(id).checked=value;
  $('threecutheight').value=String(state.cutHeight??1.15);$('threecutheightlabel').textContent=Number($('threecutheight').value).toFixed(2)+' m';$('threecutheight').setAttribute('aria-valuetext',Number($('threecutheight').value).toFixed(2)+' metres');$('threecutheightfield').hidden=!$('threecutaway').checked;
 }
-async function mountThree(){
+function mountThree(){return threeMountPromise=mountThreeScene();}
+async function mountThreeScene(){
  rememberThree();disposeThree();const token=threeToken;threeName=currentBuilding().name;threeBuildingId=currentBuilding().id;threePlan=JSON.stringify(model);const savedView=threeStates.get(threeBuildingId),activeFloor=floorId,visibility=currentBuilding().view.layers?.visible||{},saved={...savedView,visible:Object.keys(model.floors).filter(id=>Object.hasOwn(visibility,id)?visibility[id]===true:savedView?.visible?savedView.visible.includes(id):true)};let data,mounting=true;
  $('preview3dtitle').textContent=`${threeName} · 3D`;$('threestatus').hidden=false;$('threestatus').textContent='Loading 3D…';$('threefloors').innerHTML='';$('threewarnings').open=false;$('save3dpng').disabled=true;
  syncThreeSettings(saved);$('threehover').hidden=true;$('threefocusstatus').hidden=true;$('threefocusnav').hidden=true;$('threefloorup').disabled=true;$('threefloordown').disabled=true;for(const id of controlIds)$(id).disabled=true;
@@ -104,5 +105,5 @@ function snapshotSheet(plan,source,id,name){
  try{model=clone(plan);variant=source||'custom';floorId=id;return floorSheet(id,name)}finally{model=oldModel;floorId=oldFloor;variant=oldVariant}
 }
 window.addEventListener('keydown',e=>{if(e.key!=='Tab'||e.ctrlKey||e.metaKey||e.altKey||isTypingTarget(e.target)||e.target.closest?.('button,a,summary,[role=menu],[role=listbox]')||document.querySelector('.toolbar-popover[open],.connectionmenu:not([hidden])'))return;e.preventDefault();e.stopImmediatePropagation();if(e.repeat)return;if(document.querySelector('dialog[open]')){notify('Close the dialog to switch views');return;}if(isTypingTarget(document.activeElement))document.activeElement.blur();setWorkspaceMode(isThreeMode()?'2d':'3d');},true);
-window.BuildingExports={getViewer:()=>threeView,snapshotSheet,floorSheet,stackSheet,currentGeometry,svgToPNG,openStack,openThree,disposeThree,setWorkspaceMode,isThreeMode,syncWorkspace,focusThreeFloor:id=>threeView?.isolate(id)};syncModeUI();
+window.BuildingExports={whenThreeReady:()=>threeMountPromise,getViewer:()=>threeView,snapshotSheet,floorSheet,stackSheet,currentGeometry,svgToPNG,openStack,openThree,disposeThree,setWorkspaceMode,isThreeMode,syncWorkspace,focusThreeFloor:id=>threeView?.isolate(id)};syncModeUI();
 })();

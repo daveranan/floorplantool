@@ -269,3 +269,8 @@ Shift-click in the 3D viewport adds/removes the picked object without changing t
 ## Translation feedback
 
 Active point and object moves show a small live measurement from the drag start: a start marker, dashed displacement line, total metres and signed world-axis changes. Holding X, Z or C adds a colored permitted-axis guide and a clear locked-axis label. Releasing the key removes the lock feedback immediately, even without moving the pointer; the distance remains until the drag ends. Planar C holds are explicitly labelled and never depict vertical movement. Feedback follows accepted snapped geometry, stays out of selection/hit testing, and clears on completion, cancellation and view changes.
+
+
+## Stable Walk entry
+
+Walk from here keeps the picked physical surface position and the current horizontal facing. A short 360 ms camera move brings the view to the character's eye height along the shortest rotation path; reduced-motion settings skip the animation. Labels do not displace the pick, exploded spacing stays display-only, and ramps and dropped rooms use their actual surface height. Wall/ceiling hits and blocked spots are rejected without relocating the character. Movement and look input wait for the entry to settle. Saved starts retain their authored facing, and Fly-to-Walk keeps the local view direction.
