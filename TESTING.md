@@ -64,3 +64,405 @@ The new suite covers different floor footprints, arbitrary floor names, negative
 The provided screenshot was materialized and inspected at its actual pixels: the thin bright line follows the full canvas boundary. Canvas focus styling is now explicit and keyboard-only; pointer-driven return to 2D does not programmatically focus the SVG. DOM tests check pointer and keyboard mode handoff, and CSS checks retain the keyboard focus rule. Room-selection SVG styling was not changed.
 
 All 24 current JavaScript suites pass. The unchanged historical compact-layout Python test still fails its old `floorbrief`-inside-`aside` assertion. No source seeds, archived JSON, SVGs, PNGs or storage schemas changed. Real-browser native focus painting, responsive layout and GPU rendering remain unverified because this static Site has no compatible approved interactive preview in this session. The supplied screenshot and geometry/DOM assertions do not establish a new rendered browser result.
+
+## October 2: contextual split levels
+
+`npm run test:elevation` covers the outside 0 → entry +0.85 → courtyard +0.34 m route in both directions with rectangular/polygon rooms, preserving offsets on a floor move, linked endpoint updates, contextual inputs, undo/import, actual Three.js raycasts for room/floor handles with a mock renderer, Escape cancellation, interrupted drawing on floor/tool changes and capture loss, bounded riser input, endpoint-offset limits, approach headroom and cross-floor slab warnings. Additional current polygon-scene, rotate-tool, room-snapping, shape-editing, walk-scene and height-rules suites were run. This is DOM/geometry coverage; no browser visual or hardware GPU pass is claimed.
+
+The historical aggregate `npm test` was attempted and stops at `test-buildings.cjs` on `JSON.parse(undefined)`. The same failure was reproduced against unchanged HEAD. `test-floor-surfaces.cjs` and `test-objects-services.cjs` also retain identical failing assertions on unchanged HEAD (hidden labels and the old Shift support annotation). These are not reported as passing checks.
+
+## October 2: corner pivots, optional multi-edge snapping and room types
+
+Focused tests `test-rotate-tool.cjs`, `test-corner-rotation-scene.cjs`, `test-multi-snapping.cjs`, and `test-explorer-room-types.cjs` cover fixed-corner rotation, absolute 5° snapping, symbol pivots, cancel/undo, Three.js raycast handles with a renderer double, simultaneous orthogonal/angled constraints, a group translation solve, Ctrl geometry snapping versus default grid in rectangle resizing, and the integrated Explorer context menu with clicked-floor targeting and protected types. No browser/GPU visual pass is claimed.
+
+## October 2: 3D authoring and live dimensions
+
+`test-authoring3d.cjs` covers all four cardinal edge directions, automatic descent/ascent metrics, source/destination links, free stair/room footprints, quarter-metre drawing, one-commit undo and inspector refresh. `test-authoring3d-scene.cjs` exercises actual Three raycasts with a mock renderer for edge-tool preview, creation, one-shot reset, undo, Escape, floor-switch cancellation and disposal. Rotation/elevation scene tests cover fixed pivots and quarter-metre height snapping; DOM rotation tests assert the visible degree label and dashed feedback group. No physical pointer, real browser or GPU visual pass is claimed.
+
+## October 2: unified toolbar
+
+`test-shared-toolbar.cjs` covers shared R/E/S/V modes, Local steps/Edge steps, inspector width, unsupported tool gating and restoration, typing guards, and the same full-stair destination dialog without premature model edits. `test-authoring3d-scene.cjs` uses the shared viewer authoring API and verifies there is no separate canvas toolbar. Mobile toolbar-specific 3D layout overrides were removed; responsive browser rendering remains unverified.
+
+## October 2: navigation, selected points and courtyard concept
+
+`test-navigation-workspace.cjs` uses the actual renderer with mocked GPU to verify selection persistence through Tab mode switches, F framing, Alt orbit/right zoom without model mutation, and the fixed zero ground/grid after moving a whole floor. `test-transform-modifiers.cjs` checks proportional/centered resizing, D/window correction, Shift shortcuts and 2D Alt pan/zoom. `test-point-transform.cjs` checks point marquee and group move/resize/rotate with untouched unselected vertices, undo, directional radius dragging and double-click reset. `test-concept-copy.cjs` verifies original preservation, independent concept import and clean Plan/preview checks. The concept asset's route validation separately covers 17 simulated walkthrough routes. Real browser/GPU/physical-input QA remains unperformed.
+
+## Workspace and editable stair route update (October 2)
+
+Added Home/projects/building tabs, fixed-tip tool cursors, crossing marquee, explicit 3D move handles and Alt camera controls, field blur before canvas edits, faint origin cells, wall-constrained grid opening placement, and normalized-frame editable route stairs. Route nodes, flight widths, endpoint references, node elevations and polygonal landings are persisted on the stair room. Exact stair/landing polygons are shared with preview and walkthrough; stair routes do not add enclosing walls. Existing local steps can be converted via “Edit both stair endpoints.” Clipboard retains route data and remaps copied references; uncopied endpoint references are removed with a notice.
+
+Verified focused harnesses: test-workspace-home, test-route-stairs (production script order), test-route-geometry, test-v52-interactions, test-authoring3d, test-authoring3d-scene, test-navigation-workspace, test-point-transform, test-transform-modifiers, test-multi-snapping, test-rotate-tool, test-corner-rotation-scene, test-shared-toolbar, test-local-elevation, test-elevation-safety, and test-polygon-rooms. Actual Three.js math/raycast/OrbitControls use a renderer double; no GPU or physical pointer claim. Route walkthrough was checked through two flights and a flat turn (0 → 1.5 → 3 m). The independent read-only audit caught and prompted fixes for capture loss, preview autosave, empty imports, stale linked heights, incorrect node-handle heights, marquee interruption and overly broad ground masks.
+
+The aggregate npm test still stops in the pre-existing test-buildings legacy-seed setup at JSON.parse(undefined). The old test-grid-exterior seed assertion still expects V11 while the current default is V12. Neither is recorded as passing. Browser QA was attempted through the cloud browser, but the local preview URL was blocked by the browser (ERR_BLOCKED_BY_CLIENT); the escalated readiness tool also encountered a sandbox setup error. No browser visual verification is claimed for this update. Existing authored building data and seeds are preserved.
+
+## October 2: command search, connection defaults and bulk editing
+
+`node test-command-bulk-focus.cjs` loads the actual production script order and passes: window→C circulation mode in 2D/3D; Ctrl/Cmd+/ command search; validated and persisted single/double default widths with cancel and no existing-model changes; rectangular/exterior/polygon placement widths; compatible mixed-selection room/opening/item/service types; one-step undo; preserved dimensions, labels and selection; atomic locked-room/detached-opening rejection; legacy exterior types; native select/disclosure/context-menu/button focus; input-safe Tab; and preservation of an unfinished input draft through command search. Independent DOM QA also verified a rebuilt stair endpoint selector without an ID retains focus.
+
+Focused v53 creation, tools, navigation, oriented resize, 3D connections scene, shared toolbar, current navigation workspace, Explorer room-type and multi-selection suites pass. These are DOM/geometry and mock-GPU checks, not physical native-dropdown or browser visual verification. A broader `test-authoring3d.cjs` probe found a v53 route portal height regression, which the release owner corrected and reran successfully. Other historical probes still fail outside these scoped changes: `test-v52-interactions.cjs` expects the old Alt free-opening snap modifier; the legacy `test-roommenu.cjs`/`test-contextmenu.cjs` window doubles lack addEventListener. The aggregate's existing legacy-building seed failure is unchanged; no full aggregate pass is claimed.
+
+## October 2: bounded stair clearance (v54)
+
+`node test-stair-cutout-volumes.cjs` exercises default/custom finite headroom; slabs above and below stairs; floor portions above low treads and beneath high treads; horizontal gaps within a bent path's bounding rectangle; actual intermediate-floor crossings; returning routes with elevated interior nodes; partial slab thickness under landings; cross-floor endpoint references; tall-wall and oblique portal preservation; and existing polygon holes. It includes 8,120 sampled points asserting removed solid volume equals the union of actual rotated tread/landing cutter prisms. Input plans remain byte-for-byte unchanged.
+
+`node test-route-v53.cjs` now additionally tests the production inspector's 2.2 m default, import/persistence of an optional clearance value, range rejection without history changes, low-clearance warnings, and one-step undo. Headroom-dependent overlapping-flight warnings are covered by a separate stacked-flight fixture. No physical browser/GPU verification is claimed.
+
+The independent read-only audit passed 120,000 randomized volumetric samples with rotated cutters and preserved holes. It found and prompted fixes for configured-headroom turn warnings and polygon slab representation needed by label anchoring. The 28 focused regression suites pass. Unchanged-HEAD comparison confirms the historical `test-preview.cjs:22`, `test-floor-surfaces.cjs:42` and `test-cutaway-bases.cjs:71` failures remain outside this patch; these are not recorded as passing. Representative prepared-plan geometry remained within roughly 71–90 ms during that audit.
+
+
+## October 2: corner windows, chamfers and clear-height explanation
+
+`test-corner-windows.cjs` covers square, rounded, chamfered and rotated perimeter windows; the closed-perimeter seam; blocked neighbor/opening legs; actual polygon wall holes with retained sills/lintels; globally spaced mullions; sealed glass and walking collision; per-corner styling; undo/import validation; and live clearance labels without rewriting authored label text. `test-corner-window-interactions.cjs` covers center-preserving width edits, dragging/cancel/undo, straight/wrapped conversion, door-type conversion/menu and legacy external adapters. `test-corner-window-scene.cjs` exercises actual Three.js raycasts through multi-segment hover preview, corner-window creation and one-shot undo with a mock renderer. These three suites are included in the aggregate runner.
+
+Eighteen existing/focused suites passed: corner-windows, windows, overlook-window, polygon-rooms, polygon-scene, shape-editing, point-transform, point-undo-production, height-rules, v53-connections-scene, v53-creation, stair-cutout-volumes, v53-portals, v53-route-geometry, elevation-safety, command-bulk-focus, transform-modifiers and corner-rotation-scene. The two additional corner interaction/scene suites also pass. Exported SVGs for square/rounded/chamfered windows were rasterized and visually inspected. This is SVG/DOM/geometry and mock-GPU coverage; no physical browser or hardware GPU result is claimed.
+
+Independent review added 672 geometry cases covering corner styles, both contour winding directions, four rotations and varied perimeter offsets, plus cross-floor tall-wall openings and legacy adapter conversion. The review found and fixed ordinary exterior doors failing to notice a wrapped-window clash; detached wrapped windows now produce the usual preview warning. The aggregate `npm test` was run and passes the new corner suites plus the v54 cutout and command/bulk suites before stopping at the pre-existing `test-buildings.cjs` JSON.parse(undefined) seed failure. `test-elevation-ui.cjs` also retains an identical HEAD failure at the split-level-connection count, independently reproduced; it is not reported as passing.
+
+The combined release also includes `test-stair-walk-contacts.cjs` in the aggregate. It covers ascending/descending winding and stacked flights, connected landings, retained-floor ramp overlap, genuine low ceilings/side obstacles/window/solid collision, stacked-lap isolation, unchanged plans and step/drop limits. Two privately uploaded routes were verified through every flight and landing in both directions (7 flights / 22 checkpoints and 4 flights / 13 checkpoints); neither upload nor diagnostic data is included in repository or public assets. A separate reviewer checked the walk-controller change. Visual cutouts remain unchanged.
+
+Final combined checkpoint: all 28 targeted suites listed above (including the four new suites) passed after integration, preview bundle build passed, and whitespace checks passed. The final aggregate was rerun with the stair-contact suite included and again stops only when it reaches the known legacy building-seed failure. No physical browser/GPU pass is claimed.
+
+## Recovery safeguard verification (v56)
+
+`node test-persistence-recovery.cjs` loads the actual production script order. It verifies four-building recovery isolation, matching previous snapshots, exact storage preservation through startup/render/switch/Home/pagehide/history timers/pruning, raw+in-memory recovery exports, malformed/empty/missing/future-schema snapshots, rejected invalid writes before either storage update, successful correction, view-only checkpoint preservation, unchanged polygon-boundary roundtrip, safe recovery import, quota failure, blocked storage reads, and refusal to silently import stale saved data over different in-memory work.
+
+`node test-nudge-history.cjs` verifies repeated actual key events, the 80-entry cap, exact undo/redo and oldest retained state, redo branching, no-op behavior, and recovery of an already oversized session history. Independent full-production review also covers malformed view metadata, generated-ID collisions and stale-tab bundles. Focused recovery, workspace, command/bulk, corner-window and stair-contact/cutout suites pass. The aggregate still stops at the historical `test-buildings.cjs` missing-v12-seed harness failure; this is not a full aggregate pass. No private user fixtures are included.
+
+`test-window-offset-persistence.cjs` reproduces the actual null-offset writer using synthetic geometry: a 4.8 m window on a rounded room's 5 m straight segment has no half-metre-grid start. The original v55 writes NaN, serialized as null; the hotfix rejects the edit before mutation. Tests cover direct/slider edits, invalid geometry offsets, Ctrl free placement, group/wrap edits, undo and four-building recovery without automatic repair. Explicit recovery-picker tests cover cancellation, same-ID validation, stale-tab and quota refusal, unchanged previous/history, in-place restore and reload.
+
+All 20 failures observed when separately running the legacy aggregate's remaining suites were also reproduced on unmodified v55; none became newly failing in the hotfix. This does not replace the explicit focused pass evidence above.
+
+## October 2, 2026: local files and automatic disk backup workflow (v57)
+
+`node test-local-files.cjs` exercises the production UI and an isolated file-system mock. Passed SHA-256 payload verification and tampering/future-schema rejection; meaningful content/project/history dirty detection; separate raw/visible restore sources; exact file readback; denied/revoked folder access without background prompts; quota and close interruptions with earlier versions untouched; opt-in 30-version cleanup; preservation of manual, unrelated and corrupt files; the default no-deletion 500-file stop; unsupported-browser download fallback; nonmutating preview; import as independent copies; project remapping; and visible IndexedDB/permission failures.
+
+This uses mocked browser file handles, not the Windows/Brave native picker. An attempted isolated Chromium headless render could not start because this execution sandbox denies Chromium’s process-singleton socket (`Operation not permitted`). No bypass was attempted. Real native picker permission prompts, OS disk faults, and visual screenshots remain unverified here; browser capability checks and the manual download fallback are implemented.
+
+`node test-local-files-interruptions.cjs` independently asserts the previously found interruption regressions: the disk badge survives navigation, named history dirties the disk backup, pause/resume restores the correct status, a pending auto-backup retries after a canceled save picker, live rotation/point gestures do not get written, Ctrl/Cmd+S works from Home, Close cancels a delayed import preview, import warnings survive subsequent backups, stale project storage is reported, recovery project groups can be loaded, and oversized imported history is rejected without breaking subsequent named saves. Both new suites pass. Focused recovery, null-window persistence, workspace-home, corner-rotation scene, point-undo production and shape-editing suites also pass after integration.
+
+The 35 pre-v57 aggregate suites were run individually: 15 pass, 20 fail. Each of those 20 also fails from an isolated clean v56 `cab151a4105ebb1489a8a6f8241532f5aa2ce288` checkout. These are not a green aggregate run. The first failure is the historical `test-buildings.cjs` harness omitting `seed-v12.js` while iterating current variants. The two v57 suites are registered before existing suites, bringing the runner to 37; no existing suite changed from passing on the v56 baseline to failing in this run.
+
+## October 2, 2026: navigation, layers and whole-building editing (v58)
+
+`node test-building-transform.cjs` passes 17 synthetic cases, including 35 randomized route fixtures and 69 successful shared-renderer parity comparisons. It verifies true unpadded extents, rotated shapes/items, actual route/local stair geometry, bounded service joins, optional annotations, source and cached geometry translation, unchanged local frames/Z/metadata, shared-reference handling, atomic validation and safe partial-floor group rejection.
+
+`node test-keyboard-layers.cjs` tests exact modifier dispatch in 2D/3D, 1/3 navigation with 2 unassigned, text entry isolation, visibility versus active floor, heterogeneous layer selection, hiding/locking, atomic floor/building moves, undo and genuine keyboard canvas focus. `node test-layer-safety.cjs` covers nonmutating drag previews and autosave, one-step history, all interruption paths, stale-building/newer-edit protection, locked context-menu mutations, render-only legacy annotations, route-point deletion behind dialogs, exact save/Tab chords and active-workspace reload retaining layer state.
+
+The persistent layer field is preserved in the initial core capture before workspace restoration; the UI integration loads before workspace-home. No saved plan schema is migrated. New fixture data is synthetic. A known upstream route boolean-clipping exception after a mathematically valid translation is avoided for bounds and rejected by the move UI’s renderer validation before a commit. No unrelated route engine rewrite is included.
+
+The isolated cloud-browser static preview was unavailable; real pixel layout and physical input remain unverified. Static asset/accessibility checks and production-order DOM/storage tests pass. The old aggregate still has the documented baseline harness/expectation failures; v58’s focused release gate is `node scripts/test-v58.cjs` and does not claim an aggregate pass.
+## Concrete staircase passage
+
+Stairs now carve only their bounded tread/landing body and configured headroom out of solid concrete fill. Existing per-step, exact-polygon subtraction is shared by render geometry and walkthrough collision, across any floor whose physical volume intersects. Concrete remains under the staircase, beside it, above its finite clearance, and inside gaps of a bent route’s bounding rectangle. This is a derived preview change; no authored floor/room/stair data or persistence schema is changed.
+
+A rotated flight/landing boundary regression found during traversal testing was corrected with a tiny numeric edge tolerance. Smooth stair walking also treats retained concrete below the active staircase’s treads as foot support, while preserving side, headroom and unrelated-floor collisions.
+
+New checks:
+- `node test-stair-concrete.cjs`: multilevel overlap, concrete above/below, retained body/sides/headroom, 8,932 rotated-volume probes, concave outlines and holes, nonoverlap, a 0.8 m entry, rotated ascent/descent, obstruction isolation, conventional rectangular stairs and unchanged saved model bytes
+- `node test-stair-concrete-scene.cjs`: actual Three.js mesh raycasts with a renderer double for the retained below/side/overhead mass, a bent-path bounding-box gap, wall visibility, cutaway, walkthrough and disposal
+
+No private fixture or user data is included. GPU rendering and physical browser input are not established by these geometry/scene harnesses.
+
+## Doorway threshold correction
+
+The reported doorway was open, but a stair landing stopped 2.5 cm short of the room floor. Added derived physical thresholds inside passable doorway width and wall thickness, trimmed against existing coplanar surfaces. This fills only the missing support rather than overlapping the floor or making an invisible walking bridge. Windows and blocked doors do not gain thresholds, and normal step-height and side/overhead collisions remain active.
+
+`test-door-thresholds.cjs` passes at 0°, 31° and 90° with four movement step sizes in both directions. It reproduces the blocked gap when the threshold is removed, checks sealed/window/narrow/large-gap rejection, prevents a high step bypass, and confirms the generated area is only 0.05 m² in the synthetic 2 m-wide / 2.5 cm-gap fixture. Actual Three.js raycasts in `test-stair-concrete-scene.cjs` verify the threshold is rendered at the correct height and follows slab visibility. The exact private uploaded plan was independently verified in both directions at four motion cadences with unchanged saved bytes; it is not included in public fixtures.
+
+A pre-existing boolean-clipping failure triggered by an exact 90° rotation was reproduced on the baseline and corrected in the bounded-cut math by normalizing derived coordinates to 1e-8 m, below the existing 1e-6 geometry epsilon. Original authored coordinates remain unchanged.
+
+Focused passes: concrete, concrete scene, door thresholds, stair walk contacts, stair cutout volumes, route geometry, route stairs, route v53, stair types, stair detail, polygon rooms, polygon scene, elevation safety, elevation scene, local elevation, height rules, walkthrough, walk scene, walk start, place start, fly scene, authoring3d, authoring3d scene and three scene. `test-fly-mode.cjs` still fails its pre-existing KERN_EXPLORER.active assertion, reproduced on unchanged v57. `test-preview.cjs` passes its geometry sections but retains the existing later UI assertion failure, likewise reproduced on unchanged v57. No full aggregate pass is claimed.
+
+
+## v58 tiered retention and five-minute cadence
+
+The release includes the approved union of newest 30, seven local calendar-day representatives, Monday/Thursday representatives within 56 local calendar days, and current/prior 11 month representatives. The local timezone is captured, persisted and displayed; overlaps are retained once. Existing explicit policies are preserved and Smart can be applied to an already authorized folder. New verified copies precede cleanup. Unrelated/manual/corrupt/invalid/future records are preserved, and closed-page gaps are never backfilled.
+
+`test-local-files.cjs`, `test-local-files-interruptions.cjs` and `test-retention-calendar.cjs` pass. Tests cover actual mock-folder tier pruning, policy transitions and captured timezone, full weekday/calendar boundaries, UTC offsets, DST, leap-year/month edges, overlapping tiers, and five-minute pending-change scheduling that neither resets on subsequent edits nor fires early when hiding a tab. Forty independent calendar cases pass under UTC, America/New_York, Asia/Tokyo and Pacific/Kiritimati host timezones. The current release gate contains 23 focused suites; this does not alter the historical aggregate-failure disclosure.
+
+## October 3: boundary wall profiles, editable concrete caps and compact backup controls (v59)
+
+`node scripts/test-v59.cjs` is the 29-suite focused release gate. It adds wall-model, wall-editor, actual Three.js wall-mesh, cap-editing, cap-scene and backup-UI coverage to the current v58 gate. This is separate from the historical aggregate, whose unchanged legacy building harness still fails before its older suites complete.
+
+Room wall profiles are optional. Untouched rooms and terraces retain their previous Full/None defaults. The explicit terrace preset creates 1.1 m low walls, adjustable from 0.1–3 m and capped at the room's full height. Stable per-vertex ownership maps Full/Half/None to straight, rounded and chamfered edges; splitting a configured edge inherits its mode and deleting a vertex prunes its override. Shared physical boundaries retain the union of both rooms' wall heights. Windows keep all saved dimensions, render only on affected supported wall portions, and show an incompatibility warning rather than losing data.
+
+`test-wall-profiles.cjs` verifies owner union, low/full collision, open-edge traversal, ordinary/shared door cuts, clipped/restored windows, warnings, malformed metadata rejection, rotation, edge insertion/deletion, clipboard and finite empty geometry. Independent review checked 32,640 physical wall occupancy probes across 120 rotated/elevated owner combinations and 2,052 window occupancy probes. Review findings were fixed with regressions: legacy wide-door height, double-door identity/markers, inward void and crossing-facade exterior-opening geometry, colon-bearing vertex IDs, empty bounds, outdoor window elevation, and bounded window count. Repeated UI warning work is cached by complete floor-data signature, invalidating naturally after edits and undo.
+
+`test-wall-edge-ui.cjs` covers the production script order; zero-mutation hover/selection/dismissal; Full/Half/None; one-step terrace preset and undo; height bounds; right-click, Escape, keyboard and touch edge controls; stale scope; layer/source/stair guards; preserved opening data and visible warning badges; and unaffected point editing. Real Three.js raycasts in `test-wall-profiles-scene.cjs` confirm low/full/open/shared boundaries, looking over a low wall, visibility and cutaway.
+
+`test-concrete-cap-editing.cjs` verifies protected cap selection, explicit Make cap independent, exact geometry/elevation preservation, source/void isolation, one-step undo, type/void/delete operations, copy/move/import/reload and layer locks. `test-concrete-cap-scene.cjs` uses actual Three.js raycasts: picking a cap never selects or exposes a floor handle; linked caps have review-only outlines; independent caps have cap-only handles; canceled elevation edits remain canceled. No cap is detached, converted or removed automatically.
+
+`test-backup-ui.cjs` verifies the compact disk status beside existing save controls, no idle status strip or redundant brand block, actionable warnings only, stable focus, simplified backup panel, one fallback download, compatibility guidance and unchanged cadence/retention behavior. Home card management and cross-floor selection corrections are intentionally separate later work.
+
+These tests use DOM and real Three.js geometry with a renderer double. Cloud-browser visual QA was attempted against the isolated local preview and blocked with ERR_BLOCKED_BY_CLIENT. GPU rendering, physical pointer/touch behavior and full browser layout are not claimed. No private uploaded plan or screenshot was added to source or public assets.
+
+
+## v60 cross-floor corrections, camera performance and Home cards
+
+Run `node scripts/test-v60.cjs` for the v60 combined 33-suite gate. It includes all v59 wall/cap/concrete and backup/recovery checks plus the four new suites. `test-selection-transform.cjs` has 30 immutable ownership/translation/copy/delete cases. `test-crossfloor-ui.cjs` exercises actual production-order pointer/keyboard handlers for floor-qualified Shift/marquee selection, disabled/visible floors, subset moves, preview isolation, interruption, clipboard and undo. `test-crossfloor-lifecycle.cjs` covers direct legacy selection reconciliation, reload, four clipboard entry paths, protected dependencies, rejected partial rotate/point editing, camera DOM identity and invalidation, and floor creation/removal. `test-home-cards.cjs` exercises archive-backed removal, copy/paste, session history, filtered reorder, persistence/import mapping, capacity and failure guards.
+
+The prior aggregate's historical fixture/expectation failures remain separate; a green focused release gate does not claim the old aggregate is green. Native browser/GPU visual QA is still unverified in this environment. No private uploaded reference images or plan fixtures are included in the release.
+
+
+## v61 explicit editing scope
+
+`node scripts/test-v61.cjs` was the 34-suite v61 gate. `test-floor-edit-scope.cjs` covers actual floor-row/checkbox clicks, 1/3 keyboard navigation, programmatic activation, production 3D visibility/selection callbacks, mode switching and real storage reload. Saved empty editing scopes stay empty. Disabled floors reject canvas selection, marquee, nudge/delete, drawing, paste, transfer destinations and late 3D authoring completion without changing geometry/history. Floor creation no longer checks its editing box automatically. The 3D integration test uses a renderer double, not GPU drawing.
+
+
+## v62 exclusive floor navigation
+
+`node scripts/test-v62.cjs` was the 35-suite v62 gate. The updated production-order `test-floor-edit-scope.cjs` verifies normal row/checkbox clicks and plain 1/3 replace editing scope with one destination floor, while only Shift-click adds/removes floors. Same-floor clicks also collapse a multi-floor selection. Eyes, passive viewer focus restoration, 2D/3D mode changes and reload preserve the set, including empty. Background picks and marquee cannot edit disabled floors; navigation clears stale object selections; intentional Shift-enabled cross-floor movement remains atomic and undoable. The 3D callback harness models focus changes caused by hiding a floor and checks those do not alter edit scope. Existing disabled drawing/paste/transfer/late-authoring guards, data recovery and local backup suites remain in the gate. No geometry migration or private assets are included.
+
+`test-floor-navigation-scene.cjs` bundles the actual Three.js scene code with only WebGL rendering replaced. Real raycasts and pointer events verify plain versus Shift floor-label clicks, disabled object picking/room drawing/stair-route placement, exclusive same-floor/different-floor navigation, passive eye focus fallback, show-all/restoration, repeated mode switching and geometry-triggered renderer remounts. This is interaction and scene coverage, not a claim of GPU drawing.
+
+
+## v63 actual 3D floor selection
+
+The current release gate verifies the corrected real slab/room-label raycast path, persistent editable-floor highlights, whole-floor and multi-floor F framing, sidebar replacement of stale room selection, and ordinary versus Shift floor clicks without hiding other visible floors. Floor-surface selection enables its destination; object and authoring callbacks retain their editing guards. The scene checks use actual Three.js geometry, raycasts and production callbacks with a renderer double; GPU drawing is not claimed. No plan geometry migration or storage schema change is included.
+
+`node scripts/test-v63.cjs` was the v63 focused gate. `test-floor-surface-selection.cjs` checks 28 actual surface/object-picking and F-focus cases. `test-selection-roundtrip-scene.cjs` checks repeated 2D/3D roundtrips and geometry rebuilds for single/multiple floors, single/multiple rooms, cross-floor objects, windows and empty selection. It separately verifies active floor, edit scope, visibility, qualified object references and F bounds; old saved 3D focus/visibility cannot overwrite newer 2D floor choices. Unrelated eye changes and Show all keep the selection target. Explicit navigation reveals a previously hidden destination.
+
+
+## v64 shared floor-selection controller
+
+`npm run test:release` runs 37 focused suites. The latest plain-click isolation rule supersedes v63 keep-all-visible assertions. One floor transition now owns active, checked/editable and visible state for both sidebars, actual 3D geometry hits, keyboard navigation and mode restoration. The renderer applies that snapshot and emits selection/visibility intents; passive camera callbacks cannot overwrite editor selection.
+
+`test-shared-floor-controller-scene.cjs` uses the production script order and actual Three.js raycasts to verify sidebar/viewport permutations across slabs, walls, labels and concrete caps, actual group/mesh visibility, 2D ghost and active-geometry absence, Shift sets, checkbox state, camera restoration, object/F roundtrips and unchanged plans/history. `test-floor-interrupted-gesture-scene.cjs` verifies that stale pointer-up cannot commit after floor selection or hiding its floor. `test-hidden-floor-authoring-scene.cjs` checks hidden-floor authoring guards. Existing cross-floor selection/clipboard/undo, exact shortcuts, geometry, backup and raw-save recovery suites remain in the gate. These are DOM/scene interaction checks with WebGL drawing replaced; physical browser/GPU QA is not claimed. No saved plan geometry or storage schema is migrated.
+
+Ctrl/Cmd+S now invokes the same configured-folder Back up now operation as the button. `test-backup-shortcut.cjs` covers exact modifiers, repeat/in-flight deduplication, missing-folder/reconnect failures without a download fallback, and manual backup while scheduling stays paused. Save backup remains the explicit local-copy/Save As action.
+
+
+## October 3: nested rooms and interior door boundaries (v65)
+
+The focused release gate is `node scripts/test-v65.cjs`, combining the 37 v64 controller/backup/geometry suites with four nested-room suites. `test-nested-room-doors.cjs` covers plain and rotated rooms, rounded/concave containment, coincident external facades, sibling-blocked intervals, deep touching rooms, bidirectional traversal at several step sizes, invalid offsets, height separation, windows overlooking lower voids, parent geometry edits/deletion, undo/import and the axis-aligned legacy geometry export. `test-nested-room-geometry.cjs` verifies deterministic nonoverlapping slab/ceiling ownership, lower/raised/shorter/taller bodies and descendant cuts without saved-model mutation.
+
+`test-nested-room-ui.cjs` loads production script order and verifies room ordering, active/ghost hit selection, hidden/locked layers, rectangle/Pen/adjoining creation and cancellation, independent child copy/delete, parent deletion, undo/redo, inspector connection, exact JSON roundtrip, and rejection of invalid width/offset edits. `test-nested-room-scene.cjs` uses actual Three.js raycasts with a renderer double to verify rotated doorway holes, adjacent wall collision geometry/picking ownership, floor and ceiling partitioning, remaining-floor label placement and disposal. A separate independent 12-probe boundary audit passed after the identified width/elevation/window/export corrections.
+
+The source changes are derived geometry only, with no parent-link schema or automatic changes to authored rooms. The latest shared floor controller and configured-folder save correction are preserved. Real browser/GPU rendering remains unverified: Chromium's process-singleton socket was denied in this execution environment. The historical aggregate still includes earlier documented harness/expectation failures; this focused gate does not claim an aggregate pass. No private plan or screenshot is included in the source or deployment.
+
+### Primitive blockout regression coverage
+
+`node test-primitives.cjs` checks all four schema types, invalid/duplicate imports, physical surface placement, floor-relative elevation, transforms, copy/transfer/delete, exact modifier handling, menu-key isolation, field focus/details, Undo and primitive-only Fit/export. `node test-primitives-scene.cjs` uses the actual Three.js meshes, raycasting and TransformControls with only WebGL drawing mocked. It covers shared floor-first/Shift selection, hidden/locked layers, move/scale/rotate, E/toolbar handoff, drag cancellation and walking transitions, no full scene rebuild during drag, one release commit, labels/exploded placement, clipboard after deselection, and 2D/3D roundtrip. `node test-primitives-io.cjs` verifies exact local backup envelope/import copies and visible unsaved shape recovery after browser quota failure. GPU drawing and live browser layout remain unverified in this environment.
+
+The v66 release gate is `npm run test:release` (45 suites). `test-space-lock-editing.cjs` covers saved room lock review, explicit detached-floor unlocking, remaining shaft cache preservation, actual SVG dragging, copy, one-step Undo/Redo, persisted reload and stale/hidden/locked/recovery guards.
+
+
+## October 3: passage, Bridge, label and wall tools (v67)
+
+`node scripts/test-v67.cjs` is the 57-suite focused release gate: all 45 v66 suites plus four maximum-passage suites, three Bridge suites, three thin-wall suites, corner-label centering and primitive 2D editing. Exact shortcut tests now reflect the explicitly assigned Alt+C, Shift+C and Shift+W combinations.
+
+Maximum-passage tests cover whole and bounded walls, widths over 8 m, split collinear and disjoint boundaries, nested and rotated rooms, existing-opening preservation, Full/Half/None wall profiles, shared vertical clearance, preserved wall bases/lintels, malformed metadata rejection, preview/commit/undo and normal Alt navigation. Actual Three.js raycasts verify the displayed dimensions and event routing.
+
+Bridge tests cover actual floor slabs and endpoint passages, same-elevation validation, short/angled gaps, voids, existing door preservation, bidirectional traversal, floor-qualified wall ownership, solid/overhead/primitive obstructions, cancellation and stale/hidden/locked inputs. Independent review caught and resolved concave width obstructions and repeated IDs across floors: endpoint wall tolerance is restricted to a bounded physical contact strip on the correct floor. Copy/delete, JSON/backup, one-step undo, real pointer events and actual Three.js floor hits are included.
+
+The label suite covers rounded/chamfered corner changes, rotation, tessellation-independent area centroids, concave interior anchors, actual radius drags/cancellation/undo/redo and unchanged manual annotations. Thin walls have 13 model/collision checks, 14 production-order UI checks and six actual Three interaction checks, including quarter-grid transforms, upright yaw, fractional origins, interruptions and a clear narrow passage without rotated-AABB collision. The primitive correction adds 24 checks across all four primitive kinds, including resize history, aligned copies, constrained movement, disk readback, real mesh rebuild and view/reload continuity.
+
+Independent feature and merge reviews found no remaining blocker in the tested scope. GPU rendering is mocked in Three tests, and real browser/physical input is not claimed. Historical aggregate harness/expectation drift remains separate from this focused gate. Private screenshots and plans are excluded from source and deployment. Stair surface-offset and Freight teleport work remain outside this release.
+
+## Rounded-edge clipping recovery
+
+`node scripts/test-v68.cjs` runs the 58-suite release gate, including the saved v67 authoring batch. `test-clipping-robustness.cjs` independently generates two rounded rectangles that trigger the polygon engine’s sweep-line exception. It verifies bounded computation-only retries, exact ordinary results, area-preserving cap partitioning, input immutability, invalid-input rejection, and explicit incomplete height-check warnings. The exact private backup was separately tested outside this repository: production boot, all seven floor checks, three complete preview builds, reload, and unchanged authored plans and backup bytes passed. No private fixture is deployed.
+
+
+## October 3: consolidated editing and navigation (v69)
+
+`node scripts/test-v69.cjs` adds the current stair-offset, point/outline, render-cache/DOM, primitive workflow and Freight travel suites to the v68 gate. The gate retains clipping recovery, all floor-controller semantics, backup retention and raw-save recovery checks. Private input files remain outside source and deployment.
+
+The stair tests cover positive/negative access-room offsets, four cardinal orientations, rectangular and polygon scene paths, actual walking at both ends, full ascent/descent, exact bounded doorway clearance, low lintels, and derived landing/mesh context. Older conventional shafts without `stairTransition` have the same validated access diagnostics. Authored room and floor data stay unchanged.
+
+Point tests exercise full production event order with one or multiple enabled floors, stable vertex identities through insertion Undo/Redo, current adjoin geometry, nine cancellation paths, unrelated-pointer isolation, correct room contours, and consistent screen-sized controls on camera changes. Camera tests verify that room and wall DOM stays in place while only editing overlays refresh, including dark-theme colors. Layer tests verify stable controls and authoritative checkbox state.
+
+Primitive workflow tests use actual Three meshes and TransformControls with WebGL drawing replaced. They cover contextual W/E/R, metric Move/Scale snapping and Ctrl bypass, Shift rotation snapping, in-place Shift+D copies, interruption/lock/recovery guards, 2D/3D selection continuity, and100 committed edits with bounded history, one live canvas/gizmo and stable active handlers. Freight tests cover real connected stop membership, current room surface heights, physical landing clearance, stale/ambiguous/detached stops, modal input and pointer-lock races, repeated trips and destination floor/camera continuity, without changing plan or Undo data.
+
+`bench-render-session.cjs` reproduces500 committed edits, yielding between edits and sampling post-GC heap, DOM, SVG, stable listeners and Undo. In the combined local CPU/DOM harness, the supplied-plan median was130ms initially and115ms at the end, versus273/275ms before optimization. The synthetic240-room case was68/65ms versus147/141ms. Supplied-plan heap after100/500 edits was79.4/77.8MiB; synthetic was59.8/56.0MiB. DOM/listeners/defs/patterns stayed stable and Undo stayed at80. These are Node/JSDOM measurements, not browser frame rates. Exact final results are retained outside the source tree.
+
+Real browser/GPU QA remains blocked in this execution environment: cloud Chromium refused the local preview URL with `ERR_BLOCKED_BY_CLIENT`, direct headless launch could not create its sandbox socket, and an escalated readiness check failed environment setup. No workaround bypassed those restrictions. Geometry/raycast, full production events, data-preservation checks and prolonged CPU/heap tests remain available. Historical aggregate harness drift is separate from the focused release gate.
+
+Final frozen-source validation: all68 focused release suites passed. Independent integration review cleared the final event-routing, diagnostic and persistence changes, and the production preview bundle matched a fresh build byte-for-byte. The final private-input run verified all3 buildings and18 floors, three complete preview builds, save/reload and unchanged authored plans/original backup bytes. A final500-edit run on the same frozen implementation retained stable DOM/listeners and80 Undo entries.
+
+## C-only Walk crouch (v70)
+
+`node test-walk-crouch.cjs` dispatches keyboard events through production script order and checks the actual Three camera with WebGL drawing mocked. It covers C hold/release, short taps, repeated/uppercase input, W+C movement, Ctrl removal, blur, typing, low-ceiling stand refusal, Walk/Fly/2D transitions, unchanged editor C and unchanged plan/history. Browser-reserved shortcut interception is not claimed.
+
+
+## Optional crawlspaces and low openings (v71)
+
+The v71 focused gate contains the 69 v70 suites plus seven crawlspace/low-opening suites. Pure model cases cover derived polygon envelopes and excluded holes, selective opt-in, adjustable clearance, minimum upward shifts, linked stair and explicit room/service offsets, known section/overlook/exterior datums, malformed metadata, removal dependencies, preserved stranded children and input immutability. Production-order UI cases cover pure previews, stale and hidden scope, atomic Apply/Undo/Redo, validation during initial load and named restore, exact rollback, independent buildings and capped history.
+
+Cap tests check rotated geometry, exact bounded pockets, retained side/upper mass, low walking clearance, unchanged empty layers and ordinary stair cutouts. Low-opening tests cover model validation, Full/Half/None boundaries, nested rooms, effective dimensions, preservation of ordinary openings, inspector/history and actual Three raycasts. Crouched-start tests use actual camera/collision math with WebGL rendering replaced, including the first frame, saved placement/reset, Fly-to-Walk, blocked targets and unchanged C hold semantics. Real browser/GPU rendering is not claimed.
+
+The existing asynchronous disk-backup interruption test now waits for the observed write operation to finish before checking the same saved status and exact file count; production backup behavior is unchanged. Private plans and screenshots remain outside this repository and its deployment.
+
+Final v71 validation: all 76 focused suites passed. Independent model/UI and bounded-cap/spawn reviews found no remaining blockers. The exact supplied backup passed production boot, all seven active-building floor checks, all three building geometry builds, reload and unchanged source bytes/authored plans outside the repository. A 100-edit stress run with a crawl pocket in a 240-room synthetic building retained stable DOM/listeners and 80 Undo entries; median edit time was 69 ms initially and 56 ms at the end. These are local CPU/DOM measurements, not browser frame rates.
+
+
+## Small primitive movement targets (v72)
+
+`test-small-primitive-hit-targets.cjs` resolves the actual transparent SVG handle rectangles in paint order before dispatching production pointer events. The pre-fix code fails immediately because those rectangles cover the shape interior. The correction reserves the middle half of the selection for movement, extends crowded corner targets outward, and keeps each handle center separately reachable. Visible 7 px handles, ordinary large-selection targets, and all transform/selection/history code remain unchanged.
+
+The 27 focused checks cover cube/cylinder/sphere/hemisphere, rotation and tilt, mouse and coarse-pointer sizing, 0.25×/1×/5×/15× zoom, all eight intentional resize handles, dimension-preserving movement, one-step Undo/Redo, camera-only overlay refresh, Escape/capture-loss/pointercancel/blur/Undo/floor-change cancellation, unrelated pointers, Shift selection and axis constraints, multiple enabled floors, cross-floor group moves, and hidden/locked layers. The existing primitive 2D suite also verifies save/reload, backup, view switching and actual Three meshes with WebGL drawing mocked.
+
+The supplied screenshot was inspected at its actual pixels outside the repository. No private reference or plan is included in source/deployment; no data or schema migration is performed. Browser QA was attempted on the isolated local preview, but cloud Chrome returned `ERR_BLOCKED_BY_CLIENT`; the separate elevated readiness command failed environment setup. These checks establish SVG hit geometry and production event/data behavior, not physical browser/touch input or GPU rendering. The focused release gate is `npm run test:release` (77 suites). Historical aggregate harness/expectation drift remains separate.
+
+The aggregate `npm test` was also attempted. It stops at `test-floor-edit-scope.cjs:14` with the older expected `L1` versus current `L0` floor-selection rule. The exact same failure was reproduced with the unchanged v71 `app.js`; it is not caused by the hit-target correction. The current floor-controller suites remain in the focused release gate.
+
+Final v72 verification: all 77 focused release suites passed. Independent source/mathematical review found no remaining blocker. Tiny subpixel shapes still need zooming for practical pointer use; browser-native hit testing and physical touch accuracy remain unverified in this environment.
+
+## October 4: v73 shared multi-object properties
+
+New `test-bulk-properties.cjs` loads the complete production script order and covers common/mixed values, garage offsets, absolute values versus translation, matching heterogeneous subsets, duplicate IDs across floors, untouched fields, blank/zero/invalid input, stale drafts, model/layer/linked ownership guards, storage conflict refusal and atomic Undo/Redo. It exercises rooms, corners/boundaries, openings and low presets, window wrap center conversion, primitives/thin walls, symbols, services, annotations, route stairs and linked stack settings. Semantic default tests cover annotation size and explicitly overriding inherited room heights.
+
+New `test-bulk-properties-scene.cjs` verifies the actual rebuilt Three.js slab instance after one cross-floor room-offset edit, with mixed/common inspector state, unchanged object and floor selection, 2D/3D roundtrips, and one Undo/Redo boundary. The renderer/GPU is mocked. Primitive scene and gizmo regressions now assert that off-gizmo Shift picks add/remove shapes without changing enabled floors; Shift on the rotation gizmo still snaps the gesture.
+
+The current release command is `npm run test:release` (`scripts/test-v73.cjs`, 79 suites). The prior historical broad aggregate remains distinct from this current-production release gate. Plain-static Sites have no compatible managed interactive preview, so this release does not claim a new native-browser, touch-device or GPU visual pass. Source seed plans and shipped reference drawing assets remain unchanged; no private user plan was added to the release.
+
+## October 4: v74 compact inspector and workspace menus
+
+`test-toolbar-layout.cjs` loads the full production script order and exercises 25 checks for the permanent inspector mode/zoom header, retained File/building/View actions, 2D percentage and wheel updates, actual Three camera distance/FOV percentages, restored cameras, intermediate animated fitting, mode/selection roundtrips, and context-loss state. Native Enter/Space/Tab key defaults, menu arrows/Escape/exclusivity/outside dismissal, theme-select focus, menu-to-dialog focus return, and command-search draft retention are also checked. Walk/Fly retains native toolbar keyboard behavior; clicking its percentage returns to 3D and fits the building. The lens percentage is explicitly labelled in those modes.
+
+The File actions, disk-backup controls, building history and management are accessible from the building-name chevron above Floors. View options, Zoom in/out, commands and Help are under the percentage chevron. Existing real nodes and handlers are reused. Mode controls remain outside all replaceable inspector content; narrow-screen collapse leaves the mode/zoom header accessible. Mobile building names and +/Layers controls have separate grid columns, and short-height layouts reduce their fixed rows. Responsive rules are structurally checked, not measured in a native layout engine.
+
+The four user-supplied PNG references were materialized with the supported Library flow and inspected as actual pixels outside the source tree. No private screenshots/plans or new seed data are bundled. There is no data/schema migration or audience change.
+
+The current release gate is `npm run test:release` (`scripts/test-v74.cjs`, 80 focused suites). These are production-event, DOM and real-camera/geometry tests with WebGL drawing mocked. This release does not claim a new native-browser, physical-touch or GPU visual pass. Prior browser infrastructure failures and the separate historical aggregate harness drift remain documented above.
+
+A supplemental run of the old `test-fly-mode.cjs` failed at its Fly-to-Walk `active` assertion. The exact failure was reproduced with every `dist/` source read from unchanged v73 HEAD, confirming pre-existing incomplete-harness/event-order drift. The production-order toolbar and Walk lifecycle checks cover the current navigation path and pass; this old standalone test is not counted among the 80 release suites.
+
+## October 4: v75 mode selector styling correction
+
+The two follow-up PNGs were inspected as actual pixels. The correction removes only the mode-selector appearance and button-size overrides from `toolbar-layout.css`, so the original v73 rounded border, raised group surface, inset padding, button dimensions and active-state styling apply at the relocated inspector position, including the original mobile rules. Requested menu/zoom behavior and keyboard/focus fixes are unchanged. The 26-check toolbar production suite and UI static checks pass; a new assertion protects the original segmented-control declarations from future relocation-specific restyling. The prior 80-suite result remains the full behavioral gate evidence for unchanged logic. Native browser visual verification is not claimed.
+
+## October 4: smooth ramp paths
+
+The Stair Path surface choice preserves legacy stair geometry and saved schema semantics. New `test-ramp-routes.cjs`, `test-ramp-path-ui.cjs`, `test-ramp-cutouts-walk.cjs` and `test-ramp-scene.cjs` exercise smooth 8 m runs and turns, angle/rotation robustness, exact linked room offsets, reversible conversion, per-node widths/custom landings, invalid/short routes, production UI/history/copy/import/reload, and bounded planar clearance cuts. Concrete occupancy probes cover rotated and intersecting slopes, retained side/under/overhead mass and clipped floor slabs. Actual Walk paths cover both directions, room walls/caps, flat turns, peaks, offsets, headroom, crouch and real blockers.
+
+The Three scene suite checks full-width slope tops and undersides, flush turning joins, exact finite headroom meshes and horizontal cutaway clipping using real Three geometry and raycasts. 2D plan markup and live 3D route/elevation previews share the ramp detail. WebGL drawing is replaced by a renderer double; native Chromium testing was attempted in an isolated private profile but process socket creation was denied by this environment. No GPU, native pointer or physical-device pass is claimed. The supplied screenshot was inspected as pixels outside source/deployment; no user plan or private reference was added to the public bundle.
+
+A supplemental historical `test-floor-surfaces.cjs` run failed at its old `showAll()` hidden-label assertion. The identical failure was reproduced with the unchanged v75 `src/preview3d.js`; this is separate from the current release gate and ramp changes.
+
+## 3D primitive bounding-box sizing and dimensions
+
+`node test-primitive-bounds-scene.cjs` adds 37 production-event/actual-Three checks for the oriented box, six face handles and W/D/H labels. Every positive/negative face on cube, cylinder, sphere and hemisphere is resized with fixed-opposite-face assertions, preview-only mutation, exactly one commit, Undo/Redo and retained floor selection. Full XYZ tilt and yaw beyond 90 degrees, grid/Ctrl/free sizing, minimum dimensions, rotated quarter-sized walls, pointer ownership, eight cancellation paths, exploded upper floors, disabled layers, Shift-add and Layers All, near-end-on axes, tiny-object label separation, Walk transitions, exact saved geometry and 2D/3D persistence are covered.
+
+The existing primitive scene, thin-wall scene, primitive I/O and UI suites pass. The 17-check contextual gizmo workflow also passes, including 100 repeated scene rebuilds with stable handlers, one canvas/gizmo and bounded history. Independent randomized local-axis probes initially covered 991 nondegenerate tilted/rotated face drags with exploded-floor translation. After the outboard-handle correction, a further 2,000 tiny/normal tilted poses had no integer-pixel mouse/touch picking mismatches; 1,977 accepted drags kept opposite-face/size error below 6.2e-13 and 23 degenerate axes stayed hidden. All six overlay resources dispose exactly once. Reviewer findings drove near-end-on axis guards and minimum screen-space handle spacing for tiny objects.
+
+All new controls are derived editor decoration; saved schema, source seed plans and private input data are unchanged. The supplied screenshot was inspected as pixels outside the repository. These checks exercise real camera projection, ray/plane math and production event/persistence paths with WebGL drawing replaced. Physical mouse/touch behavior, native-browser layout and GPU visual rendering are not claimed.
+
+### Multi-object inspector native blur/change regression
+
+The reported screenshot showed Chromium's `innerHTML` child-removal error during a focused multi-object edit. `test-bulk-inspector-lifecycle.cjs` deterministically reproduces Chromium's synchronous removal-triggered change/blur ordering, which JSDOM does not emit by default. The original code failed the child-removal invariant. The repaired code passes shared/mixed primitive fields, repeated commits, one Undo per edit, invalid-value rollback, focus movement between fields, dirty draft preservation/Escape, changed selection and newer model state. This is an explicit event-order simulation, not a substitute claim of native-browser rendering.
+
+`test-bulk-properties-scene.cjs` now focuses the edited control and injects the same removal ordering through the actual Three.js scene/rebuild flow. The bulk model, command/focus, primitive scene, ramp path and primitive bounds suites are checked alongside it. A native public-Site check uses only a separate browser-local synthetic fixture, with its actual result reported separately after deployment; no private plan is uploaded or bundled.
+
+Final v76 validation: all 86 focused release suites passed against the combined ramp, single-object bounds and multi-object inspector repair. The preview bundle was independently rebuilt to a private comparison path and matched the shipped bundle byte-for-byte. A native Chrome check reproduced the exact old v75 Enter-triggered inspector exception with two synthetic cubes in a separate browser-local QA building; the post-publication result is reported separately. The cloud browser lacks WebGL2, so this native DOM evidence does not establish GPU rendering.
+
+## Shared multi-object 3D gizmo
+
+`test-primitive-group-scene.cjs` exercises the actual shared Three.js gizmo through production selection and pointer events, with only WebGL drawing replaced. It covers W/E/R, all three translation/rotation axes, uniform-only scale controls, differently rotated members, snapped/free changes, near-gimbal quaternion serialization, thin-wall constraints, physical cross-floor/exploded transforms, atomic rollback, ten cancellation paths, foreign-pointer isolation, hidden/locked/mixed selections, saved plan/mode roundtrips, and restoration of single-object handles. The prior bounds suite now expects group dimensions without per-object face handles for primitive-only multi-selection.
+
+Independent review passed 1,000 rigid-transform/explode probes, 1,280 thin-wall factor/clamp cases, actual ray-picked group gestures, exact-center/tiny/extreme scale deltas, atomic-rejection rollback and resource disposal. A 100,000-quaternion sweep includes near-singular orientations within 1e-14 radians of ±90 degrees; the maximum serialized corner displacement on a 150 m cube was 2.392 micrometres. Group scaling deliberately stays uniform so differently rotated shapes never acquire unrepresentable shear.
+
+No schema, seed-plan or audience change is made, and the supplied reference remains outside the source/deployment. Current cloud-browser access supports native DOM checks but has no WebGL2 context, so physical 3D pointer behavior and GPU rendering remain unverified. Real camera, ray, transform, persistence and event behavior are covered by the renderer-mocked tests.
+
+Final v77 verification: all 88 focused release suites passed on the final application source and rebuilt preview bundle. The dedicated `test-primitive-group-ui.cjs` covers exact selection coverage, opaque/stale scopes, in-place model changes, malformed transforms, hidden/locked/storage guards, cross-floor duplicate IDs, no-op/Undo behavior, toolbar shortcuts and atomic rollback. Persistence tests distinguish a thrown pre-save guard from a post-save render failure using actual stored-plan proof, retaining correct model, disk and history state in either case.
+
+### Dynamic route bounds correction
+
+`node test-route-dynamic-bounds.cjs` exercises production-derived Stair and Ramp
+bounds, point/width/landing edits, rotated frames, inspector and selection
+measurements, marquee/hit testing, persistence and Three.js selection geometry.
+The measured frame is a non-mutating clone; the authored room frame and local
+route coordinates remain unchanged during display. Sheet export and cross-floor
+selection use the same current geometry rather than the route's creation frame.
+
+Independent numerical review covered 300 deterministic Stair/Ramp variants with
+arbitrary rotations, affine skew, moved endpoints, per-flight widths, landing
+depths and custom outlines. Reframed world points differed by at most 1.6e-14 m;
+footprint symmetric difference was at most 1.16e-9 m². Seven production DOM
+render cases preserved exact authored JSON while updating the measured fields.
+Existing route geometry/UI, ramp UI, building-transform (17 cases plus 35
+random fixtures), selection-transform (30 cases), transform modifiers, point
+transforms, corner-rotation scene and ramp scene (317 checks) passed. Three.js
+scene tests use a renderer double; native GPU presentation remains unverified.
+
+## Held-axis translation and viewport Shift selection
+
+`test-translation-axis-lock.cjs` dispatches production-order events for held X/Z/C keys, simultaneous axes, uppercase/repeated/modified chords, key release continuity, input-targeted Escape, pointer/capture/blur cancellation, room and primitive groups, qualified cross-floor movement, polygon vertices/point groups, and route points/custom landing vertices. Constraint projection follows existing snapping and uses Three's world convention: X/right, Z/depth, C/Y vertical. Planar-only gestures remain planar. Existing Walk crouch and exact-keyboard-policy suites preserve non-drag C and normal shortcuts.
+
+`test-viewport-shift-selection.cjs` adds 33 actual-ray/production-selection checks. It covers floor surfaces, room labels and walls, pure floor labels, doors/windows, groups and primitives, disabled/hidden/locked scopes, and 2D/3D roundtrips. Its first test reproduces the original floor-deselection bug against unchanged v77 source. The shared-floor controller's 187 checks retain plain viewport and Floors-panel navigation behavior. Real Three camera/raycast geometry is exercised with WebGL drawing replaced; no new GPU or physical-input claim is made.
+
+`test-translation-axis-scene.cjs` adds 109 production/real-Three checks across all four primitive types and shared gizmos, snapped/free world XYZ translation, held-key unions and exact key-boundary continuity, room movement/elevation, route node/height/landing handles, linked endpoint no-ops, foreign pointers, interrupted gestures, one-step Undo, and persisted reload. The invisible XYZ interaction plane is retained for the gesture, so projecting the displayed object off that plane cannot shift subsequent ray intersections. `test-translation-axis-rejections.cjs` adds eleven validation/lifecycle groups for rejected polygon/service/landing positions, hard bounds, oblique wall-bound openings, symbols/annotations/service-body movement, and capture/no-op/cancellation safety. Axis anchors use the last accepted geometry rather than invalid proposals. Existing Ctrl+Z cancellation coverage for an active move uses the visible Undo control, since the requested drag now exclusively owns Z; normal Ctrl+Z is verified after release.
+
+The combined v78 gate is `npm run test:release` (`scripts/test-v78.cjs`, 93 focused suites). Private plans/screenshots, saved schema and audience remain unchanged. No fresh native-browser/GPU or physical-device pass is claimed.
+
+Final v78 verification: all 93 focused release suites passed on the final application source. The rebuilt preview bundle was independently rebuilt to a comparison file and matched byte-for-byte. All five new suites passed, including 109 scene-axis checks, 12 2D held-axis groups, 11 rejected-input/lifecycle groups, 33 viewport Shift-selection checks and 21 dynamic-route bounds groups. The enlarged isolated-scene matrix has a five-minute process budget; an earlier run reached the previous two-minute harness limit without an assertion failure, then completed under the appropriate budget.
+
+## Translation guides and live distance feedback
+
+`test-drag-feedback.cjs` adds 24 production-order DOM/geometry groups for stationary held-key changes; accepted snapped and rejected-candidate displacement; rooms, vertices and point groups, primitives, cross-floor groups, services, route points and landing outlines; mixed-wall connection group-center movement; reverse travel; no-op/non-translation exclusion; and pointer, focus, data, history, persistence and lifecycle safety. Numeric measurement attributes and exact line endpoints are checked against the actual accepted translation snapshot. One static 2D SVG fixture was rasterized with librsvg and inspected at actual pixels; this is not a native-browser layout check.
+
+`test-drag-feedback-scene.cjs` checks real Three helper buffers, current-position guides, distance and signed axes, projected/readjusted DOM readouts, blocked planar/vertical holds, no picking targets, reused resources, subscriber teardown and repeated mounts. Added production integration cases in `test-translation-axis-scene.cjs` cover feedback before the first move, immediate stationary key release, primitive/group transactions, room/route handles and cancellation. Feedback uses a persistent viewer overlay and in-place buffers; it does not rebuild the whole scene or write the model on pointer movement. WebGL drawing is replaced in these tests, so physical input and GPU/native-browser appearance are not claimed.
+
+The recovered v79 gate exposed a pre-existing synthetic-clock issue in `test-crawl-spawn.cjs`: elapsed setup time could exceed its first simulated timestamp and feed a negative delta into the navigation test. The same spawn-position assertion failed on unchanged v78 with a 600 ms setup delay. Its synthetic frames now advance beyond both the previous frame and real setup time. The existing assertions pass normally and with the same injected delay; no navigation application code was changed for this correction.
+
+Final v79 verification: all 95 focused release suites passed across the initial and resumed gate segments after the clock correction (21 initial suites, the corrected crawl-spawn suite, and 73 remaining suites). Both feedback suites were rerun after the final bundle rebuild. The independently rebuilt 3D bundle matches the published asset byte-for-byte; script syntax and whitespace checks pass. No new native-browser, physical-input or GPU presentation pass is claimed, and no private plans or screenshots were added to the source or deployment.
+
+
+## Stable picked-surface Walk entry
+
+`test-walk-entry-scene.cjs` adds 21 production-order event and real-Three camera/raycast groups: physical picks beneath text, preserved clicked X/Y and facing, monotonic 360 ms position/lens easing, shortest quaternion arcs across the ±π boundary, movement suspension, unsupported-pointer-lock hover/drag fallback, unlocked drag suppression, pointer-warp and nonfinite-delta rejection, repeated target re-basing, blocked target atomicity, focused-button Escape, wall rejection, exploded offsets, dropped rooms, ramp midpoint and linked cross-floor arrival-landing support, reduced motion, crouched/saved starts, Fly transitions, lock rejection/retry/loss/late acquisition, delayed 3D loading cancellation and latest-request wins. Model/history bytes remain unchanged.
+
+Walk now awaits an in-progress renderer rebuild, clears old held input on entry and clamps negative frame time defensively. The v79 crawl-spawn test-clock correction is retained. Scene and DOM tests replace WebGL drawing and do not establish native-browser pointer lock, physical-input or GPU rendering. No private plans, screenshots, saved schema or audience changes are included.
+
+The historical partial-harness `test-fly-mode.cjs` still fails its Tab/active assertion with the unchanged v79 Explorer as well. The production-order entry suite and existing production crouch/lift suites exercise and pass the corresponding Fly/Walk transition behavior.
+
+Final v80 verification: all 96 focused release suites passed. The final 21-group entry suite passed after all review fixes. Focused drag-feedback, crawl-spawn, lift-camera, ordinary Walk/Fly camera and gait suites also passed. Script syntax and whitespace checks passed, and an independent 3D rebuild matched the shipping bundle byte-for-byte. The read-only review found no remaining concrete blockers. Native-browser pointer lock and GPU presentation remain unverified.
+
+## Centered cube taper
+
+`test-cube-taper.cjs` covers implicit legacy ends; centered width/depth changes; true projected hulls; zero-end pyramid/wedge geometry; Euler rotations; proportion-preserving overall resize; support placement; malformed-profile rejection; repeat-edit center stability; and copy/floor transfer.
+
+Taper is an optional normalized local profile on blockout cubes. Each axis retains a maximum end ratio of one, so the existing dimension/transform pipeline can resize both ends without rewriting the profile. Thin walls retain their rectangular geometry and existing constraints. The reference image and other private input files are not part of the application source or deployment.
+
+`test-cube-taper-ui.cjs` adds 12 production UI/persistence groups: cube-only controls, one-step/no-op history, invalid/zero sizes, protected/stale/detached edits, mixed and cross-floor bulk changes, proportional scaling, duplicate/delete Undo, plan/preview export and SHA-backed portable import-as-copy.
+
+`test-cube-taper-scene.cjs` adds 24 real-Three groups for normalized-profile meshes and Euler rotations; sloped normals/raycasts and placement; ordinary-cube geometry isolation; endpoint edits/rebuilds; all six face handles for straight and rotated frustums; zero-end geometry; exploded floors; uniform group scaling; cancellation; and resource disposal. WebGL drawing is mocked, so native GPU presentation and physical-device interactions are not claimed.
+
+The v81 release gate includes these three suites and the v80 Walk-entry coverage (100 focused suites total, including the scrolling regression).
+
+## October 5: inspector scrolling regression
+
+The pinned-toolbar stylesheet grouped the inspector's flex-container selector with an invalid unquoted numeric-leading attribute value, `[data-view-mode=3d]`. Chrome discarded the entire group. In the observed 1180 × 757 bulk inspector, the outer sidebar was 661 px high but the inner inspector expanded to 1046 px, leaving it without a local scroll range. Its `overscroll-behavior: contain` then trapped wheel events instead of forwarding them to the outer sidebar. Native wheel input left both scroll positions at zero; the 2D camera percentage stayed unchanged. Chrome `CSS.supports('selector(body[data-view-mode=3d])')` returned false and the quoted form returned true.
+
+All `data-view-mode="3d"` CSS values in `ui.css` and `toolbar-layout.css` are now quoted. This restores the intended bounded flex container, independent inspector/3D display scroll regions, zero minimum flex heights and the original pinned segmented mode controls. No model, persistence, selection or camera logic changes.
+
+`node test-inspector-scroll.cjs` fails on the original malformed selectors and passes on the correction. It checks selector validity boundaries (JSDOM otherwise accepts these invalid selectors), bounded-scroller CSS contracts, pinned header structure, and uncanceled native wheel routing without model/history/2D camera changes for empty, room, single-cube, bulk, 3D-display and menu targets. The existing 26 `test-toolbar-layout.cjs` checks and `test-ui-static.cjs` also pass on the corrected CSS, covering original mode styling, menu/focus/keyboard behavior, collapsed mobile header rules, and actual Three.js camera math through a mocked renderer. These are DOM/CSS/camera checks, not native after-fix layout or GPU evidence. Current managed preview constraints prevent a supported after-fix browser pass for this static app; short/narrow viewport and post-fix wheel behavior remain unverified in a real browser.
+
+Final v81 verification completed 100 focused suites: the original 99-suite taper/camera gate completed in two verified segments after its runner was interrupted (67 suites, then the remaining 32). The newly added inspector-scrolling suite passed, and toolbar/UI checks were rerun on the final CSS. Application/test sources in the first segment were matched to the final checkout; only the documented CSS selector correction followed, with affected checks repeated. All 48 new taper model/editor/scene groups passed. Shift+D behavior is unchanged in this release.
+
+
+## Mixed multi-selection rotation
+
+`test-mixed-group-rotation.cjs` exercises rigid floor-qualified proposals, dynamic route pivots, attached and wrapped openings, service ownership, tilted/tapered primitive yaw, local and conventional stairs, metadata preservation, exact no-ops and rejection without mutation. Conventional straight, switchback and spiral stairs are checked in every cardinal heading and quarter-turn, including repeated rotations. The optional boolean `stairCrossFlip` retains the cross-lane direction when a rectangular conventional stair turns; existing stairs without it keep their prior frame. The authoring flow preserves it when adding floors.
+
+`test-mixed-group-rotation-ui.cjs` covers production toolbar activation, shared SVG handles, mixed/cross-floor selections, exact and snapped angles, model-isolated previews, one Undo, history controls, keyboard/input Escape, foreign pointers, lifecycle cancellation, locked dependencies and failed-save rollback. The cross-floor lifecycle suite now expects the supported shared ring while preserving the restriction against partial active-floor point edits.
+
+`test-mixed-group-rotation-scene.cjs` uses production selection, persistence and real Three camera/raycast math with only WebGL drawing replaced. It covers shared room/stair/ramp/primitive handles, live angle feedback, Shift/Ctrl, physical cross-floor centers under exploded-floor display, view roundtrips, one Undo, foreign pointers, eleven cancellation paths and resource cleanup.
+
+Independent read-only review checked 528 conventional stair cases (types, headings, spiral handedness, cross-lane flips, floors, ±90/180/270/450° and repeated turns), 28 wrapped-window cases, seeded stair doors, wall-side profiles and owned beams, 100 fractional-coordinate roundtrips and 100,000 tilted-primitive yaw compositions. Maximum basis discrepancy in the yaw sweep was approximately 1.4e-15. Shared indexing replaced per-object whole-plan reindexing; a local pure-proposal sample for 600 simple rooms decreased from roughly 313 ms to 22 ms. This is a microbenchmark, not a browser frame-rate claim.
+
+The v82 gate adds the mixed model/editor/scene and conventional stair-type suites to the 100-suite v81 gate. No private plans or user screenshots were added to source or deployment. This task has no fresh native-browser, GPU or physical-device verification; all scene claims above are renderer-mocked.
+
+Final v82 verification: all 104 focused release suites passed. The new mixed model/editor/scene suites were repeated after the final stair-opening/metadata and cancellation corrections; the affected conventional stair-authoring, cross-floor lifecycle, keyboard and cube-taper editor checks also passed. A separately rebuilt preview bundle matches the shipping asset byte-for-byte, and script syntax/whitespace checks pass. The paused Shift+D behavior is unchanged.
+
+## Rotation selection workflow correction (v83)
+
+The recorded failure had two causes that v82's ring-only test missed: pre-existing detached boundary connections suppressed the ring, and a selected-body click fell through to the old single-object/floor picker. The recording was inspected outside the source tree. Its arrangement was not copied into the app or tests; `test-rotation-selection-workflow.cjs` uses a synthetic 11-room/16-shape fixture with a retained unselected room, stale internal/boundary connections and one initially valid boundary connection.
+
+The complete production pointer/key flow selects those 27 objects by marquee, focuses and clicks the toolbar Rotate control, checks the visible ring, clicks a selected body without losing members, then drags the whole selection and checks one-step Undo. The unchanged v82 checkout fails the same regression at zero handles instead of four. JSDOM does not wire assigned PointerEvent properties, so the test bridges those property handlers into the correct bubble phase; it does not call internal selection/edit commands for the gesture. E-first Shift-selection/marquee, repeated E, blocked-group body clicks, foreign pointers, and Select/Draw cancellation are also covered.
+
+Boundary connection records and implicit already-detached internal openings remain unchanged. Reconnect warnings are shown. Existing geometry validation still marks detached connections invalid and excludes them from traversable links. An explicitly selected detached opening remains a clear rejection. No adjacent rooms are silently added to the selected group.
+
+The extended real-Three suite covers selected room/primitive body rays before downstream picking, repeated selected-single-room clicks without floor-scope collapse, E-first mixed Shift-picks, mixed/cross-floor marquee projection and screen-sized handles. Primitive-only 3D groups retain their three-axis gizmo, preserve selection on body clicks, and focus the canvas after toolbar activation; body dragging away from that gizmo is not a primitive-group transform.
+
+Final v83 verification: all 30 targeted interaction, floor-controller, keyboard, selection, persistence, ordinary rotation and cube-taper suites passed. The final mixed editor/scene and recorded-pattern suites were repeated after the last picker, focus and marquee corrections. The full future release gate now includes 105 suites; this incremental verification does not claim all 105 were rerun. A separate rebuild matches the shipped 3D asset, and syntax/whitespace checks pass. User video input remains private and outside source/deployment. GPU rendering, physical input and fresh native-browser behavior remain unverified.

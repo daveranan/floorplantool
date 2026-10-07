@@ -1,0 +1,122 @@
+/* Shared elevation commands and local stair geometry, metres / z up. */
+(function(root){'use strict';const round=n=>Math.round(n*1e6)/1e6,arr=v=>Array.isArray(v)?v:[],rect=r=>[[r.x,r.y],[r.x+r.w,r.y],[r.x+r.w,r.y+r.h],[r.x,r.y+r.h]];
+function ground(plan){return 0;}
+function value(plan,ref,fallback){if(!ref)return fallback;if(ref.kind==='site')return ground(plan)+(ref.offset||0);const f=plan.floors[ref.floor];if(!f)return fallback;if(ref.kind==='floor')return f.z+(ref.offset||0);const r=f.rooms.find(r=>r.id===ref.room);return r?(r.z??f.z)+(ref.offset||0):fallback;}
+function sync(plan){for(const f of Object.values(plan.floors))for(const r of f.rooms)if(r.routeStair){const q=r.routeStair;q.startZ=round(value(plan,q.start,q.startZ));q.endZ=round(value(plan,q.end,q.endZ));r.z=Math.min(q.startZ,q.endZ);}for(const c of arr(plan.splitLevelConnections)){if(!c.localSteps)continue;c.lowerZ=round(value(plan,c.start,c.lowerZ));c.upperZ=round(value(plan,c.end,c.upperZ));const r=plan.floors[c.floor]?.rooms.find(r=>r.id===c.room);if(r){r.z=Math.min(c.lowerZ,c.upperZ);r.lowerZ=c.lowerZ;r.upperZ=c.upperZ;r.cutoutFor=[c.start,c.end].filter(ref=>ref?.kind==='room'&&ref.floor===c.floor).map(ref=>ref.room);}}}
+function floorMove(plan,fid,z){if(!Number.isFinite(z)||Math.abs(z)>150)throw Error('Elevation must be between −150 and 150 m');const f=plan.floors[fid],d=z-f.z;if(f.rooms.some(r=>Number.isFinite(r.z)&&Math.abs(r.z+d)>150))throw Error('A room would exceed the elevation limit');plan.siteGroundZ=ground(plan);f.z=round(z);f.elevation=(z>0?'+':'')+z.toFixed(2)+' m';for(const r of f.rooms){if(Number.isFinite(r.z))r.z=round(r.z+d);if(r.routeStair){const q=r.routeStair;if(!q.start)q.startZ=round(q.startZ+d);if(!q.end)q.endZ=round(q.endZ+d);}}for(const c of arr(plan.splitLevelConnections))if(c.floor===fid&&!c.localSteps){for(const k of ['lowerZ','upperZ'])if(Number.isFinite(c[k]))c[k]=round(c[k]+d);}for(const o of f.services||[])if(Number.isFinite(o.z))o.z=round(o.z+d);sync(plan);}
+function roomMove(plan,fid,rid,z){if(!Number.isFinite(z)||Math.abs(z)>150)throw Error('Elevation must be between −150 and 150 m');const r=plan.floors[fid].rooms.find(r=>r.id===rid),c=arr(plan.splitLevelConnections).find(c=>c.floor===fid&&c.room===rid&&c.localSteps);if(c){setEnd(plan,c,z);return;}if(r.routeStair){r.routeStair.endZ=z;delete r.routeStair.end;sync(plan);return;}r.z=round(z);if(r.type==='courtyard')r.groundSurface=true;sync(plan);}
+function setEnd(plan,c,z){if(!Number.isFinite(z)||Math.abs(z)>150)throw Error('Elevation must be between −150 and 150 m');const target=z-(c.end?.offset||0);if(!Number.isFinite(target)||Math.abs(target)>150)throw Error('Linked surface elevation would exceed ±150 m');if(c.end?.kind==='room'){const r=plan.floors[c.end.floor]?.rooms.find(r=>r.id===c.end.room);if(r){r.z=round(z-(c.end.offset||0));if(r.type==='courtyard')r.groundSurface=true;}else throw Error('The linked room is missing; choose another end surface');}else if(c.end?.kind==='floor'){floorMove(plan,c.end.floor,z-(c.end.offset||0));}else if(c.end?.kind==='site')plan.siteGroundZ=round(z-(c.end.offset||0));else c.upperZ=round(z);sync(plan);}
+function build(plan,fid,rid){if(plan.floors[fid]?.rooms.find(r=>r.id===rid)?.routeStair)return (root.KERN_ROUTE_STAIRS||(typeof require==='function'?require('./route-stairs.js'):null)).build(plan,fid,rid);const c=arr(plan.splitLevelConnections).find(c=>c.localSteps&&c.floor===fid&&c.room===rid),room=plan.floors[fid]?.rooms.find(r=>r.id===rid);if(!c||!room)return null;const a=value(plan,c.start,c.lowerZ),b=value(plan,c.end,c.upperZ),rise=Math.abs(b-a),axis=c.runAxis||room.runAxis||'y',reverse=(c.landingEnd||room.landingEnd)===(axis==='x'?'east':'south'),length=axis==='x'?room.w:room.h,width=axis==='x'?room.h:room.w,landing=Math.min(.35,length*.15),run=length-2*landing,n=Math.min(2000,Math.max(1,Math.ceil(rise/(Number.isFinite(c.targetRiser)&&c.targetRiser>=.1&&c.targetRiser<=.22?c.targetRiser:.17)-1e-6))),rh=rise/n,tread=run/Math.max(1,n-1),warnings=[];const warn=(code,text)=>warnings.push({code,kind:'stair',severity:'error',text});
+if(rise<.01)warn('zero-rise','Local steps need two different surface elevations');if(tread<.22)warn('footprint-length','Stair footprint too short: '+tread.toFixed(2)+' m treads; extend the run');if(width<.8)warn('footprint-width','Local steps need at least 0.80 m clear width');for(const ref of [c.start,c.end])if(ref&&ref.kind!=='site'&&!plan.floors[ref.floor]?.rooms.some(r=>ref.kind==='floor'||r.id===ref.room))warn('missing-endpoint','A linked stair surface is missing');
+const xy=(u,v)=>axis==='x'?[room.x+(reverse?length-u:u),room.y+v]:[room.x+v,room.y+(reverse?length-u:u)],box=(u0,u1)=>{const p=xy(u0,0),q=xy(u1,width);return{x:Math.min(p[0],q[0]),y:Math.min(p[1],q[1]),w:Math.abs(q[0]-p[0]),h:Math.abs(q[1]-p[1])}},low=Math.min(a,b),high=Math.max(a,b),sid=c.id,flightRect=box(landing,length-landing),upPath=a<=b?[xy(landing,width/2),xy(length-landing,width/2)]:[xy(length-landing,width/2),xy(landing,width/2)],treads=[];
+for(let i=0;i<Math.max(1,n-1);i++){const q=box(landing+i*tread,landing+(i+1)*tread),z=a+(b-a)*(i+1)/n;treads.push({index:i+1,z,rect:q,polygon:rect(q),line:[xy(landing+i*tread,0),xy(landing+i*tread,width)]});}
+const landings=[{id:sid+'-start',rect:box(0,landing),z:a},{id:sid+'-end',rect:box(length-landing,length),z:b}].map(l=>({...l,polygon:rect(l.rect),kind:'landing',role:'floor',depth:landing,clearWidth:width,segmentId:sid}));const flight={id:sid+'-flight',segmentId:sid,rect:flightRect,polygon:rect(flightRect),kind:'flight',z0:low,z1:high,rise,risers:n,riserHeight:rh,treadDepth:tread,run,clearWidth:width,upPath,downPath:[...upPath].reverse(),treads,fromLanding:landings[a<=b?0:1].id,toLanding:landings[a<=b?1:0].id};
+const accesses=[];let minimumHeadroom=Infinity;const endpoints=[{ref:c.start,z:a,p:xy(0,width/2)},{ref:c.end,z:b,p:xy(length,width/2)}];for(const ep of endpoints){if(ep.ref?.kind!=='room')continue;const target=plan.floors[ep.ref.floor]?.rooms.find(r=>r.id===ep.ref.room);if(!target)continue;const targetFloor=plan.floors[ep.ref.floor];if(!target.outdoor&&!['courtyard','terrace','void'].includes(target.type)){const clearance=target.height??targetFloor.clearHeight??3;minimumHeadroom=Math.min(minimumHeadroom,clearance);if(clearance<2.2)warn('approach-headroom',target.name+' has only '+clearance.toFixed(2)+' m approach clearance; local steps need 2.20 m');}const S=root.KERN_SHAPES||(typeof require==='function'?require('./room-shapes.js'):null),point={x:ep.p[0],y:ep.p[1]},inside=S.contains(point,target)||S.edges(target).some(e=>S.project(point,e).distance<=.25);if(!inside)warn('detached-endpoint','Stair endpoint does not meet '+target.name);const fixed=axis==='x'?ep.p[0]:ep.p[1],start=axis==='x'?room.y:room.x;accesses.push({valid:inside,z:ep.z,floor:ep.ref.floor,room:target.id,geometry:{axis:axis==='x'?'v':'h',fixed,start,end:start+width},doorHeight:2.2});}
+const Shapes=root.KERN_SHAPES||(typeof require==='function'?require('./room-shapes.js'):null);for(const [otherId,otherFloor]of Object.entries(plan.floors)){if(otherId===fid)continue;for(const other of otherFloor.rooms){if(other.type==='void'||other.localSteps||(other.type==='courtyard'&&!other.groundSurface))continue;const overlaps=Shapes.clip.intersection(Shapes.multi(room),Shapes.multi(other));if(!overlaps.some(poly=>Math.abs(Shapes.areaOf(poly[0]))>.01))continue;const samples=overlaps.flatMap(poly=>poly[0]).map(p=>{const distance=axis==='x'?p[0]-room.x:p[1]-room.y,u=reverse?length-distance:distance,t=Math.max(0,Math.min(1,(u-landing)/run));return a+(b-a)*t;}),pathLow=Math.min(...samples),pathHigh=Math.max(...samples),slabTop=other.z??otherFloor.z,slabBottom=slabTop-(plan.floorModule?.slab||.3);if(slabTop>pathLow+.2&&slabBottom<pathHigh+2.2){minimumHeadroom=Math.min(minimumHeadroom,Math.max(0,slabBottom-pathHigh));warn('overhead-slab',otherId+' '+other.name+' slab intersects the local stair or its 2.20 m headroom');}}}
+return{schema:'kern-stair-detail-1',localSteps:true,stairType:'straight',roomId:rid,floorId:fid,connectionId:sid,name:room.name,footprint:{x:room.x,y:room.y,w:room.w,h:room.h},runAxis:axis,landingEnd:c.landingEnd,spec:{clearWidth:width,landingDepth:landing,treadDepth:tread,minHeadroom:2.2,waistThickness:.15},status:warnings.length?'error':'conditional',fit:!warnings.length,warnings,stops:[{floor:fid,z:low},{floor:fid,z:high}],flights:warnings.some(w=>w.code==='missing-endpoint')?[]:[flight],displayFlights:warnings.some(w=>w.code==='missing-endpoint')?[]:[{...flight,direction:'up',role:'departure',label:'UP '+high.toFixed(2)+' m',arrowPath:upPath}],landings:warnings.some(w=>w.code==='missing-endpoint')?[]:landings,displayLandings:warnings.some(w=>w.code==='missing-endpoint')?[]:landings,segments:[{id:sid,from:fid,to:fid,z0:low,z1:high,rise,risers:n,intermediateStops:[],riserHeights:[rh],flights:[flight.id],landings:landings.map(l=>l.id)}],openings:[],access:accesses,metrics:{clearWidth:width,landingDepth:landing,treadDepth:tread,riserMin:rh,riserMax:rh,requiredEnvelope:{long:2*landing+n*.22,short:.8},availableEnvelope:{long:length,short:width},requiredHeadroom:2.2,minimumHeadroom:Number.isFinite(minimumHeadroom)?minimumHeadroom:null},datumLabel:low.toFixed(2)+' m',clearanceNote:'Local steps use adjacent surfaces for approach clearance.'};}
+// Clearance follows each rendered tread, landing or continuous ramp plane,
+// including through solid fill.
+// Keep concrete below the stair body, beside the route and above finite headroom.
+// No footprint-wide or floor-ID projections.
+const CUT_EPS=1e-6;
+function cutHeadroom(value){return Number.isFinite(value)?Math.max(.5,Math.min(5,value)):2.2;}
+// Planar prism caps share the exact same metre-space representation in geometry,
+// rendering and Walk. Horizontal z/height remain conservative broad-phase bounds.
+const planeHeight=(plane,p)=>plane.a*p[0]+plane.b*p[1]+plane.c,flatPlane=z=>({a:0,b:0,c:z}),planeDifference=(a,b)=>({a:a.a-b.a,b:a.b-b.b,c:a.c-b.c});
+function rampPlane(f){const p=f.upPath?.[0],q=f.upPath?.at(-1);if(!p||!q)return null;const dx=q[0]-p[0],dy=q[1]-p[1],length2=dx*dx+dy*dy;if(length2<CUT_EPS*CUT_EPS)return null;const a=dx*(f.z1-f.z0)/length2,b=dy*(f.z1-f.z0)/length2;return{a,b,c:f.z0-a*p[0]-b*p[1]};}
+function clipPlane(geometry,plane){
+ if(!geometry.length)return[];const S=root.KERN_SHAPES||(typeof require==='function'?require('./room-shapes.js'):null),points=geometry.flatMap(p=>p[0]),values=points.map(p=>planeHeight(plane,p));if(Math.min(...values)>=-1e-9)return geometry;if(Math.max(...values)<=1e-9)return[];
+ const b=S.bounds(points),pad=Math.max(1,b.w,b.h),input=rect({x:b.x-pad,y:b.y-pad,w:b.w+2*pad,h:b.h+2*pad}),polygon=[];
+ for(let i=0;i<input.length;i++){const a=input[i],b=input[(i+1)%input.length],va=planeHeight(plane,a),vb=planeHeight(plane,b);if(va>=0)polygon.push(a);if((va>=0)!==(vb>=0)){const t=va/(va-vb);polygon.push([a[0]+t*(b[0]-a[0]),a[1]+t*(b[1]-a[1])]);}}
+ return polygon.length>=3?S.clip.intersection(geometry,[[polygon]]):[];
+}
+function splitPlane(geometry,plane){const values=geometry.flatMap(p=>p[0]).map(p=>planeHeight(plane,p));if(!values.length)return[[],[]];if(Math.min(...values)>=-1e-9)return[geometry,[]];if(Math.max(...values)<=1e-9)return[[],geometry];return[clipPlane(geometry,plane),clipPlane(geometry,{a:-plane.a,b:-plane.b,c:-plane.c})];}
+function prismParts(b,geometry,bottomPlane=b.bottomPlane||flatPlane(b.z),topPlane=b.topPlane||flatPlane(b.z+b.height)){
+ const S=root.KERN_SHAPES||(typeof require==='function'?require('./room-shapes.js'):null),out=[];
+ for(const rings of geometry){const polygon=rings[0],bounds=S.bounds(polygon);if(Math.abs(S.areaOf(polygon))-rings.slice(1).reduce((n,h)=>n+Math.abs(S.areaOf(h)),0)<CUT_EPS)continue;
+  const lower=polygon.map(p=>planeHeight(bottomPlane,p)),upper=polygon.map(p=>planeHeight(topPlane,p));if(Math.max(...upper.map((v,i)=>v-lower[i]))<CUT_EPS)continue;
+  const z=Math.min(...lower),height=Math.max(...upper)-z,shape={...b,...bounds,z,height,polygon,holes:rings.slice(1)};
+  if(Math.abs(bottomPlane.a)+Math.abs(bottomPlane.b)+Math.abs(topPlane.a)+Math.abs(topPlane.b)>1e-12){shape.bottomPlane={...bottomPlane};shape.topPlane={...topPlane};}else{delete shape.bottomPlane;delete shape.topPlane;}
+  out.push(shape);
+ }return out;
+}
+// Clip derived pieces at horizontal display/collision limits, without flattening
+// a slope or shrinking its thickness. Input geometry is never changed.
+function clipPrism(shape,low=-Infinity,high=Infinity){let pieces=[shape];for(const [z,upper]of [[low,false],[high,true]]){if(!Number.isFinite(z))continue;pieces=pieces.flatMap(b=>{const geometry=[[b.polygon||rect(b),...(b.holes||[])]],bottom=b.bottomPlane||flatPlane(b.z),top=b.topPlane||flatPlane(b.z+b.height),limit=flatPlane(z),diff=upper?planeDifference(top,limit):planeDifference(limit,bottom),[capped,uncapped]=splitPlane(geometry,diff),valid=clipPlane(capped,upper?planeDifference(limit,bottom):planeDifference(top,limit));return [...prismParts(b,uncapped,bottom,top),...prismParts(b,valid,upper?bottom:limit,upper?limit:top)];});}return pieces;}
+function subtractPrism(b,v){const S=root.KERN_SHAPES||(typeof require==='function'?require('./room-shapes.js'):null),geometry=[[b.polygon||rect(b),...(b.holes||[])]],intersection=S.clip.intersection(geometry,v.geometry);if(!intersection.length)return[b];
+ const bottom=b.bottomPlane||flatPlane(b.z),top=b.topPlane||flatPlane(b.z+b.height),cutBottom=v.bottomPlane||flatPlane(v.z0),cutTop=v.topPlane||flatPlane(v.z1),out=prismParts(b,S.difference(geometry,[v.geometry]),bottom,top);
+ const [below,belowCap]=splitPlane(intersection,planeDifference(cutBottom,top));out.push(...prismParts(b,below,bottom,top),...prismParts(b,clipPlane(belowCap,planeDifference(cutBottom,bottom)),bottom,cutBottom));
+ const [above,aboveCap]=splitPlane(intersection,planeDifference(bottom,cutTop));out.push(...prismParts(b,above,bottom,top),...prismParts(b,clipPlane(aboveCap,planeDifference(top,cutTop)),cutTop,top));return out;
+}
+function cutVolumes(st){const headroom=cutHeadroom(st.spec?.minHeadroom),out=[];
+ const add=(surface,thickness,source)=>{const polygon=surface.polygon||surface.rect&&rect(surface.rect);if(!polygon||polygon.length<3||!Number.isFinite(surface.z))return;const S=root.KERN_SHAPES||(typeof require==='function'?require('./room-shapes.js'):null);out.push({...S.bounds(polygon),geometry:[[polygon]],z0:surface.z-thickness,z1:surface.z+headroom,surfaceZ:surface.z,source,stair:st.connectionId});};
+ for(const f of st.flights||[]){if(f.ramp){const surfacePlane=rampPlane(f),polygon=f.polygon||f.rect&&rect(f.rect);if(surfacePlane&&polygon){const thickness=Number.isFinite(f.surface?.thickness)?f.surface.thickness:.18,bottomPlane={...surfacePlane,c:surfacePlane.c-thickness},topPlane={...surfacePlane,c:surfacePlane.c+headroom},S=root.KERN_SHAPES||(typeof require==='function'?require('./room-shapes.js'):null);out.push({...S.bounds(polygon),geometry:[[polygon]],z0:Math.min(...polygon.map(p=>planeHeight(bottomPlane,p))),z1:Math.max(...polygon.map(p=>planeHeight(topPlane,p))),surfaceZ:f.z0,surfacePlane,bottomPlane,topPlane,source:f.id,stair:st.connectionId,ramp:true});}}else for(const t of f.treads||[])add(t,Math.min(.15,f.riserHeight||.15),f.id);}
+ for(const l of st.landings||[])add(l,.18,l.id);
+ return out;
+}
+function cutSurfaces(data,volumes){const S=root.KERN_SHAPES||(typeof require==='function'?require('./room-shapes.js'):null),area=g=>g.reduce((sum,p)=>sum+Math.abs(S.areaOf(p[0]))-p.slice(1).reduce((n,h)=>n+Math.abs(S.areaOf(h)),0),0),overlap=(a,b)=>a.x<b.x+b.w-CUT_EPS&&a.x+a.w>b.x+CUT_EPS&&a.y<b.y+b.h-CUT_EPS&&a.y+a.h>b.y+CUT_EPS;
+ // Boolean clipping needs coincident rotated edges to share exact coordinates.
+ // Snap only derived cutter math, far below the geometry epsilon; never the plan.
+ const snapGeometry=g=>g.map(p=>p.map(ring=>ring.map(p=>p.map(n=>Math.round(n*1e8)/1e8))));
+ volumes=volumes.map(v=>({...v,geometry:snapGeometry(v.geometry)}));
+ function split(b,level){if(!['wall','slab','ceiling','solid'].includes(b.kind))return[b];const top=b.z+b.height,geometry=snapGeometry([[b.polygon||rect(b),...(b.holes||[])]]),cuts=volumes.filter(v=>(!v.floor||v.floor===level.id)&&(!v.room||[b.room,...b.rooms||[]].includes(v.room))&&(!v.wallOnly||b.kind==='wall')&&(!v.ceilingOnly||b.kind==='ceiling')&&v.z0<top-CUT_EPS&&v.z1>b.z+CUT_EPS&&overlap(b,v)).filter(v=>area(S.clip.intersection(geometry,v.geometry))>CUT_EPS);if(!cuts.length)return[b];
+  // Only ramp-intersecting bodies use the planar splitter; the established
+  // horizontal-tread path retains its compact merged extrusion representation.
+  if(b.bottomPlane||b.topPlane||cuts.some(v=>v.bottomPlane||v.topPlane)){let parts=[b];for(const v of cuts)parts=parts.flatMap(part=>v.z0<part.z+part.height-CUT_EPS&&v.z1>part.z+CUT_EPS&&overlap(part,v)?subtractPrism(part,v):[part]);return parts;}
+  const zs=[...new Set([b.z,top,...cuts.flatMap(v=>[Math.max(b.z,v.z0),Math.min(top,v.z1)])])].sort((a,b)=>a-b),out=[],last=new Map();
+  for(let i=1;i<zs.length;i++){const z=zs[i-1],end=zs[i];if(end-z<CUT_EPS)continue;const mid=(z+end)/2,active=cuts.filter(v=>v.z0<mid&&v.z1>mid),remaining=active.length?S.difference(geometry,active.map(v=>v.geometry)):geometry;
+   for(const rings of remaining){const polygon=rings[0],bounds=S.bounds(polygon),key=JSON.stringify(rings),prior=last.get(key);if(prior&&Math.abs(prior.z+prior.height-z)<CUT_EPS){prior.height=end-prior.z;continue;}const shape={...b,...bounds,z,height:end-z};const open=polygon.filter((p,i)=>!i||p[0]!==polygon[0][0]||p[1]!==polygon[0][1]);const axisAligned=rings.length===1&&open.length===4&&open.every(p=>(Math.abs(p[0]-bounds.x)<CUT_EPS||Math.abs(p[0]-bounds.x-bounds.w)<CUT_EPS)&&(Math.abs(p[1]-bounds.y)<CUT_EPS||Math.abs(p[1]-bounds.y-bounds.h)<CUT_EPS));if(axisAligned&&!b.polygon){delete shape.polygon;delete shape.holes;}else{shape.polygon=polygon;shape.holes=rings.slice(1);}out.push(shape);last.set(key,shape);}
+  }return out;
+ }
+ for(const l of data.levels){const shapes=[...l.boxes,...l.polygons||[]].flatMap(b=>split(b,l));l.boxes=shapes.filter(b=>!b.polygon);l.polygons=shapes.filter(b=>b.polygon);}
+ return data;
+}
+// A passable doorway has a physical threshold across its wall thickness.
+// Keep it inside the exact opening width and at the opening's own floor height:
+// this bridges tiny landing-to-room seams without inventing broad support over
+// voids or letting a lower floor jump to a raised doorway.
+function addDoorThresholds(data,S){
+ for(const level of data.levels)for(const opening of level.openings||[]){
+  if(opening.blocked||opening.kind==='window'||!(opening.height>0))continue;
+  const p=opening.p0||(opening.axis==='h'?[opening.start,opening.fixed]:[opening.fixed,opening.start]),q=opening.p1||(opening.axis==='h'?[opening.end,opening.fixed]:[opening.fixed,opening.end]);
+  if(![...p,...q,opening.z].every(Number.isFinite))continue;
+  const dx=q[0]-p[0],dy=q[1]-p[1],length=Math.hypot(dx,dy);if(length<CUT_EPS)continue;
+  const nx=-dy/length*.12,ny=dx/length*.12,polygon=[[p[0]-nx,p[1]-ny],[q[0]-nx,q[1]-ny],[q[0]+nx,q[1]+ny],[p[0]+nx,p[1]+ny]],bounds=S.bounds(polygon);
+  // Subtract coplanar supporting surfaces to avoid duplicated slabs/z-fighting.
+  const covered=data.levels.flatMap(l=>[...l.boxes,...l.polygons||[]]).filter(b=>['slab','landing','stair'].includes(b.kind)&&Math.abs(b.z+b.height-opening.z)<CUT_EPS&&b.x<bounds.x+bounds.w&&b.x+b.w>bounds.x&&b.y<bounds.y+bounds.h&&b.y+b.h>bounds.y).map(b=>[[b.polygon||rect(b),...b.holes||[]]]);
+  level.polygons??=[];
+  for(const rings of S.difference([[polygon]],covered))level.polygons.push({...S.bounds(rings[0]),polygon:rings[0],holes:rings.slice(1),z:opening.z-.18,height:.18,kind:'slab',threshold:true,door:opening.id,room:opening.a,color:'#bdc6d2'});
+ }
+}
+function decorate(plan,data){const S=root.KERN_SHAPES||(typeof require==='function'?require('./room-shapes.js'):null);data.siteGroundZ=ground(plan);for(const l of data.levels){for(const r of plan.floors[l.id].rooms){const q=l.rooms.find(q=>q.id===r.id);if(q){q.groundSurface=!!r.groundSurface;q.localSteps=!!r.localSteps;}if(r.type==='courtyard'&&r.groundSurface){const ps=S.points(r);l.polygons??=[];l.polygons.push({...S.bounds(ps),polygon:ps,z:(r.z??l.z)-.3,height:.3,kind:'slab',room:r.id,color:'#8dad82'});}}}
+ addDoorThresholds(data,S);
+ const volumes=data.stairs.flatMap(cutVolumes);
+ // Conventional access must clear its perimeter throat at the resolved landing
+ // height, including a lower storey's service ceiling left beside the shaft.
+ // The exact door width and bounded headroom remain; support below z survives.
+ for(const st of data.stairs.filter(s=>!s.localSteps&&!s.routeStair))for(const a of st.access||[]){
+  const g=a.geometry,opening=data.levels.find(l=>l.id===(a.floor||st.floorId))?.openings.find(o=>o.id===a.doorId);if(!a.valid||!g||!Number.isFinite(a.z)||!opening||opening.blocked||opening.kind==='window'||Math.abs(opening.z-a.z)>CUT_EPS)continue;
+  const p=g.p0||(g.axis==='h'?[g.start,g.fixed]:[g.fixed,g.start]),q=g.p1||(g.axis==='h'?[g.end,g.fixed]:[g.fixed,g.end]),dx=q[0]-p[0],dy=q[1]-p[1],length=Math.hypot(dx,dy);if(!(length>CUT_EPS))continue;
+  const depth=Math.max(.12,Math.min(2,st.spec?.perimeter||0)),nx=-dy/length*depth,ny=dx/length*depth,polygon=[[p[0]-nx,p[1]-ny],[q[0]-nx,q[1]-ny],[q[0]+nx,q[1]+ny],[p[0]+nx,p[1]+ny]];
+  volumes.push({...S.bounds(polygon),geometry:[[polygon]],z0:a.z,z1:a.z+Math.min(opening.height,cutHeadroom(st.spec?.minHeadroom)),source:a.doorId,stair:st.connectionId});
+ }
+ // Older local-step endpoints stop at a room edge. Extend only that explicit
+ // doorway through the wall thickness, at the endpoint's own elevation.
+ for(const st of data.stairs.filter(s=>s.localSteps&&!s.routeStair))for(const a of st.access||[]){const g=a.geometry;if(!a.valid||!g||!['h','v'].includes(g.axis))continue;const box=g.axis==='h'?{x:g.start,y:g.fixed-.12,w:g.end-g.start,h:.24}:{x:g.fixed-.12,y:g.start,w:.24,h:g.end-g.start};volumes.push({...box,geometry:[[rect(box)]],z0:a.z-.18,z1:a.z+cutHeadroom(st.spec?.minHeadroom),floor:a.floor,room:a.room,wallOnly:true});}
+ // A crawl pocket removes only its bounded occupied volume from its host's
+ // derived service cap. Keep material below its slab and above its roof, even
+ // when the existing gap is much taller than the requested crawl clearance.
+ const slab=Number.isFinite(plan.floorModule?.slab)&&plan.floorModule.slab>0?Math.min(plan.floorModule.slab,2):.3;
+ for(const [fid,f]of Object.entries(plan.floors))if(f.crawlspace?.hostFloor&&plan.floors[f.crawlspace.hostFloor])for(const r of f.rooms){
+  if(r.outdoor||['void','courtyard','terrace','solid'].includes(r.type)||r.routeStair||r.localSteps)continue;
+  const z=r.z??f.z,height=r.height??f.clearHeight??3;
+  volumes.push({...S.bounds(S.points(r)),geometry:S.multi(r),z0:z-slab,z1:z+height+slab,floor:f.crawlspace.hostFloor,ceilingOnly:true,source:fid+':'+r.id});
+ }
+ // Standalone Wall-tool objects are ordinary walls too. Derive their cut
+ // pieces on this read-only scene snapshot, preserving the editable primitive.
+ const rampCuts=data.stairs.filter(st=>st.ramp).flatMap(cutVolumes),TW=root.KERN_THIN_WALLS||(typeof require==='function'?require('./thin-walls.js'):null);
+ if(rampCuts.length&&TW)for(const level of data.levels)for(const wall of level.primitives||[])if(wall.wall===true){const original=TW.collision(wall,level.z),cutLevel={id:level.id,boxes:[original],polygons:[]};cutSurfaces({levels:[cutLevel]},rampCuts);const pieces=[...cutLevel.boxes,...cutLevel.polygons];if(pieces.length!==1||pieces[0]!==original){level.rampWallCuts??={};level.rampWallCuts[wall.id]=pieces;}}
+ cutSurfaces(data,volumes);const all=data.levels.flatMap(l=>[...l.boxes,...l.polygons||[]]);if(all.length)data.bounds={minX:Math.min(...all.map(b=>b.x)),maxX:Math.max(...all.map(b=>b.x+b.w)),minY:Math.min(...all.map(b=>b.y)),maxY:Math.max(...all.map(b=>b.y+b.h)),minZ:Math.min(...all.map(b=>b.z)),maxZ:Math.max(...all.map(b=>b.z+b.height))};return data;
+}
+const api={ground,value,sync,floorMove,roomMove,setEnd,build,decorate,cutHeadroom,cutVolumes,cutSurfaces,planeHeight,rampPlane,clipPlane,clipPrism};if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.KERN_ELEVATIONS=api;
+})(typeof window!=='undefined'?window:globalThis);

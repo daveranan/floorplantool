@@ -5,6 +5,7 @@ const objects=window.KERN_OBJECTS,editor=window.KERN_OBJECT_UI;
 const legacy=document.querySelector('.object-tools');legacy.classList.add('placement-config');legacy.setAttribute('aria-hidden','true');
 const categories=[
  {id:'all',name:'All',icon:'core'},
+ {id:'special',name:'Special',icon:'walk-start',items:['walk-start']},
  {id:'medical',name:'Medical',icon:'scanner',items:['scanner','exam']},
  {id:'technical',name:'Technical',icon:'decoder',items:['decoder','panel']},
  {id:'storage',name:'Storage',icon:'rack',items:['rack','tools']},
@@ -13,7 +14,7 @@ const categories=[
  {id:'hvac',name:'HVAC',icon:'duct',items:['duct','crawlway','hatch','vent']}
 ];
 const services=[{kind:'duct',name:'Utility duct',w:2,h:.6,route:true},{kind:'crawlway',name:'Crawlway',w:2,h:.8,route:true},{kind:'hatch',name:'Access hatch',w:.8,h:.8},{kind:'vent',name:'Vent terminal',w:.8,h:.8}];
-const inventory=[...objects.catalog,{kind:'text',name:'Text annotation',w:2,h:.45},...services];
+const inventory=[{kind:'walk-start',name:'Walk start',w:.6,h:.6,singleton:true},...objects.catalog,{kind:'text',name:'Text annotation',w:2,h:.45},...services];
 let category='all',choice='scanner',paletteDrag=null,hover=null,frame=0,connectionsOpen=false,connectionsScope='',hvacOpen=false;
 let serviceState={width:.6,clearHeight:.6,offset:4.1,access:'utility',kind:'duct'};
 const root=document.createElement('details');root.id='placemenu';root.className='toolbar-popover place-tool';
@@ -21,16 +22,13 @@ root.innerHTML=`<summary id="tool-place" aria-keyshortcuts="B" title="B · Place
 $('tool-select').parentElement.appendChild(root);wireToolbarMenu('placemenu');
 const popup=root.querySelector('.place-popup'),tabs=root.querySelector('.place-categories'),items=$('placeitems');
 const isService=kind=>services.some(s=>s.kind===kind),isRoute=kind=>services.some(s=>s.kind===kind&&s.route),item=kind=>inventory.find(i=>i.kind===kind);
-function icon(kind){
- const shapes={scanner:'<rect x="9" y="7" width="44" height="30" rx="5"/><circle cx="26" cy="22" r="11"/><path d="M27 20h25v4H27M38 24v13"/>',exam:'<rect x="11" y="17" width="43" height="15" rx="3"/><path d="M17 18v13m-2 2v7m34-7v7M11 12h12"/>',decoder:'<rect x="15" y="8" width="32" height="21" rx="2"/><path d="M9 37h46M31 29v8M19 33h24m-26-2h-6v6"/>',panel:'<rect x="19" y="5" width="26" height="35" rx="2"/><path d="M25 12h5m5 0h4m-14 8h5m5 0h4m-14 8h5m5 0h4m-14 7h14"/>',rack:'<rect x="17" y="5" width="30" height="36"/><path d="M17 14h30M17 23h30M17 32h30m-25-23v2m0 7v2m0 7v2m0 7v2"/>',tools:'<rect x="10" y="13" width="44" height="24"/><path d="M10 21h44M10 29h44m-19-12h6m-6 8h6m-6 8h6M23 12V7h18v5"/>',radio:'<path d="M10 36h44M14 35V19h19v16M19 24h5m-5 6h5M46 36V14l-8-7M41 19q9 2 13-5m-16 0q7 0 9-5"/>',utility:'<rect x="13" y="9" width="37" height="29"/><circle cx="27" cy="24" r="9"/><path d="M27 15v18M18 24h18m7-9v18m-4-13h8m-8 8h8"/>',core:'<rect x="12" y="7" width="39" height="32"/><path d="M12 7l39 32M51 7L12 39m20-18v5"/>',text:'<path d="M15 10h34M32 10v27M23 37h18m-26-20v-7m34 7v-7"/>',duct:'<path d="M7 10h22v10h28v8H21V18H7z"/><path d="M38 28v10h8V28" stroke-dasharray="3 2"/>',crawlway:'<path d="M8 16h47v14H8z" stroke-dasharray="4 2"/><path d="M14 23h32m-5-4l5 4-5 4"/>',hatch:'<rect x="15" y="7" width="34" height="33"/><path d="M15 7l34 33m0-33L15 40"/>',vent:'<rect x="12" y="9" width="40" height="28"/><path d="M17 14h30m-30 6h30m-30 6h30m-30 6h30"/>'};
- return `<svg viewBox="0 0 64 46" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${shapes[kind]||shapes.core}</svg>`;
-}
-function positionPopup(){const canvas=$('plan').getBoundingClientRect(),width=Math.min(740,innerWidth-24),left=Math.max(12,Math.min(canvas.left+16,innerWidth-width-12));popup.style.left=left+'px';popup.style.width=width+'px';popup.style.top=Math.ceil($('tool-place').getBoundingClientRect().bottom+9)+'px';}
+function icon(kind){if(kind==='walk-start')return '<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="5"><circle cx="50" cy="65" r="18"/><path d="M50 65V12M34 30L50 12L66 30"/></svg>';return window.KERN_SYMBOL_ART.icon(kind);}
+function positionPopup(){const canvas=$('plan').getBoundingClientRect(),width=Math.max(240,Math.min(680,canvas.width-24,innerWidth-24)),left=Math.max(12,Math.min(canvas.left+(canvas.width-width)/2,innerWidth-width-12));popup.style.left=left+'px';popup.style.width=width+'px';popup.style.top='auto';popup.style.bottom=Math.max(12,innerHeight-canvas.bottom+12)+'px';}
 function renderItems(){
  const c=categories.find(c=>c.id===category),list=category==='all'?inventory:inventory.filter(i=>c.items.includes(i.kind));
  tabs.innerHTML=categories.map(c=>`<button type="button" role="tab" aria-selected="${c.id===category}" aria-controls="placeitems" data-place-category="${c.id}" title="${c.name}">${icon(c.icon)}<span>${c.name}</span></button>`).join('');
  $('place-category-label').textContent=c.name;$('placecaption').textContent=category==='hvac'?'Routes: click to draw, or drag a 2 m starter segment · edit height and use in the inspector':'Editable outlines · dimensions in metres';
- items.innerHTML=list.map(i=>`<button type="button" class="place-card" data-place-kind="${i.kind}" aria-pressed="${i.kind===choice}" title="${i.name} · ${i.w} × ${i.h} m${i.route?' · starter segment':''}"><div class="place-illustration">${icon(i.kind)}</div><strong>${esc(i.name)}</strong><small>${i.w} × ${i.h} m${i.route?' · starter':''}</small></button>`).join('');items.scrollLeft=0;
+ items.innerHTML=list.map(i=>`<button type="button" class="place-card" data-place-kind="${i.kind}" aria-pressed="${i.kind===choice}" title="${i.name} · ${i.singleton?'One per building':i.w+' × '+i.h+' m'}${i.route?' · starter segment':''}"><div class="place-illustration">${icon(i.kind)}</div><strong>${esc(i.name)}</strong><small>${i.singleton?(model.walkStart?'Placed · reposition':'One per building'):i.w+' × '+i.h+' m'+(i.route?' · starter':'')}</small></button>`).join('');items.scrollLeft=0;
  for(const tab of tabs.querySelectorAll('[data-place-category]'))tab.onclick=()=>{category=tab.dataset.placeCategory;renderItems();};
  for(const card of items.querySelectorAll('[data-place-kind]')){card.onpointerdown=beginPaletteDrag;card.onclick=e=>{if(e.detail===0)choose(card.dataset.placeKind);else e.preventDefault();};}
 }
@@ -42,7 +40,7 @@ $('placeprev').onclick=()=>items.scrollBy({left:-300,behavior:'smooth'});$('plac
 popup.addEventListener('wheel',e=>{const rail=e.target.closest('.place-rail')||items;if(rail.scrollWidth>rail.clientWidth+1){const amount=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;rail.scrollLeft+=amount*(e.deltaMode===1?16:e.deltaMode===2?rail.clientWidth:1);e.preventDefault();e.stopPropagation();}},{passive:false});
 tabs.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key))return;e.preventDefault();const i=categories.findIndex(c=>c.id===category);category=categories[(i+(e.key==='ArrowRight'?1:categories.length-1))%categories.length].id;renderItems();tabs.querySelector('[aria-selected=true]')?.focus();});
 function choose(kind){
- choice=kind;cancelPlacement();root.open=false;
+ choice=kind;cancelPlacement();root.open=false;if(kind==='walk-start'){window.KERN_START?.activate();return;}
  if(isService(kind)){$('servicekind').value=kind;serviceState.kind=kind;serviceState.clearHeight=$('serviceaccess').value==='player'?1.5:kind==='duct'?.6:.4;hvacOpen=true;$('drawservice').click();}
  else{$('symbolkind').value=kind;$('placesymbol').click();}
  syncPlace();
@@ -50,7 +48,7 @@ function choose(kind){
 function serviceDefaults(){const kind=$('servicekind').value,access=$('serviceaccess').value;if(serviceState.access!==access||serviceState.kind!==kind)return{};return{width:serviceState.width,clearHeight:serviceState.clearHeight,z:cleanNumber(floor().z+serviceState.offset)};}
 function canvasPoint(e){const rect=$('plan').getBoundingClientRect(),menu=popup.getBoundingClientRect(),inside=e.clientX>=rect.left&&e.clientX<=rect.right&&e.clientY>=rect.top&&e.clientY<=rect.bottom&&!(root.open&&e.clientX>=menu.left&&e.clientX<=menu.right&&e.clientY>=menu.top&&e.clientY<=menu.bottom);return inside?point(e):null;}
 function footprint(kind,p){const t=item(kind);if(kind==='text')return{x:snap(p.x),y:snap(p.y),w:2,h:.45};if(isRoute(kind)){const width=serviceDefaults().width||($('serviceaccess').value==='player'?.8:.6);return{x:snap(p.x-1),y:snap(p.y),w:2,h:width,route:true};}return{x:snap(p.x-t.w/2),y:snap(p.y-t.h/2),w:t.w,h:t.h};}
-function validPlacement(kind,p){if(!p||!item(kind))return false;const r=footprint(kind,p),key=isService(kind)?'services':kind==='text'?'annotations':'symbols';return Math.abs(r.x)<=150&&Math.abs(r.y)<=150&&r.x+r.w<=150&&r.y+r.h<=150&&(key==='annotations'?objects.annotations(model,floorId):floor()[key]||[]).length<300;}
+function validPlacement(kind,p){if(!p||!item(kind))return false;if(kind==='walk-start')return Math.abs(p.x)<=150&&Math.abs(p.y)<=150;const r=footprint(kind,p),key=isService(kind)?'services':kind==='text'?'annotations':'symbols';return Math.abs(r.x)<=150&&Math.abs(r.y)<=150&&r.x+r.w<=150&&r.y+r.h<=150&&(key==='annotations'?objects.annotations(model,floorId):floor()[key]||[]).length<300;}
 function queueDraw(){if(!frame)frame=requestAnimationFrame(()=>{frame=0;draw();});}
 function updateDrop(e){const p=canvasPoint(e);paletteDrag.point=p;paletteDrag.valid=validPlacement(paletteDrag.kind,p);paletteDrag.moved||=Math.hypot(e.clientX-paletteDrag.start.x,e.clientY-paletteDrag.start.y)>6;const badge=$('place-drag-badge');if(badge){badge.style.transform=`translate(${e.clientX+14}px,${e.clientY+14}px)`;badge.dataset.valid=String(paletteDrag.valid);}queueDraw();}
 function beginPaletteDrag(e){
@@ -61,18 +59,18 @@ function cancelPlacement(){const d=paletteDrag;paletteDrag=null;hover=null;$('pl
 function drop(e){
  if(!paletteDrag||e.pointerId!==paletteDrag.pointerId)return;const d=paletteDrag;updateDrop(e);const place=d.moved&&d.valid&&d.buildingId===currentBuilding().id&&d.floorId===floorId;const p=d.point;cancelPlacement();
  if(!d.moved){choose(d.kind);return;}if(!place){notify('Drop on the plan to place an item.');return;}
- choose(d.kind);
+ if(d.kind==='walk-start'){root.open=false;window.KERN_START?.place(p);return;}choose(d.kind);
  if(isService(d.kind)){
   const points=isRoute(d.kind)?[{x:snap(p.x-1),y:snap(p.y)},{x:snap(p.x+1),y:snap(p.y)}]:null;
-  const o=editor.newService(p,points,serviceDefaults()),next=clone(floor());next.services??=[];next.services.push(o);try{objects.validateFloor(next);commit(()=>{floor().services??=[];floor().services.push(o);setSelection({services:[o.id]});});setTool('service-select');notify('Service placed · edit its dimensions and height in the inspector');}catch(error){notify(error.message);}
- }else{editor.pointerDown({button:0,target:$('plan'),clientX:e.clientX,clientY:e.clientY,preventDefault(){}});notify('Outline placed · drag another preview, or click to place again');}
+  const o=editor.newService(p,points,serviceDefaults()),next=clone(floor());next.services??=[];next.services.push(o);try{objects.validateFloor(next);commit(()=>{floor().services??=[];floor().services.push(o);setSelection({services:[o.id]});});setTool('select');notify('Service placed · edit its dimensions and height in the inspector');}catch(error){notify(error.message);}
+ }else{editor.pointerDown({button:0,target:$('plan'),clientX:e.clientX,clientY:e.clientY,preventDefault(){}});notify('Outline placed · drag its handles to edit');}
 }
 document.addEventListener('pointermove',e=>{if(paletteDrag&&e.pointerId===paletteDrag.pointerId){updateDrop(e);return;}if(drag||!['symbol','service-draw'].includes(tool)){if(hover){hover=null;queueDraw();}return;}const kind=tool==='symbol'?$('symbolkind').value:$('servicekind').value,p=canvasPoint(e);hover=p?{kind,point:p,valid:validPlacement(kind,p)}:null;queueDraw();},true);
 document.addEventListener('pointerup',drop,true);
 for(const type of ['pointercancel','lostpointercapture'])document.addEventListener(type,e=>{if(paletteDrag?.pointerId===e.pointerId)cancelPlacement();},true);
 window.addEventListener('blur',cancelPlacement);document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelPlacement();});window.addEventListener('resize',()=>{cancelPlacement();if(root.open)positionPopup();});
 document.addEventListener('keydown',e=>{
- if(e.key==='Escape'&&(paletteDrag||root.open)){e.preventDefault();e.stopImmediatePropagation();closePlace(true);return;}
+ if(e.key==='Escape'&&!document.querySelector('dialog[open]')&&(paletteDrag||root.open||['place','symbol','service-draw'].includes(tool))){e.preventDefault();e.stopImmediatePropagation();closePlace();resetTransient(true);$('tool-select').focus({preventScroll:true});return;}
  if(isTypingTarget(e.target)||document.querySelector('dialog[open]')||e.ctrlKey||e.metaKey||e.altKey||window.BuildingExports?.isThreeMode?.())return;
  if(e.key.toLowerCase()==='b'){e.preventDefault();e.stopImmediatePropagation();if(!e.repeat)root.open?closePlace(true):openPlace();}
  if(e.key.toLowerCase()==='v'&&root.open){e.preventDefault();e.stopImmediatePropagation();closePlace();setTool('select');}
@@ -97,7 +95,7 @@ function appendHVAC(){
  for(const [id,key]of [['hvacwidth','width'],['hvacheight','clearHeight'],['hvacbottom','offset']])$(id).onchange=e=>{const n=Number(e.target.value),value=id==='hvacbottom'?n-floor().z:n;if(!Number.isFinite(n)||(id==='hvacbottom'?Math.abs(n)>150:n<.1||n>20)){notify('Enter a valid metric service dimension.');syncPlace();return;}serviceState[key]=cleanNumber(value);draw();};
 }
 function syncPlace(){
- const three=window.BuildingExports?.isThreeMode?.();root.hidden=!!three;$('tool-place').setAttribute('aria-pressed',String(['place','symbol','service-draw'].includes(tool)));root.dataset.active=String(['place','symbol','service-draw'].includes(tool));
+ const three=window.BuildingExports?.isThreeMode?.();root.hidden=false;$('tool-place').setAttribute('aria-pressed',String(['place','symbol','service-draw'].includes(tool)));root.dataset.active=String(['place','symbol','service-draw'].includes(tool));
  if(paletteDrag&&(paletteDrag.buildingId!==currentBuilding().id||paletteDrag.floorId!==floorId||three))cancelPlacement();
  if(hover&&!['symbol','service-draw'].includes(tool))hover=null;
  if($('hvacvisible')){$('hvacvisible').checked=currentBuilding().view.serviceVisibility?.[floorId]===true;$('hvacedit').checked=tool.startsWith('service');$('hvacstatus').textContent=$('hvacvisible').checked?'Visible':'Hidden';$('hvaclocation').value=$('servicelocation').value;$('hvacaccess').value=$('serviceaccess').value;$('hvacwidth').value=serviceState.width;$('hvacheight').value=serviceState.clearHeight;$('hvacbottom').value=cleanNumber(floor().z+serviceState.offset);}

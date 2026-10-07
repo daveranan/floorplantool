@@ -14,7 +14,7 @@
     $('savecompactlabel').textContent = {saved: 'Saved locally', editing: 'Editing…', error: 'Not saved', loading: 'Importing…'}[state] || 'Saved locally';
     const failed = $('saved').dataset.state === 'error';
     $('savewarning').hidden = !failed;
-    $('savecompact').title = failed ? 'Changes are in memory only. Download a backup before closing.' : 'Saved in this browser on this device. File downloads portable backups.';
+    $('savecompact').title = failed ? 'Changes are in memory only. Download a backup before closing.' : 'Saved in this browser on this device. The building menu downloads portable backups.';
     if (failed) $('savewarningtext').textContent = ($('saved').title && !$('saved').title.startsWith('Saved') ? $('saved').title : buildingState.message) || 'Download a backup before closing or reloading.';
   }
   function sync() {
@@ -26,7 +26,7 @@
     $('floor-menulabel').textContent = `Current floor · ${floorId}`;
     $('floorstats').textContent = `${plural(f.rooms.filter(r => !['void', 'solid'].includes(r.type) && !r.throughOnly).length, 'space')} · ${plural(allConnections(f).length, 'connection')}`;
     $('canvasfloor').textContent = `${floorId} / ${f.name}`;
-    $('emptyfloor').hidden = !!f.rooms.length || tool !== 'select' || preview;
+    $('emptyfloor').hidden = !!f.rooms.length || !!f.primitives?.length || tool !== 'select' || preview;
     $('removefloor').title = floorId === 'L0' ? 'The ground-floor code L0 is permanent. Its name and elevation are editable.' : `Remove ${floorId} · ${f.name}`;
     $('building').title = `${currentBuilding().name} · ${plural(count, 'floor')} · saved in this browser`;
     $('inspectortoggle').classList.toggle('has-selection', !!(selected || selectedDoor));
@@ -133,6 +133,8 @@
         case 'rename-building': renameBuilding(name); notify('Building renamed'); break;
         case 'add-floor': addFloor({id: code, name, z}); notify(`${code} added · draw your first room`); break;
         case 'edit-floor':
+          const crawlReview = window.KERN_CRAWLSPACE_UI?.prepareFloorDetails(state.floorId, {name, z});
+          if (crawlReview) { closeManagement(); window.KERN_CRAWLSPACE_UI.show(crawlReview.proposal, crawlReview.snapshot); return true; }
           if (floor().name !== name || floor().z !== z) commit(() => { floor().name = name; floor().z = z; floor().elevation = `${z > 0 ? '+' : ''}${z.toFixed(2)} m`; });
           notify('Floor details saved · Undo restores the previous details');
           break;
@@ -231,7 +233,7 @@
     button.innerHTML = `<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg><span>${button.innerHTML}</span>`;
   }
   $('undo').setAttribute('aria-label', 'Undo'); $('redo').setAttribute('aria-label', 'Redo');
-  for (const [id, shortcut] of Object.entries({'tool-select':'V', 'tool-door':'D', 'tool-connect': 'C', 'tool-disconnect': 'X', 'tool-draw': 'P', undo: 'Control+Z Meta+Z', redo: 'Control+Shift+Z Meta+Shift+Z'})) $(id).setAttribute('aria-keyshortcuts', shortcut);
+  for (const [id, shortcut] of Object.entries({'tool-select':'V', 'tool-door':'D', 'tool-connect': 'C', 'tool-disconnect': 'X', 'tool-draw': 'R', undo: 'Control+Z Meta+Z', redo: 'Control+Shift+Z Meta+Shift+Z'})) $(id).setAttribute('aria-keyshortcuts', shortcut);
   for (const button of document.querySelectorAll('button:not([type])')) button.type = 'button';
   $('opennotes').onclick=()=>{$('planinfodialog').showModal()};$('closenotes').onclick=()=>$('planinfodialog').close();$('openchecks').onclick=()=>{$('checksDialog').showModal()};$('closechecks').onclick=()=>$('checksDialog').close();
   $('loadstatus').hidden = true;

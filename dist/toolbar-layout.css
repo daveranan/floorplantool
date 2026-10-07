@@ -1,0 +1,57 @@
+/* One permanent inspector header and one building/file menu. */
+#workspace-editor-title{display:flex!important;flex:none;flex-direction:column;padding:10px 12px;border-bottom:1px solid var(--line)}
+#workspace-editor-title #buildingmenu>summary{width:100%;min-height:32px;justify-content:space-between;font-size:13px;padding:3px 2px;gap:8px}
+#workspace-editor-title #buildingmenu>summary:after{display:none}
+#workspace-building-project[hidden]{display:none!important}
+#buildingmenu>.toolbar-popover-panel{width:290px;max-width:calc(100vw - 16px)}
+#buildingmenu>.toolbar-popover-panel>#buildingname{display:none}
+#inspectorpanel,body.panelsopen #inspectorpanel,body[data-view-mode="3d"] #inspectorpanel{display:flex;flex-direction:column;min-height:0;padding:0;overflow:hidden;scrollbar-gutter:auto}
+.inspector-toolbar{position:relative;z-index:35;display:flex;align-items:center;justify-content:space-between;gap:8px;flex:none;min-width:0;min-height:51px;padding:8px 10px;background:var(--panel);border-bottom:1px solid var(--line)}
+/* Relocate the original segmented control without restyling it. */
+.inspector-toolbar .viewmode{margin:0;min-width:0}
+.zoom-control{display:flex;align-items:stretch;flex:none;border-radius:5px;background:var(--raised)}
+.zoom-control #fit{min-width:43px;min-height:32px;max-width:78px;padding:5px 4px 5px 7px;border:0;border-radius:5px 0 0 5px;background:transparent;font-size:12px;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.zoom-control #viewmenu{display:block}
+.zoom-control #viewmenu>summary{display:flex;align-items:center;justify-content:center;min-width:23px;min-height:32px;padding:3px 5px;border:0;border-radius:0 5px 5px 0;background:transparent;font-size:14px;color:var(--muted);list-style:none}
+.zoom-control #viewmenu>summary:after,.zoom-control #viewmenu>summary::-webkit-details-marker{display:none}
+.zoom-control #fit:hover,.zoom-control #viewmenu>summary:hover,.zoom-control #viewmenu[open]>summary{background:var(--hover)}
+#viewmenu>.toolbar-popover-panel{width:280px;max-width:calc(100vw - 16px);z-index:110}
+#inspectorpanel>.asidehead{position:static;flex:none;margin:0;padding:12px 14px 10px;min-height:0}
+#inspectorpanel>#inspector{display:block;flex:1;min-height:0;max-height:none;overflow:auto;overscroll-behavior:contain;padding:0 14px 14px}
+#inspectorpanel>#inspector[data-selection=none]{display:flex;flex-direction:column}
+#inspectorpanel>#inspector[data-selection=none] .connectionlist{overflow:auto}
+body.editing3d[data-view-mode="3d"] #inspectorpanel>#inspector{flex:1;max-height:none;padding:0 14px 12px}
+body.editing3d[data-view-mode="3d"] #inspectorpanel>.threeoptions{flex:0 1 35%;min-height:0}
+#inspectorpanel>.threeoptions{min-height:0;overscroll-behavior:contain}
+.inspector-toolbar #collapseinspector{flex:none;margin:0}
+@media(min-width:721px){.appbar .toolbar{flex-wrap:nowrap}.appbar .editbar{min-width:0;overflow-x:auto;scrollbar-width:thin}.appbar .viewtools{display:none}.inspector-toolbar #collapseinspector{display:none!important}}
+@media(max-width:1050px) and (min-width:721px){.inspector-toolbar{padding:7px 6px;gap:3px}.zoom-control #fit{min-width:40px;padding-left:4px}.zoom-control #viewmenu>summary{min-width:20px;padding:3px}}
+@media(max-width:720px){
+  main{grid-template-rows:118px minmax(100px,1fr) minmax(178px,33%)}
+  .floor-sidebar{display:grid;grid-template-columns:minmax(0,1fr) auto!important;grid-template-rows:40px 78px;position:relative;height:118px!important;max-height:118px!important;overflow:visible;scrollbar-gutter:auto}
+  #workspace-editor-title{grid-column:1;grid-row:1;height:40px;min-height:40px;min-width:0;padding:3px 10px;display:block!important}
+  #workspace-editor-title #buildingmenu>summary{min-height:34px;width:100%;max-width:100%;font-size:12px;padding:3px 0;gap:9px}
+  #workspace-editor-title #workspace-building-title{max-width:100%;min-width:0}
+  .floor-sidebar #floors{grid-column:1/-1!important;grid-row:2;min-height:0;height:78px!important;max-height:78px;overflow-x:auto}
+  .floor-sidebar .floorsheading{grid-column:2;grid-row:1;position:static;align-self:center;justify-self:end;padding:0 5px 0 0;border-bottom:1px solid var(--line);height:40px}
+  #inspectorpanel,body.panelsopen #inspectorpanel{padding:0}
+  .inspector-toolbar{padding:3px 8px;min-height:48px;gap:5px}
+  .zoom-control #fit{min-height:40px;min-width:45px}
+  .zoom-control #viewmenu>summary{min-height:40px;min-width:30px}
+  .inspector-toolbar #collapseinspector{min-height:40px;min-width:32px;font-size:18px;padding:0}
+  .inspector-collapsed main{grid-template-rows:118px minmax(0,1fr) 48px}
+  .inspector-collapsed #inspectorpanel,.inspector-collapsed[data-view-mode="3d"] #inspectorpanel{display:flex!important}
+  .inspector-collapsed #inspectorpanel>:not(.inspector-toolbar){display:none!important}
+  .inspector-collapsed .inspector-toolbar #collapseinspector{transform:rotate(180deg)}
+}
+@media(max-width:374px){.inspector-toolbar{padding:3px 5px;gap:3px}.zoom-control #fit{min-width:39px}.zoom-control #viewmenu>summary{min-width:25px}}
+
+@media(max-width:720px) and (max-height:560px){
+ main{grid-template-rows:96px minmax(40px,1fr) minmax(48px,28%)}
+ .floor-sidebar{grid-template-rows:36px 60px;height:96px!important;max-height:96px!important}
+ #workspace-editor-title{height:36px;min-height:36px;padding-top:1px;padding-bottom:1px}
+ .floor-sidebar .floorsheading{height:36px}
+ .floor-sidebar #floors{height:60px!important;max-height:60px}
+ .inspector-collapsed main{grid-template-rows:96px minmax(0,1fr) 48px}
+ #inspectorpanel>.asidehead{padding:5px 12px;min-height:28px}
+}

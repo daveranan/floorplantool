@@ -8,8 +8,21 @@
     "test:browser": "node scripts/browser-qa.cjs",
     "build:preview": "esbuild src/preview3d.js --bundle --minify --format=iife --target=es2020 --outfile=dist/preview3d.js",
     "test:ui": "node test-ui.cjs",
-    "test:preview": "node test-preview.cjs"
+    "test:preview": "node test-preview.cjs",
+    "test:elevation": "node test-local-elevation.cjs && node test-elevation-ui.cjs && node test-elevation-scene.cjs && node test-elevation-safety.cjs",
+    "test:release": "node scripts/test-v83.cjs"
   },
-  "dependencies": {"three": "0.180.0"},
-  "devDependencies": {"esbuild": "0.25.10", "jsdom": "26.1.0"}
+  "dependencies": {
+    "polygon-clipping": "^0.15.7",
+    "three": "0.180.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.10",
+    "jsdom": "26.1.0"
+  },
+  "imports": {
+    "#primitive-scene": "./src/primitive-scene.js",
+    "#drag-feedback": "./src/drag-feedback.js",
+    "#group-rotation-scene": "./src/group-rotation-scene.js"
+  }
 }

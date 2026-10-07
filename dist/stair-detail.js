@@ -16,18 +16,38 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const round=n=>Math.round(n*1000000)/1000000;
 function intersection(a,b){const x=Math.max(a.x,b.x),y=Math.max(a.y,b.y),w=Math.min(a.x+a.w,b.x+b.w)-x,h=Math.min(a.y+a.h,b.y+b.h)-y;return w>EPS&&h>EPS?{x,y,w,h}:null}
 function boundary(a,b){let lo,hi;if(!a||!b)return null;if(Math.abs(a.x+a.w-b.x)<EPS||Math.abs(b.x+b.w-a.x)<EPS){lo=Math.max(a.y,b.y);hi=Math.min(a.y+a.h,b.y+b.h);if(hi>lo)return{axis:'v',fixed:Math.abs(a.x+a.w-b.x)<EPS?b.x:a.x,lo,hi}}if(Math.abs(a.y+a.h-b.y)<EPS||Math.abs(b.y+b.h-a.y)<EPS){lo=Math.max(a.x,b.x);hi=Math.min(a.x+a.w,b.x+b.w);if(hi>lo)return{axis:'h',fixed:Math.abs(a.y+a.h-b.y)<EPS?b.y:a.y,lo,hi}}return null}
-function doorGeometry(d,f){if(d.b==='outside')return connections?.geometry(d,f);const a=f.rooms.find(r=>r.id===d.a),b=f.rooms.find(r=>r.id===d.b),g=boundary(a,b);if(!g)return null;if(d.kind==='open'&&d.fullWidth!==false)return{...g,start:g.lo,end:g.hi};if(g.hi-g.lo<d.width+.2-EPS)return null;const t=Math.max(0,Math.min(1,d.offset??.5)),start=g.lo+.1+Math.max(0,g.hi-g.lo-d.width-.2)*t;return{...g,start,end:start+d.width}}
+function doorGeometry(d,f){if(d.edge||f.rooms.some(r=>(r.id===d.a||r.id===d.b)&&r.shape)){const S=root.KERN_SHAPES||(typeof require==='function'?require('./room-shapes.js'):null),g=S?.opening(d,f);if(!g)return null;if(Math.abs(g.u[1])<EPS)return{...g,axis:'h',fixed:g.p0[1]};if(Math.abs(g.u[0])<EPS)return{...g,axis:'v',fixed:g.p0[0]};return null;}if(d.b==='outside')return connections?.geometry(d,f);const a=f.rooms.find(r=>r.id===d.a),b=f.rooms.find(r=>r.id===d.b),g=boundary(a,b);if(!g)return null;if(d.kind==='open'&&d.fullWidth!==false)return{...g,start:g.lo,end:g.hi};if(g.hi-g.lo<d.width+.2-EPS)return null;const t=Math.max(0,Math.min(1,d.offset??.5)),start=g.lo+.1+Math.max(0,g.hi-g.lo-d.width-.2)*t;return{...g,start,end:start+d.width}}
+// A conventional stack follows its real access surfaces. This is derived only:
+// moving a room does not rewrite the shaft, another room, or saved floor datums.
+function accessSurface(plan,floorId,roomId){
+ const floor=plan?.floors?.[floorId],room=arr(floor?.rooms).find(r=>r?.id===roomId),fallback=finite(room?.z,floor?.z),targets=[];
+ if(!room||!floor)return{z:fallback,targets,conflict:false};
+ for(const d of connections?connections.all(floor):arr(floor.doors)){
+  if(!d||d.kind==='window'||d.sealed||d.cemented||d.a!==roomId&&d.b!==roomId)continue;
+  const other=arr(floor.rooms).find(r=>r.id===(d.a===roomId?d.b:d.a));
+  if(!other||['void','solid'].includes(other.type)||!doorGeometry(d,floor))continue;
+  const z=finite(other.z,floor.z);if(Number.isFinite(z))targets.push({door:d.id,room:other.id,z});
+ }
+ const heights=targets.map(t=>t.z).sort((a,b)=>a-b),conflict=heights.length>1&&heights.at(-1)-heights[0]>EPS;
+ return{z:!conflict&&heights.length?heights[0]:fallback,targets,conflict};
+}
+// Threshold checks use the same verified landing contact as the rendered stair.
+function hasLandingAccess(plan,floorId,door,detailFor){
+ if(!door||door.kind==='window'||door.sealed||door.cemented)return false;
+ const floor=plan?.floors?.[floorId];if(!floor)return false;
+ return [door.a,door.b].some(id=>{const r=arr(floor.rooms).find(r=>r.id===id);if(!r||!arr(plan.verticalConnections).some(c=>c?.type==='stair'&&c.room===id&&arr(c.floors).includes(floorId))||accessSurface(plan,floorId,id).conflict)return false;const detail=detailFor?detailFor(r,floorId):build(plan,floorId,id);return !!detail?.access?.some(a=>a.doorId===door.id&&a.valid);});
+}
 function coordinateFrame(r,axis,end){
  const long=axis==='x'?r.w:r.h,short=axis==='x'?r.h:r.w;
  const reverse=(axis==='x'&&end==='east')||(axis==='y'&&end==='south');
- const xy=(u,v)=>axis==='x'?[r.x+(reverse?long-u:u),r.y+v]:[r.x+v,r.y+(reverse?long-u:u)];
- const uv=(x,y)=>axis==='x'?[reverse?r.x+long-x:x-r.x,y-r.y]:[reverse?r.y+long-y:y-r.y,x-r.x];
+ const xy=(u,v)=>axis==='x'?[r.x+(reverse?long-u:u),r.y+(r.stairCrossFlip?short-v:v)]:[r.x+(r.stairCrossFlip?short-v:v),r.y+(reverse?long-u:u)];
+ const uv=(x,y)=>axis==='x'?[reverse?r.x+long-x:x-r.x,r.stairCrossFlip?r.y+short-y:y-r.y]:[reverse?r.y+long-y:y-r.y,r.stairCrossFlip?r.x+short-x:x-r.x];
  const world=local=>{const a=xy(local.u0,local.v0),b=xy(local.u1,local.v1);return{x:Math.min(a[0],b[0]),y:Math.min(a[1],b[1]),w:Math.abs(a[0]-b[0]),h:Math.abs(a[1]-b[1])}};
  return{axis,end,long,short,reverse,xy,uv,world};
 }
 function build(plan,floorId,roomId,options={}){
  const floor=plan?.floors?.[floorId],room=arr(floor?.rooms).find(r=>r?.id===roomId);
- if(!floor||!room)return null;
+ if(!floor||!room)return null;if(room.routeStair)return (root.KERN_ROUTE_STAIRS||(typeof require==='function'?require('./route-stairs.js'):null)).build(plan,floorId,roomId);const local=(root.KERN_ELEVATIONS||(typeof require==='function'?require('./elevation.js'):null))?.build(plan,floorId,roomId);if(local)return local;
  const connection=arr(plan.verticalConnections).find(c=>c?.type==='stair'&&c.room===roomId&&arr(c.floors).includes(floorId));
  const split=arr(plan.splitLevelConnections).find(c=>c?.floor===floorId&&c.room===roomId);
  if(!connection&&!split&&!room.stairTransition)return null;
@@ -45,7 +65,7 @@ function build(plan,floorId,roomId,options={}){
  let end=room.landingEnd||c.landingEnd||(roomId==='transferstair'?'north':axis==='x'?'west':'south');
  if(!(axis==='x'?['west','east']:['north','south']).includes(end)){warn('invalid-end','Landing end does not match the stair axis');end=axis==='x'?'west':'south'}
  const frame=coordinateFrame(room,axis,end);
- const stops=connection?arr(c.floors).map(id=>{const f=plan.floors[id],r=arr(f?.rooms).find(a=>a?.id===roomId);return f&&r?{floor:id,z:finite(r.z,f.z),room:r}:null}).filter(Boolean).sort((a,b)=>a.z-b.z):[{floor:floorId,z:finite(c.lowerZ,finite(room.lowerZ,room.z)),room},{floor:floorId,z:finite(c.upperZ,finite(room.upperZ,floor.z)),room}];
+ const stops=connection?arr(c.floors).map(id=>{const f=plan.floors[id],r=arr(f?.rooms).find(a=>a?.id===roomId);if(!f||!r)return null;const surface=accessSurface(plan,id,roomId);if(surface.conflict)warn('access-height-conflict',id+': connected access surfaces have different heights; use local steps or separate stairs before treating this landing as connected');return{floor:id,z:surface.z,room:r}}).filter(Boolean).sort((a,b)=>a.z-b.z):[{floor:floorId,z:finite(c.lowerZ,finite(room.lowerZ,room.z)),room},{floor:floorId,z:finite(c.upperZ,finite(room.upperZ,floor.z)),room}];
  if(stops.length<2||stops.some(s=>!Number.isFinite(s.z))){warn('missing-levels','Connected stair needs two explicit, finite floor elevations');return{roomId,floorId,warnings,status:'error',flights:[],landings:[],openings:[],access:[],segments:[],metrics:{},displayFlights:[],displayLandings:[]}}
  for(const stop of stops){if(['x','y','w','h'].some(k=>Math.abs(stop.room[k]-room[k])>.01))warn('alignment',`${stop.floor}: stair footprint does not align with ${floorId}`)}
  const stairType=room.stairType||c.stairType||'switchback';
@@ -122,7 +142,7 @@ function build(plan,floorId,roomId,options={}){
  }
  if(minimum!==null&&minimum<spec.minHeadroom-EPS)warn('headroom',`Only ${minimum.toFixed(2)} m headroom below ${worst.obstructionId}; needs ${spec.minHeadroom.toFixed(2)} m`,'error',{headroom:minimum,required:spec.minHeadroom,location:worst.point});
  const access=[];
- for(const d of (connections?connections.all(floor):arr(floor.doors))){if(!d||d.a!==roomId&&d.b!==roomId)continue;const other=d.b==='outside'?{id:'outside',name:'Outside',z:room.z??floor.z}:floor.rooms.find(r=>r.id===(d.a===roomId?d.b:d.a)),g=doorGeometry(d,floor);if(!other||!g){warn('door-detached',`Door ${d.id} is detached or too wide`);access.push({doorId:d.id,valid:false,reason:'detached'});continue}
+ for(const d of (connections?connections.all(floor):arr(floor.doors))){if(!d||d.kind==='window'||d.sealed||d.cemented||d.a!==roomId&&d.b!==roomId)continue;const other=d.b==='outside'?{id:'outside',name:'Outside',z:room.z??floor.z}:floor.rooms.find(r=>r.id===(d.a===roomId?d.b:d.a)),g=doorGeometry(d,floor);if(!other||!g){warn('door-detached',`Door ${d.id} is detached or too wide`);access.push({doorId:d.id,valid:false,reason:'detached'});continue}
   const z=finite(other.z,floor.z),ends=g.axis==='h'?[[g.start,g.fixed],[g.end,g.fixed]]:[[g.fixed,g.start],[g.fixed,g.end]];
   const uv=ends.map(a=>frame.uv(...a));
   // Project through the perimeter wall into the walking clear zone; opening must still sit within the near landing band.
@@ -136,7 +156,7 @@ function build(plan,floorId,roomId,options={}){
   if(a.doorHeight<spec.minHeadroom-EPS)warn('door-headroom',`${d.id}: door height ${a.doorHeight.toFixed(2)} m is below the ${spec.minHeadroom.toFixed(2)} m route headroom target`);
  }
  if(!access.length)warn('no-door','Stair has no floor access connection');
- const currentZ=connection?finite(room.z,floor.z):null;
+ const currentZ=connection?stops.find(s=>s.floor===floorId)?.z:null;
  const up=connection?segments.find(s=>s.from===floorId):segments[0],down=connection?segments.find(s=>s.to===floorId):segments[0];
  const displayFlights=[];
  function display(fid,direction,role,label){const f=flights.find(a=>a.id===fid);if(f)displayFlights.push({...f,direction,role,label,arrowPath:direction==='up'?f.upPath:f.downPath})}
@@ -187,18 +207,20 @@ function markup(detail){
  if(detail.preview){s+='<g class="stair-ghost" opacity=".18">';for(const l of detail.ghostLandings||[])s+=`<polygon points="${poly(l.polygon)}" fill="#ddd6bf" stroke="#66736e" stroke-width=".045" stroke-dasharray=".15 .1"/>`;for(const f of detail.ghostFlights||[]){s+=`<polygon points="${poly(f.polygon)}" fill="#d8dfdc" stroke="#66736e" stroke-width=".045" stroke-dasharray=".15 .1"/>`;for(const t of f.treads)s+=`<path d="M${t.line[0].map(n).join(' ')}L${t.line[1].map(n).join(' ')}" stroke="#66736e" stroke-width=".035"/>`}s+='</g>'}
  // Landings are real level surfaces. Coincident projections at different heights remain separately described in data.
  const drawn=new Set();for(const l of detail.displayLandings||[]){const key=poly(l.polygon);if(drawn.has(key))continue;drawn.add(key);s+=`<polygon points="${key}" fill="#f2e9ca" fill-opacity=".86" stroke="${color}" stroke-width=".055"/>`}
- for(const f of detail.displayFlights||[]){const c=f.direction==='up'?'#216c7b':'#a2612c',dashed=f.role==='continuation';s+=`<polygon points="${poly(f.polygon)}" fill="${f.direction==='up'?'#dbeaed':'#eee1cf'}" fill-opacity=".85" stroke="${c}" stroke-width=".065"${dashed?' stroke-dasharray=".14 .11"':''}/>`;
+ let badges='';for(const f of detail.displayFlights||[]){const c=f.direction==='up'?'#216c7b':'#a2612c',dashed=f.role==='continuation';s+=`<polygon points="${poly(f.polygon)}" fill="${f.direction==='up'?'#dbeaed':'#eee1cf'}" fill-opacity=".85" stroke="${c}" stroke-width=".065"${dashed?' stroke-dasharray=".14 .11"':''}/>`;
   for(const t of f.treads)s+=`<path d="M${t.line[0].map(n).join(' ')}L${t.line[1].map(n).join(' ')}" stroke="${c}" stroke-width=".035"/>`;
   const cutTread=f.treads[Math.min(f.treads.length-1,Math.max(0,Math.floor(1.2/f.riserHeight)-1))];if(cutTread){const [a,b]=cutTread.line;s+=`<path class="stair-cut-line" d="M${a[0]} ${a[1]}L${b[0]} ${b[1]}" stroke="${c}" stroke-width=".08" stroke-dasharray=".13 .07"/>`;}
   const [a,b]=f.arrowPath,dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len,from=[a[0]+ux*.25,a[1]+uy*.25],to=[b[0]-ux*.25,b[1]-uy*.25];
   s+=`<path d="M${from.map(n).join(' ')}L${to.map(n).join(' ')}m${n(-ux*.28-uy*.15)} ${n(-uy*.28+ux*.15)}L${to.map(n).join(' ')}l${n(-ux*.28+uy*.15)} ${n(-uy*.28-ux*.15)}" fill="none" stroke="${c}" stroke-width=".095"/>`;
-  const cx=(a[0]+b[0])/2,cy=(a[1]+b[1])/2,rotation=detail.runAxis==='y'?-90:0,label=f.label;
-  s+=`<g transform="translate(${n(cx)} ${n(cy)}) rotate(${rotation})"><rect x="${n(-Math.min(2.2,label.length*.077))}" y="-.22" width="${n(Math.min(4.4,label.length*.154))}" height=".44" rx=".08" fill="#f7f7f2" fill-opacity=".97"/><text x="0" y=".105" text-anchor="middle" font-family="system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" letter-spacing="normal" word-spacing="normal" font-size=".3" font-weight="bold" fill="${c}">${esc(label)}</text></g>`;
+  const cx=(a[0]+b[0])/2,cy=(a[1]+b[1])/2,label=f.ramp?'RAMP':f.direction==='up'?'UP':'DOWN',target=f.direction==='up'?f.z1:f.z0;
+  const bw=Math.min(1.2,Math.max(.8,f.rect.w-.12)),font=Math.min(.27,bw/(label.length*.68)),sub=f.ramp?(f.gradePercent||0).toFixed(1)+'%':(target>=0?'+':'')+target.toFixed(1)+'m';
+  badges+=`<g aria-label="${esc(f.label)}" transform="translate(${n(cx)} ${n(cy)})"><rect x="${n(-bw/2)}" y="-.43" width="${n(bw)}" height=".86" rx=".08" fill="#f7f7f2" stroke="${c}" stroke-width=".04"/><text x="0" y="-.07" text-anchor="middle" font-family="Arial,sans-serif" style="font-size:${font}px;font-weight:700;letter-spacing:0" fill="${c}">${label}</text><text x="0" y=".25" text-anchor="middle" font-family="Arial,sans-serif" style="font-size:${Math.min(.2,bw/(sub.length*.62))}px;letter-spacing:0" fill="${c}">${sub}</text></g>`;
+
  }
  const near=detail.displayLandings.find(l=>l.role==='floor')||detail.displayLandings[0];
  if(near){const x=near.rect.x+near.rect.w/2,y=near.rect.y+near.rect.h/2;s+=`<text x="${n(x)}" y="${n(y+.1)}" text-anchor="middle" font-family="system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif" letter-spacing="normal" word-spacing="normal" font-size=".28" fill="${color}">${esc(detail.datumLabel)}</text>`}
- if(detail.status==='error')s+=`<rect x="${n(r.x+.08)}" y="${n(r.y+.08)}" width="${n(Math.max(.1,r.w-.16))}" height="${n(Math.max(.1,r.h-.16))}" fill="none" stroke="#b73e31" stroke-width=".14" stroke-dasharray=".2 .12"/>`;
- return s+'</g>';
+ if(detail.status==='error'&&!detail.routeStair&&!detail.localSteps)s+=`<rect x="${n(r.x+.08)}" y="${n(r.y+.08)}" width="${n(Math.max(.1,r.w-.16))}" height="${n(Math.max(.1,r.h-.16))}" fill="none" stroke="#b73e31" stroke-width=".14" stroke-dasharray=".2 .12"/>`;
+ return s+badges+'</g>';
 }
-const api={build,markup,previewLevels,slice,defaults:{...DEFAULTS},doorGeometry};root.KERN_STAIR_DETAIL=api;if(typeof module!=='undefined'&&module.exports)module.exports=api;
+const api={build,markup,previewLevels,slice,defaults:{...DEFAULTS},doorGeometry,accessSurface,hasLandingAccess};root.KERN_STAIR_DETAIL=api;if(typeof module!=='undefined'&&module.exports)module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);
